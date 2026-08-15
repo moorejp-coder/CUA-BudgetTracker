@@ -189,3 +189,7 @@ frontend/    React + TypeScript + Vite + Tailwind + Recharts
                    alongside the core Dashboard/Transactions/Budgets/etc. pages
 legacy-static/   original localStorage-only prototype (kept for reference)
 ```
+
+## License
+
+Proprietary and confidential — all rights reserved. See [LICENSE](LICENSE) for details.
