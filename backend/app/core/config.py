@@ -18,12 +18,20 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
-    # Local LLM (OpenAI-compatible endpoint, e.g. Ollama's /v1)
+    # LLM provider: "local" (self-hosted, OpenAI-compatible endpoint, e.g. Ollama) or
+    # "claude" (Anthropic API — data leaves the host machine; see README for the tradeoff).
     LLM_ENABLED: bool = True
+    LLM_PROVIDER: str = "local"
+    LLM_TIMEOUT_SECONDS: float = 15.0
+
+    # Local LLM (OpenAI-compatible endpoint, e.g. Ollama's /v1)
     LLM_BASE_URL: str = "http://localhost:11434/v1"
     LLM_MODEL: str = "llama3.1"
     LLM_API_KEY: str = "not-needed"
-    LLM_TIMEOUT_SECONDS: float = 15.0
+
+    # Claude API (used when LLM_PROVIDER=claude)
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-sonnet-5"
 
     # Weekly/monthly recaps + daily nudge evaluation. Off by default under pytest; set
     # explicitly in .env for a real deployment. Disable if you don't want background jobs
