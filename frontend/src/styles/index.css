@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-feature-settings: "tnum" 1;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  @apply bg-surface border border-border-subtle rounded-xl2 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.4)];
+}
+
+.btn-primary {
+  @apply bg-accent text-white font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply bg-transparent border border-border text-white/80 font-medium px-4 py-2 rounded-lg hover:bg-surface-raised transition;
+}
+
+.input {
+  @apply bg-surface-sunken border border-border rounded-lg px-3 py-2 text-sm text-white/90 outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition;
+}
+
+.label {
+  @apply text-xs text-white/60 mb-1.5 block;
+}

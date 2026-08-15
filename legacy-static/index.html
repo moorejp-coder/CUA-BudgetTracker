@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Tracker</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">$</span>
+      <span class="brand-name">Budget Tracker</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">&#9673;</span> Dashboard
+      </li>
+      <li class="nav-item" data-view="transactions">
+        <span class="nav-icon">&#8942;</span> Transactions
+      </li>
+      <li class="nav-item" data-view="categories">
+        <span class="nav-icon">&#9635;</span> Categories
+      </li>
+      <li class="nav-item" data-view="budgets">
+        <span class="nav-icon">&#9776;</span> Budgets
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <button id="exportBtn" class="ghost-btn">Export data</button>
+      <label class="ghost-btn" for="importFile">Import data</label>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div class="month-switcher">
+        <button id="prevMonth" class="icon-btn">&#8592;</button>
+        <h1 id="currentMonthLabel">August 2026</h1>
+        <button id="nextMonth" class="icon-btn">&#8594;</button>
+      </div>
+      <button id="addTxnBtn" class="primary-btn">+ Add Transaction</button>
+    </header>
+
+    <!-- DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view active">
+      <div class="summary-cards">
+        <div class="card">
+          <div class="card-label">Income</div>
+          <div class="card-value income" id="sumIncome">$0.00</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Expenses</div>
+          <div class="card-value expense" id="sumExpense">$0.00</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Net</div>
+          <div class="card-value" id="sumNet">$0.00</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="panel">
+          <h2>Spending by Category</h2>
+          <canvas id="categoryChart" height="260"></canvas>
+          <div id="categoryLegend" class="legend"></div>
+        </div>
+        <div class="panel">
+          <h2>Income vs Expenses (6 months)</h2>
+          <canvas id="trendChart" height="260"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Recent Transactions</h2>
+        <div id="recentTxns" class="txn-list"></div>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS VIEW -->
+    <section id="view-transactions" class="view">
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="Search transactions...">
+        <select id="filterCategory"><option value="">All Categories</option></select>
+        <select id="filterType">
+          <option value="">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div class="panel">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th class="right">Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="txnTableBody"></tbody>
+        </table>
+        <div id="txnEmptyState" class="empty-state" hidden>No transactions yet. Click "Add Transaction" to get started.</div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES VIEW -->
+    <section id="view-categories" class="view">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Categories</h2>
+          <button id="addCategoryBtn" class="primary-btn small">+ Add Category</button>
+        </div>
+        <div id="categoryGrid" class="category-grid"></div>
+      </div>
+    </section>
+
+    <!-- BUDGETS VIEW -->
+    <section id="view-budgets" class="view">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Monthly Budgets</h2>
+          <p class="muted">Set a monthly spending limit per category. Progress reflects the currently selected month.</p>
+        </div>
+        <div id="budgetList" class="budget-list"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Add/Edit Transaction Modal -->
+<div id="txnModal" class="modal-overlay" hidden>
+  <div class="modal">
+    <h2 id="txnModalTitle">Add Transaction</h2>
+    <form id="txnForm">
+      <input type="hidden" id="txnId">
+      <div class="type-toggle">
+        <button type="button" class="toggle-btn active" data-type="expense">Expense</button>
+        <button type="button" class="toggle-btn" data-type="income">Income</button>
+      </div>
+      <label>Amount
+        <input type="number" id="txnAmount" step="0.01" min="0" required placeholder="0.00">
+      </label>
+      <label>Description
+        <input type="text" id="txnDesc" required placeholder="e.g. Groceries at Trader Joe's">
+      </label>
+      <label>Category
+        <select id="txnCategory" required></select>
+      </label>
+      <label>Date
+        <input type="date" id="txnDate" required>
+      </label>
+      <div class="modal-actions">
+        <button type="button" id="txnCancelBtn" class="ghost-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add/Edit Category Modal -->
+<div id="categoryModal" class="modal-overlay" hidden>
+  <div class="modal">
+    <h2>Add Category</h2>
+    <form id="categoryForm">
+      <label>Name
+        <input type="text" id="categoryName" required placeholder="e.g. Groceries">
+      </label>
+      <label>Type
+        <select id="categoryType">
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+      </label>
+      <label>Color
+        <input type="color" id="categoryColor" value="#5b8def">
+      </label>
+      <div class="modal-actions">
+        <button type="button" id="categoryCancelBtn" class="ghost-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/store.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
