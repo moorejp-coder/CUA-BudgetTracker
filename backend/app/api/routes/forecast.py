@@ -18,6 +18,11 @@ def get_cashflow_forecast(
     return forecasting.cashflow_forecast(db, user.id, horizon_days=days)
 
 
+@router.get("/goals")
+def get_goal_forecast(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return forecasting.goal_forecast(db, user.id)
+
+
 @router.post("/scenario", response_model=ScenarioResponse)
 def post_scenario(
     payload: ScenarioRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)

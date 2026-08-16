@@ -4,11 +4,14 @@ import type {
   AssistantQueryResponse,
   BehaviorSignals,
   Budget,
+  BudgetSuggestion,
+  BudgetVarianceResponse,
   CashflowForecast,
   CashflowPoint,
   Category,
   CategorySpend,
   Goal,
+  GoalForecastItem,
   NetWorthPoint,
   Nudge,
   Page,
@@ -95,6 +98,12 @@ export const AnalyticsApi = {
     api.get<CategorySpend[]>("/analytics/spend-by-category", { params: { start, end } }).then((r) => r.data),
   netWorth: (start: string, end: string) =>
     api.get<NetWorthPoint[]>("/analytics/net-worth", { params: { start, end } }).then((r) => r.data),
+  budgetSuggestion: (period: string) =>
+    api.get<BudgetSuggestion>("/analytics/budget-suggestion", { params: { period } }).then((r) => r.data),
+  budgetVariance: (period: string, compare_months = 1) =>
+    api
+      .get<BudgetVarianceResponse>("/analytics/budget-variance", { params: { period, compare_months } })
+      .then((r) => r.data),
 };
 
 export const CsvImportApi = {
@@ -125,6 +134,7 @@ export const ForecastApi = {
   cashflow: (days: number): Promise<CashflowForecast> => api.get("/forecast/cashflow", { params: { days } }).then((r) => r.data),
   scenario: (adjustments: ScenarioAdjustment[], base_months = 3): Promise<ScenarioResult> =>
     api.post("/forecast/scenario", { adjustments, base_months }).then((r) => r.data),
+  goals: (): Promise<GoalForecastItem[]> => api.get("/forecast/goals").then((r) => r.data),
 };
 
 export const RecapsApi = {

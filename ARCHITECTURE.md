@@ -126,6 +126,8 @@ GET    /analytics/summary?month=2026-08              # income, expense, net, top
 GET    /analytics/cashflow?start=&end=&granularity=month
 GET    /analytics/spend-by-category?start=&end=
 GET    /analytics/net-worth?start=&end=
+GET    /analytics/budget-variance?period=2026-08&compare_months=1   # per-category variance vs the budget (target) and vs a prior period
+GET    /analytics/budget-suggestion?period=2026-08                  # 55/5/10/15/15 rule split of monthly income, debt-aware
 GET    /analytics/subscriptions                      # confirmed recurring items, normalized to monthly cost
 GET    /analytics/subscriptions/anomalies             # new recurring patterns + price increases
 GET    /analytics/anomalies?start=&end=                # outlier transactions vs. the user's own category baseline
@@ -141,6 +143,7 @@ GET    /assistant/subscriptions           # subscriptions + anomalies + LLM narr
 GET    /assistant/anomalies?days=30       # spending anomalies + LLM narrative summary
 
 GET    /forecast/cashflow?days=30|60|90               # trailing-3mo averages + upcoming recurring, projected forward
+GET    /forecast/goals                                 # per-goal projected completion date at the current monthly_contribution rate
 POST   /forecast/scenario                              # { adjustments: [{target, value}], base_months } -> projected impact
 
 GET    /recaps                            # list generated recaps

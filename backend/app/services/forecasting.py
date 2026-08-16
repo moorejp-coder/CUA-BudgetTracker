@@ -101,6 +101,54 @@ def cashflow_forecast(db: Session, user_id: str, horizon_days: int = 30) -> dict
     }
 
 
+def goal_forecast(db: Session, user_id: str) -> list[dict]:
+    """When each goal will be hit given its current monthly_contribution rate — a standalone
+    projection (the scenario engine also computes goal impact, but only relative to an
+    adjustment; this is the plain baseline)."""
+    goals = db.query(Goal).filter(Goal.user_id == user_id).all()
+    today = date.today()
+    results = []
+    for g in goals:
+        current = sum(float(a.current_balance) for a in g.accounts)
+        target = float(g.target_amount)
+        remaining = max(0.0, target - current)
+        rate = float(g.monthly_contribution)
+
+        months_to_goal = (remaining / rate) if rate > 0 else None
+        projected_date = None
+        if months_to_goal is not None:
+            month_idx = today.year * 12 + (today.month - 1) + round(months_to_goal)
+            projected_date = date(month_idx // 12, month_idx % 12 + 1, 1)
+
+        on_pace = None
+        if g.target_date:
+            if remaining <= 0:
+                on_pace = True
+            elif rate <= 0:
+                on_pace = False
+            else:
+                months_available = max(
+                    0, (g.target_date.year - today.year) * 12 + (g.target_date.month - today.month)
+                )
+                on_pace = months_to_goal is not None and months_to_goal <= months_available
+
+        results.append(
+            {
+                "goal_id": g.id,
+                "goal_name": g.name,
+                "target_amount": target,
+                "current_amount": current,
+                "remaining_amount": round(remaining, 2),
+                "monthly_contribution": rate,
+                "months_to_goal": round(months_to_goal, 1) if months_to_goal is not None else None,
+                "projected_completion_date": projected_date,
+                "target_date": g.target_date,
+                "on_pace": on_pace,
+            }
+        )
+    return results
+
+
 def run_scenario(db: Session, user_id: str, adjustments: list[dict], base_months: int = 3) -> dict:
     """`adjustments` is a list of {"target": str, "value": float}. A target matching an
     existing expense category name applies a relative change (|value| <= 1) or an absolute

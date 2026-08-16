@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { BudgetsApi, CategoriesApi } from "@/api/resources";
+import { AnalyticsApi, BudgetsApi, CategoriesApi } from "@/api/resources";
 import BudgetProgress from "@/components/BudgetProgress";
+import BudgetVariance from "@/components/BudgetVariance";
 
 const PALETTE = ["#5b8def", "#34d399", "#f59e0b", "#f87171", "#a78bfa", "#22d3ee", "#f472b6", "#84cc16", "#fb923c", "#64748b"];
 
@@ -11,6 +12,16 @@ export default function Categories() {
   const period = format(new Date(), "yyyy-MM");
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: CategoriesApi.list });
   const { data: budgets = [] } = useQuery({ queryKey: ["budgets", period], queryFn: () => BudgetsApi.list(period) });
+  const { data: suggestion } = useQuery({
+    queryKey: ["budget-suggestion", period],
+    queryFn: () => AnalyticsApi.budgetSuggestion(period),
+  });
+
+  const [compareMonths, setCompareMonths] = useState(1);
+  const { data: variance } = useQuery({
+    queryKey: ["budget-variance", period, compareMonths],
+    queryFn: () => AnalyticsApi.budgetVariance(period, compareMonths),
+  });
 
   const [newCat, setNewCat] = useState({ name: "", type: "expense" as "income" | "expense", emoji: "" });
 
@@ -103,6 +114,59 @@ export default function Categories() {
           </ul>
         </div>
       </div>
+
+      {suggestion && suggestion.monthly_income > 0 && (
+        <div className="card">
+          <h2 className="text-sm font-semibold mb-1">Suggested budget — {period}</h2>
+          <p className="text-xs text-white/50 mb-4">
+            Based on {suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD" })} of
+            monthly income.{" "}
+            {suggestion.has_debt
+              ? "You have outstanding debt, so 10% is allocated to paying it down."
+              : "You're debt-free, so that 10% is allocated to investing instead."}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {suggestion.buckets.map((b) => (
+              <div key={b.key} className="rounded-lg bg-white/5 p-3">
+                <div className="text-xs text-white/50">
+                  {b.label} · {Math.round(b.pct * 100)}%
+                </div>
+                <div className="text-lg font-semibold text-white">
+                  {b.amount.toLocaleString(undefined, { style: "currency", currency: "USD" })}
+                </div>
+                <div className="text-[11px] text-white/40 mt-1">{b.description}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {variance && variance.categories.length > 0 && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold">Budget variance — {period}</h2>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setCompareMonths(1)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 1 ? "bg-accent text-white" : "btn-secondary"}`}
+              >
+                vs last month
+              </button>
+              <button
+                onClick={() => setCompareMonths(3)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 3 ? "bg-accent text-white" : "btn-secondary"}`}
+              >
+                vs last quarter
+              </button>
+            </div>
+          </div>
+          <div>
+            {variance.categories.map((row) => (
+              <BudgetVariance key={row.category_id} row={row} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <h2 className="text-sm font-semibold mb-4">Monthly budgets — {period}</h2>

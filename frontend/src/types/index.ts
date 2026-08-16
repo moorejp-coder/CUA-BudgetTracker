@@ -110,6 +110,22 @@ export interface NetWorthPoint {
   net_worth: number;
 }
 
+export interface BudgetSuggestionBucket {
+  key: string;
+  label: string;
+  description: string;
+  pct: number;
+  amount: number;
+}
+
+export interface BudgetSuggestion {
+  period: string;
+  monthly_income: number;
+  has_debt: boolean;
+  debt_bucket_label: "debt_paydown" | "investing";
+  buckets: BudgetSuggestionBucket[];
+}
+
 // --- AI features ---------------------------------------------------------
 
 export interface AssistantQueryResponse {
@@ -207,6 +223,39 @@ export interface BehaviorSignals {
     weekend_to_weekday_ratio: number | null;
     notable: boolean;
   };
+}
+
+export interface BudgetVarianceRow {
+  category_id: string;
+  category_name: string;
+  target_budget: number;
+  spent: number;
+  variance_vs_target: number;
+  variance_vs_target_pct: number | null;
+  over_target: boolean;
+  prior_period: string;
+  prior_spent: number;
+  variance_vs_prior: number;
+  variance_vs_prior_pct: number | null;
+}
+
+export interface BudgetVarianceResponse {
+  period: string;
+  prior_period: string;
+  categories: BudgetVarianceRow[];
+}
+
+export interface GoalForecastItem {
+  goal_id: string;
+  goal_name: string;
+  target_amount: number;
+  current_amount: number;
+  remaining_amount: number;
+  monthly_contribution: number;
+  months_to_goal: number | null;
+  projected_completion_date: string | null;
+  target_date: string | null;
+  on_pace: boolean | null;
 }
 
 export interface CashflowForecast {

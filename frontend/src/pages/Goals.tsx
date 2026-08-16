@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AccountsApi, GoalsApi } from "@/api/resources";
+import { AccountsApi, ForecastApi, GoalsApi } from "@/api/resources";
+import type { GoalForecastItem } from "@/types";
 
 export default function Goals() {
   const qc = useQueryClient();
   const { data: goals = [] } = useQuery({ queryKey: ["goals"], queryFn: GoalsApi.list });
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts"], queryFn: AccountsApi.list });
+  const { data: forecasts = [] } = useQuery({ queryKey: ["goal-forecast"], queryFn: ForecastApi.goals });
+  const forecastByGoal = new Map(forecasts.map((f) => [f.goal_id, f]));
   const [form, setForm] = useState({ name: "", target_amount: "", target_date: "", monthly_contribution: "", account_ids: [] as string[] });
 
   async function addGoal(e: React.FormEvent) {
@@ -74,6 +77,7 @@ export default function Goals() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {goals.map((g) => {
           const pct = g.target_amount > 0 ? Math.min(100, (g.current_amount / g.target_amount) * 100) : 0;
+          const forecast = forecastByGoal.get(g.id);
           return (
             <div key={g.id} className="card">
               <div className="font-semibold">{g.name}</div>
@@ -87,11 +91,29 @@ export default function Goals() {
               {g.monthly_contribution > 0 && (
                 <div className="text-xs text-white/40 mt-2">${g.monthly_contribution.toFixed(0)}/mo contribution</div>
               )}
+              {forecast && <GoalForecastLine forecast={forecast} />}
             </div>
           );
         })}
         {goals.length === 0 && <p className="text-white/40 text-sm">No goals yet.</p>}
       </div>
+    </div>
+  );
+}
+
+function GoalForecastLine({ forecast }: { forecast: GoalForecastItem }) {
+  if (forecast.months_to_goal === null) {
+    return <div className="text-xs text-white/40 mt-2">Set a monthly contribution to project a completion date.</div>;
+  }
+  const paceColor = forecast.on_pace === false ? "text-expense" : forecast.on_pace === true ? "text-income" : "text-white/60";
+  return (
+    <div className="text-xs mt-2 pt-2 border-t border-white/5 space-y-0.5">
+      <div className={paceColor}>
+        {forecast.months_to_goal.toFixed(1)} months to go{forecast.projected_completion_date && ` — projected ${forecast.projected_completion_date}`}
+      </div>
+      {forecast.on_pace !== null && (
+        <div className="text-white/40">{forecast.on_pace ? "On pace for target date" : "Behind target date at current rate"}</div>
+      )}
     </div>
   );
 }

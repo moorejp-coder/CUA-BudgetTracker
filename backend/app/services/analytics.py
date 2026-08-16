@@ -345,6 +345,67 @@ def budget_adherence(db: Session, user_id: str, period: str) -> dict:
     }
 
 
+def _shift_period(period: str, months: int) -> str:
+    year, month = (int(x) for x in period.split("-"))
+    idx = (year * 12 + (month - 1)) + months
+    return f"{idx // 12}-{idx % 12 + 1:02d}"
+
+
+def budget_variance(db: Session, user_id: str, period: str, compare_months: int = 1) -> dict:
+    """Budget-vs-actual per category for `period`, plus variance against a prior period
+    (default: previous month; pass compare_months=3 to compare against the same point three
+    months back, e.g. quarter-over-quarter). The budget amount itself is the user-defined
+    target, so `variance_vs_target` here IS the adherence variance the spec asks for."""
+    start, end = month_bounds(period)
+    prior_period = _shift_period(period, -compare_months)
+    prior_start, prior_end = month_bounds(prior_period)
+
+    budgets = db.query(Budget).filter(Budget.user_id == user_id, Budget.period == period).all()
+    details = []
+    for b in budgets:
+        spent = float(
+            db.query(func.coalesce(func.sum(Transaction.amount), 0))
+            .filter(
+                Transaction.user_id == user_id,
+                Transaction.category_id == b.category_id,
+                Transaction.type == "expense",
+                Transaction.date.between(start, end),
+            )
+            .scalar()
+            or 0
+        )
+        prior_spent = float(
+            db.query(func.coalesce(func.sum(Transaction.amount), 0))
+            .filter(
+                Transaction.user_id == user_id,
+                Transaction.category_id == b.category_id,
+                Transaction.type == "expense",
+                Transaction.date.between(prior_start, prior_end),
+            )
+            .scalar()
+            or 0
+        )
+        target = float(b.amount)
+        variance_vs_target = spent - target
+        variance_vs_prior = spent - prior_spent
+        details.append(
+            {
+                "category_id": b.category_id,
+                "category_name": b.category.name if b.category else "",
+                "target_budget": target,
+                "spent": spent,
+                "variance_vs_target": round(variance_vs_target, 2),
+                "variance_vs_target_pct": round(variance_vs_target / target * 100, 1) if target else None,
+                "over_target": spent > target,
+                "prior_period": prior_period,
+                "prior_spent": prior_spent,
+                "variance_vs_prior": round(variance_vs_prior, 2),
+                "variance_vs_prior_pct": round(variance_vs_prior / prior_spent * 100, 1) if prior_spent else None,
+            }
+        )
+    return {"period": period, "prior_period": prior_period, "categories": details}
+
+
 def goal_progress(db: Session, user_id: str) -> list[dict]:
     goals = db.query(Goal).filter(Goal.user_id == user_id).all()
     results = []
@@ -442,4 +503,120 @@ def behavior_signals(db: Session, user_id: str, period: str) -> dict:
         "budget_adherence": budget_adherence(db, user_id, period),
         "goal_progress": goal_progress(db, user_id),
         "weekday_weekend_pattern": weekday_weekend_pattern(db, user_id),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Budget suggestion (55/5/10/15/15 rule)
+# ---------------------------------------------------------------------------
+
+BUDGET_SUGGESTION_RULE = {
+    "essential": 0.55,
+    "guilt_free": 0.05,
+    "debt_or_invest": 0.10,
+    "short_term_investing": 0.15,
+    "long_term_investing": 0.15,
+}
+
+
+def _monthly_income(db: Session, user_id: str, period: str) -> float:
+    """Income for the given period, falling back to the average of the prior three
+    months when the current period has no income recorded yet."""
+    start, end = month_bounds(period)
+    current = (
+        db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .filter(Transaction.user_id == user_id, Transaction.type == "income", Transaction.date.between(start, end))
+        .scalar()
+    )
+    if current:
+        return float(current)
+
+    year, month = (int(x) for x in period.split("-"))
+    totals = []
+    for i in range(1, 4):
+        m = month - i
+        y = year
+        while m < 1:
+            m += 12
+            y -= 1
+        p_start, p_end = month_bounds(f"{y}-{m:02d}")
+        total = (
+            db.query(func.coalesce(func.sum(Transaction.amount), 0))
+            .filter(
+                Transaction.user_id == user_id,
+                Transaction.type == "income",
+                Transaction.date.between(p_start, p_end),
+            )
+            .scalar()
+        )
+        if total:
+            totals.append(float(total))
+    return mean(totals) if totals else 0.0
+
+
+def has_outstanding_debt(db: Session, user_id: str) -> bool:
+    return (
+        db.query(Account)
+        .filter(
+            Account.user_id == user_id,
+            Account.archived.is_(False),
+            Account.is_liability.is_(True),
+            Account.current_balance > 0,
+        )
+        .first()
+        is not None
+    )
+
+
+def budget_suggestion(db: Session, user_id: str, period: str) -> dict:
+    income = _monthly_income(db, user_id, period)
+    debt = has_outstanding_debt(db, user_id)
+
+    debt_label = "debt_paydown" if debt else "investing"
+    buckets = [
+        {
+            "key": "essential",
+            "label": "Essential expenses",
+            "description": "Housing, utilities, groceries, transportation",
+            "pct": BUDGET_SUGGESTION_RULE["essential"],
+            "amount": round(income * BUDGET_SUGGESTION_RULE["essential"], 2),
+        },
+        {
+            "key": "guilt_free",
+            "label": "Guilt-free money",
+            "description": "Spend on whatever you want, no tracking guilt",
+            "pct": BUDGET_SUGGESTION_RULE["guilt_free"],
+            "amount": round(income * BUDGET_SUGGESTION_RULE["guilt_free"], 2),
+        },
+        {
+            "key": "debt_or_invest",
+            "label": "Debt paydown" if debt else "Investing (debt-free)",
+            "description": (
+                "Extra payments toward loans and credit cards" if debt else "No outstanding debt — invest this instead"
+            ),
+            "pct": BUDGET_SUGGESTION_RULE["debt_or_invest"],
+            "amount": round(income * BUDGET_SUGGESTION_RULE["debt_or_invest"], 2),
+        },
+        {
+            "key": "short_term_investing",
+            "label": "Short-term goals",
+            "description": "Vacation, car, down payment",
+            "pct": BUDGET_SUGGESTION_RULE["short_term_investing"],
+            "amount": round(income * BUDGET_SUGGESTION_RULE["short_term_investing"], 2),
+        },
+        {
+            "key": "long_term_investing",
+            "label": "Long-term wealth",
+            "description": "Retirement and long-term investing",
+            "pct": BUDGET_SUGGESTION_RULE["long_term_investing"],
+            "amount": round(income * BUDGET_SUGGESTION_RULE["long_term_investing"], 2),
+        },
+    ]
+
+    return {
+        "period": period,
+        "monthly_income": round(income, 2),
+        "has_debt": debt,
+        "debt_bucket_label": debt_label,
+        "buckets": buckets,
     }

@@ -92,6 +92,76 @@ def test_spending_anomaly_flags_large_transaction(client, auth_headers, seeded):
     assert any(a["payee"] == "Big One" for a in flagged)
 
 
+def _shift_period(period: str, months: int) -> str:
+    year, month = (int(x) for x in period.split("-"))
+    idx = (year * 12 + (month - 1)) + months
+    return f"{idx // 12}-{idx % 12 + 1:02d}"
+
+
+def test_budget_variance_vs_target_and_prior_period(client, auth_headers, seeded):
+    today = date.today()
+    period = f"{today.year}-{today.month:02d}"
+    prior_period = _shift_period(period, -1)
+    prior_date = date.fromisoformat(f"{prior_period}-15")
+
+    client.post(
+        f"{API}/budgets",
+        json={"category_id": seeded["expense_category"]["id"], "period": period, "amount": 100, "rollover": False},
+        headers=auth_headers,
+    )
+    _add_txn(client, auth_headers, seeded["account"]["id"], seeded["expense_category"]["id"], 150, "expense", today)
+    _add_txn(client, auth_headers, seeded["account"]["id"], seeded["expense_category"]["id"], 50, "expense", prior_date)
+
+    resp = client.get(f"{API}/analytics/budget-variance", params={"period": period}, headers=auth_headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["prior_period"] == prior_period
+    row = data["categories"][0]
+    assert row["target_budget"] == 100
+    assert row["spent"] == 150
+    assert row["variance_vs_target"] == 50
+    assert row["over_target"] is True
+    assert row["prior_spent"] == 50
+    assert row["variance_vs_prior"] == 100
+
+
+def test_budget_suggestion_splits_income_debt_free(client, auth_headers, seeded):
+    today = date.today()
+    period = f"{today.year}-{today.month:02d}"
+    _add_txn(client, auth_headers, seeded["account"]["id"], seeded["income_category"]["id"], 4000, "income", today)
+
+    resp = client.get(f"{API}/analytics/budget-suggestion", params={"period": period}, headers=auth_headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["monthly_income"] == 4000
+    assert data["has_debt"] is False
+
+    by_key = {b["key"]: b for b in data["buckets"]}
+    assert by_key["essential"]["amount"] == 2200  # 55%
+    assert by_key["guilt_free"]["amount"] == 200  # 5%
+    assert by_key["debt_or_invest"]["label"] == "Investing (debt-free)"
+    assert by_key["debt_or_invest"]["amount"] == 400  # 10%
+    assert by_key["short_term_investing"]["amount"] == 600  # 15%
+    assert by_key["long_term_investing"]["amount"] == 600  # 15%
+
+
+def test_budget_suggestion_routes_to_debt_paydown_with_liability(client, auth_headers, seeded):
+    today = date.today()
+    period = f"{today.year}-{today.month:02d}"
+    _add_txn(client, auth_headers, seeded["account"]["id"], seeded["income_category"]["id"], 4000, "income", today)
+    client.post(
+        f"{API}/accounts",
+        json={"name": "Credit Card", "type": "credit_card", "current_balance": 500, "is_liability": True},
+        headers=auth_headers,
+    )
+
+    resp = client.get(f"{API}/analytics/budget-suggestion", params={"period": period}, headers=auth_headers)
+    data = resp.json()
+    assert data["has_debt"] is True
+    by_key = {b["key"]: b for b in data["buckets"]}
+    assert by_key["debt_or_invest"]["label"] == "Debt paydown"
+
+
 def test_behavior_signals_budget_adherence(client, auth_headers, seeded):
     today = date.today()
     period = f"{today.year}-{today.month:02d}"

@@ -34,6 +34,16 @@ def get_net_worth(start: date, end: date, db: Session = Depends(get_db), user: U
     return svc.net_worth(db, user.id, start, end)
 
 
+@router.get("/budget-variance")
+def get_budget_variance(
+    period: str,
+    compare_months: int = 1,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return svc.budget_variance(db, user.id, period, compare_months=compare_months)
+
+
 @router.get("/subscriptions")
 def get_subscriptions(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     subs = svc.subscriptions(db, user.id)
@@ -53,3 +63,8 @@ def get_anomalies(start: date, end: date, db: Session = Depends(get_db), user: U
 @router.get("/behavior-signals")
 def get_behavior_signals(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return svc.behavior_signals(db, user.id, period)
+
+
+@router.get("/budget-suggestion")
+def get_budget_suggestion(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return svc.budget_suggestion(db, user.id, period)
