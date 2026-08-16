@@ -126,6 +126,19 @@ export interface BudgetSuggestion {
   buckets: BudgetSuggestionBucket[];
 }
 
+export interface HomeSavingsPlan {
+  period: string;
+  monthly_income: number;
+  has_debt: boolean;
+  max_monthly_mortgage_payment: number;
+  max_home_price: number;
+  down_payment_pct: number;
+  closing_cost_pct: number;
+  amount_needed_to_close: number;
+  suggested_monthly_savings: number;
+  months_to_save_from_zero: number | null;
+}
+
 // --- AI features ---------------------------------------------------------
 
 export interface AssistantQueryResponse {

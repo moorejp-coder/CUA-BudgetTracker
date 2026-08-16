@@ -68,3 +68,8 @@ def get_behavior_signals(period: str, db: Session = Depends(get_db), user: User 
 @router.get("/budget-suggestion")
 def get_budget_suggestion(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return svc.budget_suggestion(db, user.id, period)
+
+
+@router.get("/home-savings-plan")
+def get_home_savings_plan(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return svc.home_savings_plan(db, user.id, period)

@@ -16,6 +16,10 @@ export default function Categories() {
     queryKey: ["budget-suggestion", period],
     queryFn: () => AnalyticsApi.budgetSuggestion(period),
   });
+  const { data: homePlan } = useQuery({
+    queryKey: ["home-savings-plan", period],
+    queryFn: () => AnalyticsApi.homeSavingsPlan(period),
+  });
 
   const [compareMonths, setCompareMonths] = useState(1);
   const { data: variance } = useQuery({
@@ -137,6 +141,53 @@ export default function Categories() {
                 <div className="text-[11px] text-white/40 mt-1">{b.description}</div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {homePlan && homePlan.monthly_income > 0 && (
+        <div className="card">
+          <h2 className="text-sm font-semibold mb-1">House down payment plan — {period}</h2>
+          <p className="text-xs text-white/50 mb-4">
+            Conventional 10% down, assuming no other debts.
+            {homePlan.has_debt && " You currently have outstanding debt, so treat this as an optimistic ceiling."}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="rounded-lg bg-white/5 p-3">
+              <div className="text-xs text-white/50">Max monthly payment</div>
+              <div className="text-lg font-semibold text-white">
+                {homePlan.max_monthly_mortgage_payment.toLocaleString(undefined, { style: "currency", currency: "USD" })}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">50% of monthly income</div>
+            </div>
+            <div className="rounded-lg bg-white/5 p-3">
+              <div className="text-xs text-white/50">Max home price</div>
+              <div className="text-lg font-semibold text-white">
+                {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD" })}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">Max payment ÷ $7.40 per $1,000 borrowed</div>
+            </div>
+            <div className="rounded-lg bg-white/5 p-3">
+              <div className="text-xs text-white/50">Needed to close</div>
+              <div className="text-lg font-semibold text-white">
+                {homePlan.amount_needed_to_close.toLocaleString(undefined, { style: "currency", currency: "USD" })}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">10% down + 2% closing costs</div>
+            </div>
+            <div className="rounded-lg bg-white/5 p-3">
+              <div className="text-xs text-white/50">Suggested savings</div>
+              <div className="text-lg font-semibold text-white">
+                {homePlan.suggested_monthly_savings.toLocaleString(undefined, { style: "currency", currency: "USD" })}/mo
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">30% of monthly income</div>
+            </div>
+            <div className="rounded-lg bg-white/5 p-3">
+              <div className="text-xs text-white/50">Time to save from $0</div>
+              <div className="text-lg font-semibold text-white">
+                {homePlan.months_to_save_from_zero !== null ? `${homePlan.months_to_save_from_zero} months` : "—"}
+              </div>
+              <div className="text-[11px] text-white/40 mt-1">Needed to close ÷ suggested savings</div>
+            </div>
           </div>
         </div>
       )}

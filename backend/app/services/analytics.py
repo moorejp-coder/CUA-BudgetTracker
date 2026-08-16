@@ -620,3 +620,42 @@ def budget_suggestion(db: Session, user_id: str, period: str) -> dict:
         "debt_bucket_label": debt_label,
         "buckets": buckets,
     }
+
+
+# ---------------------------------------------------------------------------
+# House down payment savings plan
+# ---------------------------------------------------------------------------
+
+HOME_MAX_PAYMENT_PCT = 0.5  # max monthly mortgage payment as a share of monthly income, debt-free
+HOME_PAYMENT_PER_1000 = 7.4  # ~monthly P&I per $1,000 borrowed at a conventional 30yr rate
+HOME_DOWN_PAYMENT_PCT = 0.10
+HOME_CLOSING_COST_PCT = 0.02
+HOME_SAVINGS_RATE_PCT = 0.30  # share of monthly income suggested to save toward the home fund
+
+
+def home_savings_plan(db: Session, user_id: str, period: str) -> dict:
+    """Conventional 10%-down affordability + savings-timeline estimate, assuming no other debts."""
+    income = _monthly_income(db, user_id, period)
+    debt = has_outstanding_debt(db, user_id)
+
+    max_monthly_payment = round(income * HOME_MAX_PAYMENT_PCT, 2)
+    max_home_price = round(max_monthly_payment / HOME_PAYMENT_PER_1000 * 1000, 2)
+    total_to_close_pct = HOME_DOWN_PAYMENT_PCT + HOME_CLOSING_COST_PCT
+    amount_needed_to_close = round(max_home_price * total_to_close_pct, 2)
+    suggested_monthly_savings = round(income * HOME_SAVINGS_RATE_PCT, 2)
+    months_to_save = (
+        round(amount_needed_to_close / suggested_monthly_savings, 1) if suggested_monthly_savings > 0 else None
+    )
+
+    return {
+        "period": period,
+        "monthly_income": round(income, 2),
+        "has_debt": debt,
+        "max_monthly_mortgage_payment": max_monthly_payment,
+        "max_home_price": max_home_price,
+        "down_payment_pct": HOME_DOWN_PAYMENT_PCT,
+        "closing_cost_pct": HOME_CLOSING_COST_PCT,
+        "amount_needed_to_close": amount_needed_to_close,
+        "suggested_monthly_savings": suggested_monthly_savings,
+        "months_to_save_from_zero": months_to_save,
+    }

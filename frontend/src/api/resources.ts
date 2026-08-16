@@ -12,6 +12,7 @@ import type {
   CategorySpend,
   Goal,
   GoalForecastItem,
+  HomeSavingsPlan,
   NetWorthPoint,
   Nudge,
   Page,
@@ -104,6 +105,8 @@ export const AnalyticsApi = {
     api
       .get<BudgetVarianceResponse>("/analytics/budget-variance", { params: { period, compare_months } })
       .then((r) => r.data),
+  homeSavingsPlan: (period: string) =>
+    api.get<HomeSavingsPlan>("/analytics/home-savings-plan", { params: { period } }).then((r) => r.data),
 };
 
 export const CsvImportApi = {
