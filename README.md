@@ -4,9 +4,42 @@ A private, self-hosted Copilot Money–style budgeting app. No Plaid, no bank AP
 third-party aggregators — you enter transactions manually or import CSVs exported from your
 bank's own website. Everything runs on a server you control.
 
+**Live demo:** http://23.22.144.99 (AWS EC2, Free Tier — see note below if the IP has moved)
+
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the stack/ER diagram/API surface and
 [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for the UI design tokens. The original static
 localStorage prototype from before this rewrite lives in [`legacy-static/`](legacy-static/).
+
+## Problem, users, and success criteria
+
+**Problem.** AI-powered budgeting tools (Copilot Money, Cleo, etc.) get their intelligence
+by linking directly to your bank accounts through an aggregator like Plaid — which means
+handing a third party read access to every transaction you make. Privacy-conscious users are
+stuck choosing between "dumb but private" spreadsheets and "smart but exposed" fintech apps.
+
+**Target user.** Anyone who wants AI-level budgeting insight — spend analysis, forecasting,
+proactive nudges — without connecting their bank accounts to a third-party service. In
+practice: privacy-conscious individuals and households who are comfortable manually entering
+transactions or importing a CSV they exported themselves.
+
+**AI solution.** A conversational assistant, automatic recaps, cash-flow forecasting with
+what-if scenarios, subscription/anomaly detection, and behavioral nudging — all narrated by
+an LLM but computed from a deterministic analytics layer underneath, so every feature has a
+non-AI fallback and the model never invents a number it wasn't given. The LLM backend is
+pluggable: a fully local/self-hosted model (Ollama, LM Studio) for maximum privacy, or the
+Claude API when cloud inference is preferred (`LLM_PROVIDER` in `backend/.env`).
+
+**Success criteria.**
+1. A user can register, log in, and fully track transactions/budgets/goals with zero
+   third-party bank connections.
+2. The AI Assistant answers spending questions using only the user's own data — no
+   hallucinated numbers, verifiable against the deterministic analytics endpoints.
+3. Weekly/monthly recaps and behavioral nudges generate automatically via a background
+   scheduler, with no manual step required.
+4. Every AI feature keeps working (with a templated/rule-based fallback) if the LLM is
+   disabled or unreachable — `LLM_ENABLED=false` never breaks functionality.
+5. The app is deployed on AWS Free Tier, publicly reachable, and gated behind a real login
+   (hashed passwords, working logout, no user data exposed on public endpoints).
 
 ## Quick start (Docker Compose — recommended)
 
@@ -58,10 +91,23 @@ Open http://localhost:5173 — Vite proxies `/api` to `http://localhost:8000`.
 7. Export CSVs from your bank(s) and import them via **Transactions → Import CSV**.
 8. Set up a periodic backup of the `budget-data` volume (see below).
 
-## Configuring or disabling the local LLM
+## Configuring or disabling the LLM
 
-The app never calls any cloud LLM API. It expects an **OpenAI-compatible** endpoint — the
-default config assumes [Ollama](https://ollama.com) running on the host:
+Two providers are supported, selected with `LLM_PROVIDER` in `backend/.env`:
+
+- `LLM_PROVIDER=local` (default) — a self-hosted, OpenAI-compatible endpoint. Financial data
+  never leaves the machine running the model.
+- `LLM_PROVIDER=claude` — the Anthropic API. Set `ANTHROPIC_API_KEY` (from
+  console.anthropic.com — set a spend cap there) and optionally `ANTHROPIC_MODEL`. Financial
+  data in prompts is sent to Anthropic; only use this mode if that tradeoff is acceptable for
+  your deployment.
+
+Both go through the same `llm_client.chat()` interface, so every AI feature and its
+deterministic fallback behave identically regardless of provider.
+
+### Local provider setup
+
+The default config assumes [Ollama](https://ollama.com) running on the host:
 
 ```bash
 ollama pull llama3.1
@@ -116,11 +162,13 @@ code should go through `ai_gateway`). Every `ai_gateway` function takes already-
 analytics data as input, never a raw DB session, and every prompt states explicitly that the
 model must only use the supplied JSON and must not give investment/tax/legal advice.
 
-**Privacy guarantee:** no analytics or AI feature ever calls an external API. The LLM
-endpoint is configurable but defaults to `localhost`; if you point it at a real local model
-(Ollama, LM Studio, vLLM), your financial data still never leaves the machine running that
-model. Turn `LLM_ENABLED=false` to remove the LLM from the picture entirely and get
-keyword-rule / templated-summary behavior everywhere.
+**Privacy guarantee (local provider):** with `LLM_PROVIDER=local`, no analytics or AI feature
+ever calls an external API. The endpoint is configurable but defaults to `localhost`; if you
+point it at a real local model (Ollama, LM Studio, vLLM), your financial data never leaves
+the machine running that model. Switching to `LLM_PROVIDER=claude` trades this guarantee for
+cloud inference — analytics JSON (not raw transaction rows, but aggregated numbers) is sent
+to Anthropic in each prompt. Turn `LLM_ENABLED=false` to remove the LLM from the picture
+entirely and get keyword-rule / templated-summary behavior everywhere, regardless of provider.
 
 To enable the background scheduler (weekly/monthly recaps + daily nudges) in a real
 deployment, set in `backend/.env`:
