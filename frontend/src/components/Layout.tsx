@@ -1,25 +1,70 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import {
+  LayoutGrid,
+  Receipt,
+  LineChart,
+  PiggyBank,
+  Wallet,
+  Target,
+  Repeat,
+  Sparkles,
+  TrendingUp,
+  CreditCard,
+  AlertTriangle,
+  MessageCircleHeart,
+  BookOpenText,
+  LogOut,
+  Menu,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", end: true },
-  { to: "/transactions", label: "Transactions" },
-  { to: "/cashflow", label: "Cash Flow" },
-  { to: "/categories", label: "Categories & Budgets" },
-  { to: "/accounts", label: "Accounts" },
-  { to: "/goals", label: "Goals" },
-  { to: "/recurring", label: "Recurring" },
+const NAV_ITEMS: { to: string; label: string; end?: boolean; icon: LucideIcon }[] = [
+  { to: "/", label: "Dashboard", end: true, icon: LayoutGrid },
+  { to: "/transactions", label: "Transactions", icon: Receipt },
+  { to: "/cashflow", label: "Cash Flow", icon: LineChart },
+  { to: "/categories", label: "Categories & Budgets", icon: PiggyBank },
+  { to: "/accounts", label: "Accounts", icon: Wallet },
+  { to: "/goals", label: "Goals", icon: Target },
+  { to: "/recurring", label: "Recurring", icon: Repeat },
 ];
 
-const AI_NAV_ITEMS = [
-  { to: "/assistant", label: "Assistant" },
-  { to: "/forecasts", label: "Forecasts" },
-  { to: "/subscriptions", label: "Subscriptions" },
-  { to: "/anomalies", label: "Anomalies" },
-  { to: "/coach", label: "Coach" },
-  { to: "/recaps", label: "Recaps" },
+const AI_NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: "/assistant", label: "Assistant", icon: Sparkles },
+  { to: "/forecasts", label: "Forecasts", icon: TrendingUp },
+  { to: "/subscriptions", label: "Subscriptions", icon: CreditCard },
+  { to: "/anomalies", label: "Anomalies", icon: AlertTriangle },
+  { to: "/coach", label: "Coach", icon: MessageCircleHeart },
+  { to: "/recaps", label: "Recaps", icon: BookOpenText },
 ];
+
+function NavItemLink({ to, label, end, icon: Icon }: { to: string; label: string; end?: boolean; icon: LucideIcon }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `group relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
+          isActive ? "bg-surface-raised text-white" : "text-white/55 hover:bg-surface-raised/60 hover:text-white"
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span
+            className={`absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-accent transition-all duration-150 ${
+              isActive ? "opacity-100" : "opacity-0"
+            }`}
+          />
+          <Icon size={17} strokeWidth={2} className={isActive ? "text-accent" : "text-white/40 group-hover:text-white/70"} />
+          <span className="truncate">{label}</span>
+        </>
+      )}
+    </NavLink>
+  );
+}
 
 export default function Layout() {
   const { logout } = useAuth();
@@ -32,23 +77,25 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen bg-canvas text-white/90">
-      <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas">
+      <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas/95 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-sm font-bold">$</div>
+          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-sm font-bold text-white shadow-[0_0_0_1px_rgba(91,141,239,0.3),0_4px_12px_rgba(91,141,239,0.25)]">
+            $
+          </div>
           <span className="font-semibold text-white">Budget Tracker</span>
         </div>
         <button
           onClick={() => setNavOpen((v) => !v)}
           aria-label={navOpen ? "Close menu" : "Open menu"}
-          className="btn-secondary px-3 py-1.5 text-sm"
+          className="btn-secondary px-2.5 py-1.5 text-sm"
         >
-          {navOpen ? "Close" : "Menu"}
+          {navOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </header>
 
       {navOpen && (
         <div
-          className="md:hidden fixed inset-0 z-20 bg-black/60 top-[57px]"
+          className="md:hidden fixed inset-0 z-20 bg-black/60 top-[57px] animate-fade-in"
           onClick={() => setNavOpen(false)}
         />
       )}
@@ -58,45 +105,36 @@ export default function Layout() {
           navOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="hidden md:flex items-center gap-2 px-2 py-3 mb-4">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-sm font-bold">$</div>
-          <span className="font-semibold text-white">Budget Tracker</span>
+        <div className="hidden md:flex items-center gap-2.5 px-2 py-3 mb-5">
+          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-base font-bold text-white shadow-[0_0_0_1px_rgba(91,141,239,0.3),0_4px_14px_rgba(91,141,239,0.3)]">
+            $
+          </div>
+          <span className="font-semibold text-white tracking-tight">Budget Tracker</span>
         </div>
         <ul className="flex-1 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <li key={item.to}>
-              <NavLink
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-lg text-sm font-medium transition ${
-                    isActive ? "bg-surface-raised text-white" : "text-white/60 hover:bg-surface-raised hover:text-white"
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
+              <NavItemLink {...item} />
             </li>
           ))}
-          <li className="px-3 pt-4 pb-1.5 text-[11px] uppercase tracking-wide text-white/30">AI Insights</li>
+          <li className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/30">
+            AI Insights
+          </li>
           {AI_NAV_ITEMS.map((item) => (
             <li key={item.to}>
-              <NavLink
-                to={item.to}
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-lg text-sm font-medium transition ${
-                    isActive ? "bg-surface-raised text-white" : "text-white/60 hover:bg-surface-raised hover:text-white"
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
+              <NavItemLink {...item} />
             </li>
           ))}
         </ul>
-        <button onClick={logout} className="btn-secondary text-sm mt-4">
-          Log out
-        </button>
+        <div className="mt-4 pt-4 border-t border-border-subtle">
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-white/50 hover:text-expense hover:bg-expense-bg transition-colors duration-150"
+          >
+            <LogOut size={17} strokeWidth={2} />
+            Log out
+          </button>
+        </div>
       </nav>
       <main className="flex-1 p-4 md:p-8 pt-[73px] md:pt-8 max-w-[1280px] min-w-0">
         <Outlet />
