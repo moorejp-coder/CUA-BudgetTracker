@@ -10,5 +10,8 @@ backend/**/__pycache__/
 frontend/node_modules/
 frontend/dist/
 
+# hello-contest (AWS Amplify + Cognito checkpoint app)
+hello-contest/node_modules/
+
 # OS
 .DS_Store
