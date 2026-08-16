@@ -10,7 +10,10 @@ contest's milestone checklist. Check items should become GitHub issues as they'r
 - [x] GitHub repository created, initial commit, iterative history
 - [x] AWS Free Tier account active — billing alerts + root MFA enabled
 - [x] Tech stack locked: FastAPI + React/TypeScript, Docker Compose, SQLite
-- [x] Hello-world deployed with a real login screen, reachable at a public URL
+- [x] Hello-world deployed with a real login screen, reachable at a public URL — the Budget
+      Tracker app itself, on EC2 (see README). The contest's separate Amplify+Cognito
+      "Hello World" checkpoint also exists in-repo at `hello-contest/` (its own
+      `amplify.yml`), submitted independently and not part of the Budget Tracker deploy.
 - [x] `deploy.sh` — one-command pull + rebuild on the server
 - [ ] Repository flipped from private to **public** (required before submission)
 - [ ] License question resolved with Prof. Yoest (proprietary vs. contest's MIT-or-similar requirement)

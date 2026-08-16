@@ -238,6 +238,9 @@ frontend/    React + TypeScript + Vite + Tailwind + Recharts
   src/pages/       Assistant.tsx, Forecasts.tsx, Subscriptions.tsx, Anomalies.tsx, Coach.tsx, Recaps.tsx
                    alongside the core Dashboard/Transactions/Budgets/etc. pages
 legacy-static/   original localStorage-only prototype (kept for reference)
+hello-contest/   separate Create React App + Amplify/Cognito scaffold — not part of the Budget
+                 Tracker app; it's the standalone "Hello World + Login" checkpoint from the
+                 contest's AWS setup guide, deployed independently via the root amplify.yml
 ```
 
 ## License
