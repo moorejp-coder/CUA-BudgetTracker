@@ -5,7 +5,7 @@
 # Override defaults with env vars, e.g.: DEPLOY_HOST=1.2.3.4 ./deploy.sh
 set -euo pipefail
 
-DEPLOY_HOST="${DEPLOY_HOST:-23.22.144.99}"
+DEPLOY_HOST="${DEPLOY_HOST:-54.175.240.105}"
 DEPLOY_USER="${DEPLOY_USER:-ubuntu}"
 DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/budget-tracker.pem}"
 REMOTE_DIR="${REMOTE_DIR:-budget-tracker}"

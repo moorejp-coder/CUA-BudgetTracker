@@ -46,16 +46,13 @@ contest's milestone checklist. Check items should become GitHub issues as they'r
 - [ ] One-page summary written (problem, solution, AI usage, key learnings) — PDF in repo
 - [ ] 5–10 minute demo script prepared and rehearsed at least once
 - [ ] README screenshots/demo GIF added
-- [ ] Live URL confirmed stable (elastic IP or documented static address — the current IP is
-      tied to the EC2 instance and will change if it's stopped/restarted)
+- [x] Live URL confirmed stable — Elastic IP allocated and associated (`54.175.240.105`),
+      survives instance stop/restart
 - [ ] Final repo cleanup: no secrets in history (`git log -p` check), license finalized,
       broken links fixed
 
 ## Known risks
 
-- **EC2 public IP is not static.** Stopping/restarting the instance will change
-  `23.22.144.99`. Either allocate an Elastic IP before demo day, or re-verify and update the
-  README/submission the morning of judging.
 - **Repo visibility.** Currently private; must be public before judges can review commit
   history (15% of the score).
 - **License.** Currently proprietary; contest rules ask for MIT-or-similar. Needs a decision

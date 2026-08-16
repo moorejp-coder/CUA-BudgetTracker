@@ -4,7 +4,7 @@ A private, self-hosted Copilot Money–style budgeting app. No Plaid, no bank AP
 third-party aggregators — you enter transactions manually or import CSVs exported from your
 bank's own website. Everything runs on a server you control.
 
-**Live demo:** http://23.22.144.99 (AWS EC2, Free Tier — see note below if the IP has moved)
+**Live demo:** http://54.175.240.105 (AWS EC2, Free Tier — static via Elastic IP)
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the stack/ER diagram/API surface and
 [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for the UI design tokens. The original static
