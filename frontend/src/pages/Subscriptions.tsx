@@ -12,7 +12,7 @@ export default function Subscriptions() {
 
       {data && (
         <>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="card">
               <div className="text-xs text-white/60 mb-1">Total monthly subscription cost</div>
               <div className="text-2xl font-bold tabular">
@@ -37,6 +37,7 @@ export default function Subscriptions() {
 
           <div className="card">
             <h2 className="text-sm font-semibold mb-3">Active subscriptions</h2>
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-white/50 text-xs uppercase">
                 <tr>
@@ -64,10 +65,11 @@ export default function Subscriptions() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {(data.anomalies.new_subscriptions.length > 0 || data.anomalies.price_increases.length > 0) && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="card">
                 <h2 className="text-sm font-semibold mb-3">Newly detected</h2>
                 <ul className="space-y-2 text-sm">

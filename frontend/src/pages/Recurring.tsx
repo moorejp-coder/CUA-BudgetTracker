@@ -46,7 +46,8 @@ export default function Recurring() {
 
       <div className="card">
         <h2 className="text-sm font-semibold mb-3">Confirmed recurring items</h2>
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+            <table className="w-full text-sm">
           <thead className="text-white/50 text-xs uppercase">
             <tr>
               <th className="text-left py-2">Merchant</th>
@@ -77,6 +78,7 @@ export default function Recurring() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

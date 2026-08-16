@@ -64,7 +64,7 @@ export default function Forecasts() {
 
       {forecast && (
         <div className="card">
-          <div className="grid grid-cols-4 gap-4 mb-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 text-sm">
             <div>
               <div className="text-white/50 text-xs">Avg monthly income</div>
               <div className="text-income font-semibold tabular">${forecast.avg_monthly_income.toFixed(0)}</div>
@@ -86,7 +86,7 @@ export default function Forecasts() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
           <h2 className="text-sm font-semibold mb-3">Scenario builder</h2>
           <p className="text-xs text-white/50 mb-3">
@@ -153,7 +153,7 @@ export default function Forecasts() {
 function ScenarioResultView({ result }: { result: ScenarioResult }) {
   return (
     <div className="mt-4 space-y-3">
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div>
           <div className="text-white/50 text-xs">Baseline net/mo</div>
           <div className="font-semibold tabular">${result.baseline_monthly_net.toFixed(2)}</div>

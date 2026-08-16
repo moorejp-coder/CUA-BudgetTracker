@@ -26,7 +26,7 @@ export default function CashFlow() {
         </select>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card">
           <div className="text-xs text-white/60 mb-1">Total income</div>
           <div className="text-2xl font-bold text-income tabular">${totalIncome.toFixed(0)}</div>

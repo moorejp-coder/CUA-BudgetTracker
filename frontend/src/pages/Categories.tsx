@@ -69,7 +69,7 @@ export default function Categories() {
         </form>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
           <h2 className="text-sm font-semibold mb-3">Expense categories</h2>
           <ul className="space-y-2">

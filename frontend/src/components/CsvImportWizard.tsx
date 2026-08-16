@@ -111,7 +111,7 @@ export default function CsvImportWizard() {
               ))}
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {INTERNAL_FIELDS.map((field) => (
               <div key={field}>
                 <label className="label capitalize">{field}</label>

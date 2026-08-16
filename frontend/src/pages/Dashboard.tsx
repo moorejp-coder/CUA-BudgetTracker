@@ -32,7 +32,7 @@ export default function Dashboard() {
         <p className="text-white/50 text-sm">{format(new Date(), "MMMM yyyy")}</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Income" value={summary?.total_income ?? 0} tone="income" />
         <StatCard label="Expenses" value={summary?.total_expense ?? 0} tone="expense" />
         <StatCard label="Net" value={summary?.net ?? 0} tone={summary && summary.net < 0 ? "expense" : "income"} />
@@ -54,7 +54,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
           <h2 className="text-sm font-semibold mb-3">Spending by category</h2>
           <CategoryDonut data={spendByCategory} />
@@ -65,7 +65,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
           <h2 className="text-sm font-semibold mb-3">Upcoming charges (30 days)</h2>
           {upcoming.length === 0 && <p className="text-sm text-white/40">No upcoming recurring charges detected.</p>}

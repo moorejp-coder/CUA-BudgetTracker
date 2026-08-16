@@ -28,6 +28,7 @@ export default function Anomalies() {
           </div>
 
           <div className="card">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-white/50 text-xs uppercase">
                 <tr>
@@ -57,6 +58,7 @@ export default function Anomalies() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </>
       )}

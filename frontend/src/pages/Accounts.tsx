@@ -69,7 +69,7 @@ export default function Accounts() {
         </form>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {accounts.map((a) => (
           <div key={a.id} className="card">
             <div className="flex justify-between items-start">

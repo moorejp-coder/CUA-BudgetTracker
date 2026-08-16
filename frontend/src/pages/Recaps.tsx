@@ -42,7 +42,7 @@ export default function Recaps() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card col-span-1">
           <h2 className="text-sm font-semibold mb-3">History</h2>
           {isLoading && <p className="text-white/40 text-sm">Loading…</p>}
@@ -77,7 +77,7 @@ export default function Recaps() {
               </div>
               <div className="text-sm text-white/80 whitespace-pre-line leading-relaxed">{active.recap_text}</div>
 
-              <div className="grid grid-cols-3 gap-3 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
                 <div className="bg-surface-sunken rounded-lg p-3">
                   <div className="text-xs text-white/50">Income</div>
                   <div className="text-lg font-bold text-income tabular">${Number(active.context.income ?? 0).toFixed(0)}</div>
