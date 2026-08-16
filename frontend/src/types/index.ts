@@ -74,6 +74,7 @@ export interface Goal {
   target_amount: number;
   target_date: string | null;
   monthly_contribution: number;
+  allocated_amount: number;
   current_amount: number;
   account_ids: string[];
 }

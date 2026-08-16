@@ -10,6 +10,8 @@ export default function Goals() {
   const { data: forecasts = [] } = useQuery({ queryKey: ["goal-forecast"], queryFn: ForecastApi.goals });
   const forecastByGoal = new Map(forecasts.map((f) => [f.goal_id, f]));
   const [form, setForm] = useState({ name: "", target_amount: "", target_date: "", monthly_contribution: "", account_ids: [] as string[] });
+  const [contributions, setContributions] = useState<Record<string, string>>({});
+  const [allocationErrors, setAllocationErrors] = useState<Record<string, string>>({});
 
   async function addGoal(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +25,21 @@ export default function Goals() {
     } as any);
     setForm({ name: "", target_amount: "", target_date: "", monthly_contribution: "", account_ids: [] });
     qc.invalidateQueries({ queryKey: ["goals"] });
+  }
+
+  async function allocate(goalId: string, sign: 1 | -1) {
+    const raw = contributions[goalId];
+    const amount = parseFloat(raw || "0");
+    if (!amount) return;
+    setAllocationErrors({ ...allocationErrors, [goalId]: "" });
+    try {
+      await GoalsApi.contribute(goalId, sign * amount);
+      setContributions({ ...contributions, [goalId]: "" });
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["goal-forecast"] });
+    } catch (e: any) {
+      setAllocationErrors({ ...allocationErrors, [goalId]: e?.response?.data?.detail ?? "Something went wrong" });
+    }
   }
 
   return (
@@ -91,6 +108,29 @@ export default function Goals() {
               {g.monthly_contribution > 0 && (
                 <div className="text-xs text-white/40 mt-2">${g.monthly_contribution.toFixed(0)}/mo contribution</div>
               )}
+              <div className="flex gap-2 mt-3">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="input flex-1"
+                  placeholder="Amount"
+                  value={contributions[g.id] ?? ""}
+                  onChange={(e) => setContributions({ ...contributions, [g.id]: e.target.value })}
+                />
+                <button type="button" className="btn-primary" onClick={() => allocate(g.id, 1)}>
+                  Allocate
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={g.allocated_amount <= 0}
+                  onClick={() => allocate(g.id, -1)}
+                >
+                  Withdraw
+                </button>
+              </div>
+              {allocationErrors[g.id] && <div className="text-xs text-expense mt-1">{allocationErrors[g.id]}</div>}
               {forecast && <GoalForecastLine forecast={forecast} />}
             </div>
           );

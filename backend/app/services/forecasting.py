@@ -109,7 +109,7 @@ def goal_forecast(db: Session, user_id: str) -> list[dict]:
     today = date.today()
     results = []
     for g in goals:
-        current = sum(float(a.current_balance) for a in g.accounts)
+        current = float(g.allocated_amount) + sum(float(a.current_balance) for a in g.accounts)
         target = float(g.target_amount)
         remaining = max(0.0, target - current)
         rate = float(g.monthly_contribution)
@@ -200,7 +200,7 @@ def run_scenario(db: Session, user_id: str, adjustments: list[dict], base_months
     goal_impacts = []
     for g in goals:
         extra = goal_contribution_by_goal.get(g.id, 0)
-        current = sum(float(a.current_balance) for a in g.accounts)
+        current = float(g.allocated_amount) + sum(float(a.current_balance) for a in g.accounts)
         remaining = max(0.0, float(g.target_amount) - current)
         base_rate = float(g.monthly_contribution) or 0.01
         new_rate = base_rate + extra

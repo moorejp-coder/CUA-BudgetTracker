@@ -24,5 +24,6 @@ class Goal(IdMixin, TimestampMixin, Base):
     target_amount: Mapped[float] = mapped_column(Numeric(14, 2))
     target_date: Mapped[date_type | None] = mapped_column(Date, nullable=True)
     monthly_contribution: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
+    allocated_amount: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
 
     accounts: Mapped[list["Account"]] = relationship(secondary=goal_accounts)

@@ -25,7 +25,12 @@ class GoalOut(BaseModel):
     target_amount: float
     target_date: date | None = None
     monthly_contribution: float
+    allocated_amount: float = 0
     current_amount: float = 0
     account_ids: list[str] = []
 
     model_config = {"from_attributes": True}
+
+
+class GoalContribution(BaseModel):
+    amount: float

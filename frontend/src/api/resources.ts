@@ -89,6 +89,7 @@ export const GoalsApi = {
   list: () => api.get<Goal[]>("/goals").then((r) => r.data),
   create: (data: Partial<Goal> & { account_ids?: string[] }) => api.post<Goal>("/goals", data).then((r) => r.data),
   update: (id: string, data: Partial<Goal>) => api.patch<Goal>(`/goals/${id}`, data).then((r) => r.data),
+  contribute: (id: string, amount: number) => api.post<Goal>(`/goals/${id}/contribute`, { amount }).then((r) => r.data),
 };
 
 export const AnalyticsApi = {

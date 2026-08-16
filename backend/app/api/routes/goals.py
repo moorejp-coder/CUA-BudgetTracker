@@ -6,19 +6,22 @@ from app.db.session import get_db
 from app.models.account import Account
 from app.models.goal import Goal
 from app.models.user import User
-from app.schemas.goal import GoalCreate, GoalOut, GoalUpdate
+from app.schemas.goal import GoalContribution, GoalCreate, GoalOut, GoalUpdate
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 
 
 def _serialize(goal: Goal) -> dict:
+    allocated = float(goal.allocated_amount)
+    linked = sum(float(a.current_balance) for a in goal.accounts)
     return {
         "id": goal.id,
         "name": goal.name,
         "target_amount": float(goal.target_amount),
         "target_date": goal.target_date,
         "monthly_contribution": float(goal.monthly_contribution),
-        "current_amount": sum(float(a.current_balance) for a in goal.accounts),
+        "allocated_amount": allocated,
+        "current_amount": allocated + linked,
         "account_ids": [a.id for a in goal.accounts],
     }
 
@@ -36,6 +39,22 @@ def create_goal(payload: GoalCreate, db: Session = Depends(get_db), user: User =
     if payload.account_ids:
         goal.accounts = db.query(Account).filter(Account.id.in_(payload.account_ids), Account.user_id == user.id).all()
     db.add(goal)
+    db.commit()
+    db.refresh(goal)
+    return _serialize(goal)
+
+
+@router.post("/{goal_id}/contribute", response_model=GoalOut)
+def contribute_to_goal(
+    goal_id: str, payload: GoalContribution, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    goal = db.get(Goal, goal_id)
+    if not goal or goal.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    new_allocated = float(goal.allocated_amount) + payload.amount
+    if new_allocated < 0:
+        raise HTTPException(status_code=400, detail="Allocation cannot go below zero")
+    goal.allocated_amount = new_allocated
     db.commit()
     db.refresh(goal)
     return _serialize(goal)
