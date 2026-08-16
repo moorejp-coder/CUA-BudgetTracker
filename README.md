@@ -6,7 +6,9 @@ bank's own website. Everything runs on a server you control.
 
 **Live demo:** http://54.175.240.105 (AWS EC2, Free Tier — static via Elastic IP)
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the stack/ER diagram/API surface and
+See [PROJECT_SUMMARY.pdf](PROJECT_SUMMARY.pdf) for a one-page overview (problem, solution, AI
+usage, key learnings). For more detail: [ARCHITECTURE.md](ARCHITECTURE.md) for the stack/ER
+diagram/API surface and
 [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for the UI design tokens. The original static
 localStorage prototype from before this rewrite lives in [`legacy-static/`](legacy-static/).
 

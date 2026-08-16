@@ -32,24 +32,29 @@ contest's milestone checklist. Check items should become GitHub issues as they'r
       + what-if scenarios, subscription/anomaly detection, behavioral nudging
 - [x] Every AI feature has a deterministic, no-LLM fallback (verified via test suite with
       `LLM_ENABLED=false`)
-- [ ] Access control hardened — confirm hashed passwords, working session/token refresh, and
-      logout; verify protected routes reject unauthenticated requests (not just hidden UI)
-- [ ] PII separation audit — confirm no user data appears in URLs, logs, or public API
-      responses
-- [ ] Error handling pass — confirm the app degrades gracefully on empty/bad inputs and API
-      failures (no raw stack traces surfaced to the user)
-- [ ] UX pass with a non-technical tester — labels, button copy, mobile layout
+- [x] Access control hardened — confirmed hashed passwords, working session/token refresh, and
+      logout; every route requires auth except `/health`; ownership checks verified on every
+      `db.get(...)` lookup (no IDOR); password length now enforced server-side, not just in
+      the React form; `/llm/status` no longer unauthenticated
+- [x] PII separation audit — confirmed no user data in URLs, logs, or public API responses;
+      export endpoints correctly scoped to the requesting user
+- [x] Error handling pass — backend has no debug mode, so unhandled exceptions return generic
+      500s, not stack traces; added a React ErrorBoundary so a frontend crash shows a friendly
+      message instead of a blank screen
+- [ ] UX pass with a non-technical tester — labels, button copy. Mobile layout done: fixed a
+      sidebar that broke the app entirely on phones, plus grid/table overflow across every
+      page (see commit `1c10e58`); still need a real non-technical tester for copy/labels
 
 ## Phase 4 — Polish, package, submit
 
 - [ ] Feature freeze — bug fixes and docs only after this point
-- [ ] One-page summary written (problem, solution, AI usage, key learnings) — PDF in repo
+- [x] One-page summary written (problem, solution, AI usage, key learnings) — PDF in repo
 - [ ] 5–10 minute demo script prepared and rehearsed at least once
 - [ ] README screenshots/demo GIF added
 - [x] Live URL confirmed stable — Elastic IP allocated and associated (`54.175.240.105`),
       survives instance stop/restart
-- [ ] Final repo cleanup: no secrets in history (`git log -p` check), license finalized,
-      broken links fixed
+- [ ] Final repo cleanup: no secrets in history (checked — clean) and no broken links
+      (checked — clean); license still needs to be finalized (see known risks)
 
 ## Known risks
 
