@@ -62,6 +62,27 @@ def _deterministic_answer(context: dict) -> str:
     if over:
         names = ", ".join(b["category_name"] for b in over)
         text += f" You're currently over budget in: {names}."
+
+    goals = context.get("goals") or []
+    if goals:
+        parts = ", ".join(f"{g['name']} {g['pct_complete']:.0f}% (${g['current_amount']:.2f}/${g['target_amount']:.2f})" for g in goals)
+        text += f" Goal progress: {parts}."
+
+    subs = context.get("subscriptions") or []
+    if subs:
+        total = context.get("subscriptions_total_monthly", sum(s.get("monthly_equivalent", 0) for s in subs))
+        text += f" You have {len(subs)} active subscriptions totaling ${total:.2f}/month."
+
+    cashflow = context.get("cashflow_last_6_months") or []
+    if cashflow:
+        latest = cashflow[-1]
+        text += f" Most recent month ({latest['period']}): income ${latest['income']:.2f}, expenses ${latest['expense']:.2f}, net ${latest['net']:.2f}."
+
+    net_worth_history = context.get("net_worth_history") or []
+    if net_worth_history:
+        latest = net_worth_history[-1]
+        text += f" Current net worth: ${latest['net_worth']:.2f} (assets ${latest['assets']:.2f}, liabilities ${latest['liabilities']:.2f})."
+
     return text
 
 
