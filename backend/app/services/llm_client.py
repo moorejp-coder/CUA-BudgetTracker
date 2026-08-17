@@ -23,7 +23,17 @@ async def is_reachable() -> bool:
     if not settings.LLM_ENABLED:
         return False
     if settings.LLM_PROVIDER == "claude":
-        return bool(settings.ANTHROPIC_API_KEY)
+        if not settings.ANTHROPIC_API_KEY:
+            return False
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                resp = await client.get(
+                    f"{ANTHROPIC_API_URL.rsplit('/', 1)[0]}/models",
+                    headers={"x-api-key": settings.ANTHROPIC_API_KEY, "anthropic-version": ANTHROPIC_VERSION},
+                )
+                return resp.status_code < 500
+        except (httpx.ConnectError, httpx.TimeoutException, httpx.HTTPError):
+            return False
     try:
         async with httpx.AsyncClient(timeout=3.0) as client:
             resp = await client.get(f"{settings.LLM_BASE_URL}/models", headers=_local_headers())

@@ -27,9 +27,11 @@ settings = get_settings()
 @router.get("/status", response_model=LlmStatus)
 async def status(user: User = Depends(get_current_user)):
     reachable = await llm_client.is_reachable()
-    return LlmStatus(
-        enabled=settings.LLM_ENABLED, reachable=reachable, base_url=settings.LLM_BASE_URL, model=settings.LLM_MODEL
-    )
+    if settings.LLM_PROVIDER == "claude":
+        base_url, model = "https://api.anthropic.com", settings.ANTHROPIC_MODEL
+    else:
+        base_url, model = settings.LLM_BASE_URL, settings.LLM_MODEL
+    return LlmStatus(enabled=settings.LLM_ENABLED, reachable=reachable, base_url=base_url, model=model)
 
 
 @router.post("/categorize", response_model=LlmCategorizeResponse)
