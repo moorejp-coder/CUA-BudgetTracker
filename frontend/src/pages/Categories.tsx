@@ -5,7 +5,7 @@ import { AnalyticsApi, BudgetsApi, CategoriesApi } from "@/api/resources";
 import BudgetProgress from "@/components/BudgetProgress";
 import BudgetVariance from "@/components/BudgetVariance";
 
-const PALETTE = ["#5b8def", "#34d399", "#f59e0b", "#f87171", "#a78bfa", "#22d3ee", "#f472b6", "#84cc16", "#fb923c", "#64748b"];
+const PALETTE = ["#c99a4b", "#4fae7b", "#4fa3c4", "#c6604a", "#9b7ebd", "#d4b483", "#6e8fa3", "#b5a45c", "#a85c7c", "#7a7268"];
 
 export default function Categories() {
   const qc = useQueryClient();
@@ -58,7 +58,7 @@ export default function Categories() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Categories &amp; Budgets</h1>
+      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Categories &amp; Budgets</h1>
 
       <div className="card">
         <h2 className="text-sm font-semibold mb-3">Add category</h2>
@@ -94,7 +94,7 @@ export default function Categories() {
                   <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />
                   {c.emoji} {c.name}
                 </span>
-                <button onClick={() => removeCategory(c.id)} className="text-white/30 hover:text-expense text-xs">
+                <button onClick={() => removeCategory(c.id)} className="text-ink/30 hover:text-expense text-xs">
                   Delete
                 </button>
               </li>
@@ -110,7 +110,7 @@ export default function Categories() {
                   <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />
                   {c.emoji} {c.name}
                 </span>
-                <button onClick={() => removeCategory(c.id)} className="text-white/30 hover:text-expense text-xs">
+                <button onClick={() => removeCategory(c.id)} className="text-ink/30 hover:text-expense text-xs">
                   Delete
                 </button>
               </li>
@@ -122,7 +122,7 @@ export default function Categories() {
       {suggestion && suggestion.monthly_income > 0 && (
         <div className="card">
           <h2 className="text-sm font-semibold mb-1">Suggested budget — {period}</h2>
-          <p className="text-xs text-white/50 mb-4">
+          <p className="text-xs text-ink/50 mb-4">
             Based on {suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD" })} of
             monthly income.{" "}
             {suggestion.has_debt
@@ -132,13 +132,13 @@ export default function Categories() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {suggestion.buckets.map((b) => (
               <div key={b.key} className="rounded-lg bg-white/5 p-3">
-                <div className="text-xs text-white/50">
+                <div className="text-xs text-ink/50">
                   {b.label} · {Math.round(b.pct * 100)}%
                 </div>
-                <div className="text-lg font-semibold text-white">
+                <div className="text-lg font-semibold text-ink">
                   {b.amount.toLocaleString(undefined, { style: "currency", currency: "USD" })}
                 </div>
-                <div className="text-[11px] text-white/40 mt-1">{b.description}</div>
+                <div className="text-[11px] text-ink/40 mt-1">{b.description}</div>
               </div>
             ))}
           </div>
@@ -148,45 +148,45 @@ export default function Categories() {
       {homePlan && homePlan.monthly_income > 0 && (
         <div className="card">
           <h2 className="text-sm font-semibold mb-1">House down payment plan — {period}</h2>
-          <p className="text-xs text-white/50 mb-4">
+          <p className="text-xs text-ink/50 mb-4">
             Conventional 10% down, assuming no other debts.
             {homePlan.has_debt && " You currently have outstanding debt, so treat this as an optimistic ceiling."}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <div className="rounded-lg bg-white/5 p-3">
-              <div className="text-xs text-white/50">Max monthly payment</div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-xs text-ink/50">Max monthly payment</div>
+              <div className="text-lg font-semibold text-ink">
                 {homePlan.max_monthly_mortgage_payment.toLocaleString(undefined, { style: "currency", currency: "USD" })}
               </div>
-              <div className="text-[11px] text-white/40 mt-1">50% of monthly income</div>
+              <div className="text-[11px] text-ink/40 mt-1">50% of monthly income</div>
             </div>
             <div className="rounded-lg bg-white/5 p-3">
-              <div className="text-xs text-white/50">Max home price</div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-xs text-ink/50">Max home price</div>
+              <div className="text-lg font-semibold text-ink">
                 {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD" })}
               </div>
-              <div className="text-[11px] text-white/40 mt-1">Max payment ÷ $7.40 per $1,000 borrowed</div>
+              <div className="text-[11px] text-ink/40 mt-1">Max payment ÷ $7.40 per $1,000 borrowed</div>
             </div>
             <div className="rounded-lg bg-white/5 p-3">
-              <div className="text-xs text-white/50">Needed to close</div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-xs text-ink/50">Needed to close</div>
+              <div className="text-lg font-semibold text-ink">
                 {homePlan.amount_needed_to_close.toLocaleString(undefined, { style: "currency", currency: "USD" })}
               </div>
-              <div className="text-[11px] text-white/40 mt-1">10% down + 2% closing costs</div>
+              <div className="text-[11px] text-ink/40 mt-1">10% down + 2% closing costs</div>
             </div>
             <div className="rounded-lg bg-white/5 p-3">
-              <div className="text-xs text-white/50">Suggested savings</div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-xs text-ink/50">Suggested savings</div>
+              <div className="text-lg font-semibold text-ink">
                 {homePlan.suggested_monthly_savings.toLocaleString(undefined, { style: "currency", currency: "USD" })}/mo
               </div>
-              <div className="text-[11px] text-white/40 mt-1">30% of monthly income</div>
+              <div className="text-[11px] text-ink/40 mt-1">30% of monthly income</div>
             </div>
             <div className="rounded-lg bg-white/5 p-3">
-              <div className="text-xs text-white/50">Time to save from $0</div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-xs text-ink/50">Time to save from $0</div>
+              <div className="text-lg font-semibold text-ink">
                 {homePlan.months_to_save_from_zero !== null ? `${homePlan.months_to_save_from_zero} months` : "—"}
               </div>
-              <div className="text-[11px] text-white/40 mt-1">Needed to close ÷ suggested savings</div>
+              <div className="text-[11px] text-ink/40 mt-1">Needed to close ÷ suggested savings</div>
             </div>
           </div>
         </div>
@@ -199,13 +199,13 @@ export default function Categories() {
             <div className="flex gap-1">
               <button
                 onClick={() => setCompareMonths(1)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 1 ? "bg-accent text-white" : "btn-secondary"}`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 1 ? "bg-accent text-ink" : "btn-secondary"}`}
               >
                 vs last month
               </button>
               <button
                 onClick={() => setCompareMonths(3)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 3 ? "bg-accent text-white" : "btn-secondary"}`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 3 ? "bg-accent text-ink" : "btn-secondary"}`}
               >
                 vs last quarter
               </button>
@@ -254,7 +254,7 @@ function BudgetInlineForm({ onSet }: { onSet: (amount: number, rollover: boolean
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <label className="text-xs text-white/50 flex items-center gap-1">
+      <label className="text-xs text-ink/50 flex items-center gap-1">
         <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
         rollover
       </label>

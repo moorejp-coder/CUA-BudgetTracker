@@ -6,40 +6,40 @@ export default function Subscriptions() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
+      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Subscriptions</h1>
 
-      {isLoading && <p className="text-white/40 text-sm">Loading…</p>}
+      {isLoading && <p className="text-ink/40 text-sm">Loading…</p>}
 
       {data && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="card">
-              <div className="text-xs text-white/60 mb-1">Total monthly subscription cost</div>
-              <div className="text-2xl font-bold tabular">
+              <div className="text-xs text-ink/60 mb-1">Total monthly subscription cost</div>
+              <div className="text-2xl numeral">
                 ${data.subscriptions.reduce((s, sub) => s + sub.monthly_equivalent, 0).toFixed(2)}
               </div>
             </div>
             <div className="card">
-              <div className="text-xs text-white/60 mb-1">Active subscriptions</div>
-              <div className="text-2xl font-bold tabular">{data.subscriptions.length}</div>
+              <div className="text-xs text-ink/60 mb-1">Active subscriptions</div>
+              <div className="text-2xl numeral">{data.subscriptions.length}</div>
             </div>
             <div className="card">
-              <div className="text-xs text-white/60 mb-1">Price increases detected</div>
-              <div className="text-2xl font-bold tabular text-warning">{data.anomalies.price_increases.length}</div>
+              <div className="text-xs text-ink/60 mb-1">Price increases detected</div>
+              <div className="text-2xl numeral text-warning">{data.anomalies.price_increases.length}</div>
             </div>
           </div>
 
           <div className="card">
             <h2 className="text-sm font-semibold mb-3">AI summary</h2>
-            <div className="text-sm text-white/80 whitespace-pre-line">{data.summary}</div>
-            <div className="text-[10px] text-white/30 mt-2 uppercase tracking-wide">{data.source}</div>
+            <div className="text-sm text-ink/80 whitespace-pre-line">{data.summary}</div>
+            <div className="text-[10px] text-ink/30 mt-2 uppercase tracking-wide">{data.source}</div>
           </div>
 
           <div className="card">
             <h2 className="text-sm font-semibold mb-3">Active subscriptions</h2>
             <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-white/50 text-xs uppercase">
+              <thead className="text-ink/50 text-xs uppercase">
                 <tr>
                   <th className="text-left py-2">Merchant</th>
                   <th className="text-left py-2">Cadence</th>
@@ -58,7 +58,7 @@ export default function Subscriptions() {
                 ))}
                 {data.subscriptions.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center text-white/40">
+                    <td colSpan={4} className="py-6 text-center text-ink/40">
                       No confirmed subscriptions yet — confirm suggestions on the Recurring page.
                     </td>
                   </tr>
@@ -76,10 +76,10 @@ export default function Subscriptions() {
                   {data.anomalies.new_subscriptions.map((s, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{s.merchant}</span>
-                      <span className="tabular text-white/60">${s.expected_amount.toFixed(2)} · {s.cadence}</span>
+                      <span className="tabular text-ink/60">${s.expected_amount.toFixed(2)} · {s.cadence}</span>
                     </li>
                   ))}
-                  {data.anomalies.new_subscriptions.length === 0 && <p className="text-white/40 text-xs">None</p>}
+                  {data.anomalies.new_subscriptions.length === 0 && <p className="text-ink/40 text-xs">None</p>}
                 </ul>
               </div>
               <div className="card">
@@ -93,7 +93,7 @@ export default function Subscriptions() {
                       </span>
                     </li>
                   ))}
-                  {data.anomalies.price_increases.length === 0 && <p className="text-white/40 text-xs">None</p>}
+                  {data.anomalies.price_increases.length === 0 && <p className="text-ink/40 text-xs">None</p>}
                 </ul>
               </div>
             </div>

@@ -44,7 +44,7 @@ export default function Goals() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Goals</h1>
+      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Goals</h1>
 
       <div className="card">
         <h2 className="text-sm font-semibold mb-3">New goal</h2>
@@ -98,32 +98,32 @@ export default function Goals() {
           return (
             <div key={g.id} className="card">
               <div className="font-semibold">{g.name}</div>
-              {g.target_date && <div className="text-xs text-white/40">by {g.target_date}</div>}
-              <div className="mt-3 text-lg font-bold tabular">
-                ${g.current_amount.toFixed(0)} <span className="text-white/40 font-normal text-sm">/ ${g.target_amount.toFixed(0)}</span>
+              {g.target_date && <div className="text-xs text-ink/40">by {g.target_date}</div>}
+              <div className="mt-3 text-lg numeral">
+                ${g.current_amount.toFixed(0)} <span className="text-ink/40 font-sans font-normal text-sm">/ ${g.target_amount.toFixed(0)}</span>
               </div>
               <div className="h-2 rounded-full bg-surface-sunken overflow-hidden mt-2">
                 <div className="h-full bg-accent rounded-full" style={{ width: `${pct}%` }} />
               </div>
               {g.monthly_contribution > 0 && (
-                <div className="text-xs text-white/40 mt-2">${g.monthly_contribution.toFixed(0)}/mo contribution</div>
+                <div className="text-xs text-ink/40 mt-2">${g.monthly_contribution.toFixed(0)}/mo contribution</div>
               )}
-              <div className="flex gap-2 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3">
                 <input
                   type="number"
                   min="0"
                   step="0.01"
-                  className="input flex-1"
+                  className="input flex-1 min-w-[100px]"
                   placeholder="Amount"
                   value={contributions[g.id] ?? ""}
                   onChange={(e) => setContributions({ ...contributions, [g.id]: e.target.value })}
                 />
-                <button type="button" className="btn-primary" onClick={() => allocate(g.id, 1)}>
+                <button type="button" className="btn-primary shrink-0 whitespace-nowrap" onClick={() => allocate(g.id, 1)}>
                   Allocate
                 </button>
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="btn-secondary shrink-0 whitespace-nowrap"
                   disabled={g.allocated_amount <= 0}
                   onClick={() => allocate(g.id, -1)}
                 >
@@ -135,7 +135,7 @@ export default function Goals() {
             </div>
           );
         })}
-        {goals.length === 0 && <p className="text-white/40 text-sm">No goals yet.</p>}
+        {goals.length === 0 && <p className="text-ink/40 text-sm">No goals yet.</p>}
       </div>
     </div>
   );
@@ -143,16 +143,16 @@ export default function Goals() {
 
 function GoalForecastLine({ forecast }: { forecast: GoalForecastItem }) {
   if (forecast.months_to_goal === null) {
-    return <div className="text-xs text-white/40 mt-2">Set a monthly contribution to project a completion date.</div>;
+    return <div className="text-xs text-ink/40 mt-2">Set a monthly contribution to project a completion date.</div>;
   }
-  const paceColor = forecast.on_pace === false ? "text-expense" : forecast.on_pace === true ? "text-income" : "text-white/60";
+  const paceColor = forecast.on_pace === false ? "text-expense" : forecast.on_pace === true ? "text-income" : "text-ink/60";
   return (
     <div className="text-xs mt-2 pt-2 border-t border-white/5 space-y-0.5">
       <div className={paceColor}>
         {forecast.months_to_goal.toFixed(1)} months to go{forecast.projected_completion_date && ` — projected ${forecast.projected_completion_date}`}
       </div>
       {forecast.on_pace !== null && (
-        <div className="text-white/40">{forecast.on_pace ? "On pace for target date" : "Behind target date at current rate"}</div>
+        <div className="text-ink/40">{forecast.on_pace ? "On pace for target date" : "Behind target date at current rate"}</div>
       )}
     </div>
   );

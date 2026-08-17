@@ -25,14 +25,16 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas text-white/90 flex items-center justify-center">
+    <div className="min-h-screen bg-canvas text-ink/90 flex items-center justify-center">
       <div className="card w-full max-w-sm">
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-bold">$</div>
-          <span className="font-semibold text-lg text-white">Budget Tracker</span>
+          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-display italic font-semibold text-canvas text-lg">b</div>
+          <span className="font-display italic text-lg text-ink">Budget Tracker</span>
         </div>
-        <h1 className="text-xl font-bold mb-1">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
-        <p className="text-sm text-white/50 mb-6">Your data stays on this server. No banks, no third parties.</p>
+        <h1 className="font-display text-2xl font-semibold text-ink tracking-tight mb-1">
+          {mode === "login" ? "Welcome back" : "Create your account"}
+        </h1>
+        <p className="text-sm text-ink/50 mb-6">Your data stays on this server. No banks, no third parties.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "register" && (
@@ -63,7 +65,7 @@ export default function Login() {
         </form>
 
         <button
-          className="text-sm text-white/50 hover:text-white mt-4"
+          className="text-sm text-ink/50 hover:text-ink mt-4"
           onClick={() => setMode(mode === "login" ? "register" : "login")}
         >
           {mode === "login" ? "Need an account? Register" : "Already have an account? Log in"}

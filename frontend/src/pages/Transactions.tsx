@@ -38,7 +38,7 @@ export default function Transactions() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Transactions</h1>
+        <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Transactions</h1>
         <div className="flex gap-2">
           <Link to="/transactions/import" className="btn-secondary">
             Import CSV
@@ -82,7 +82,7 @@ export default function Transactions() {
 
       {selected.size > 0 && (
         <div className="card flex items-center gap-3 py-3">
-          <span className="text-sm text-white/60">{selected.size} selected</span>
+          <span className="text-sm text-ink/60">{selected.size} selected</span>
           <select className="input" onChange={(e) => e.target.value && handleBulkCategory(e.target.value)} defaultValue="">
             <option value="" disabled>
               Set category…
@@ -110,7 +110,7 @@ export default function Transactions() {
           <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(page - 1)}>
             Previous
           </button>
-          <span className="py-2 text-white/50">
+          <span className="py-2 text-ink/50">
             Page {page} of {Math.ceil(data.total / data.page_size)}
           </span>
           <button className="btn-secondary" disabled={page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>
@@ -179,7 +179,7 @@ function AddTransactionModal({
                 key={t}
                 onClick={() => setType(t)}
                 className={`flex-1 py-2 text-sm font-semibold capitalize ${
-                  type === t ? (t === "income" ? "bg-income text-black" : "bg-expense text-black") : "text-white/50"
+                  type === t ? (t === "income" ? "bg-income text-black" : "bg-expense text-black") : "text-ink/50"
                 }`}
               >
                 {t}

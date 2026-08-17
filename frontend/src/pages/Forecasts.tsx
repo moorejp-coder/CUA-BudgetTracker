@@ -48,13 +48,13 @@ export default function Forecasts() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Forecasts</h1>
+        <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Forecasts</h1>
         <div className="flex gap-1">
           {[30, 60, 90].map((d) => (
             <button
               key={d}
               onClick={() => setHorizon(d)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${horizon === d ? "bg-accent text-white" : "btn-secondary"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${horizon === d ? "bg-accent text-ink" : "btn-secondary"}`}
             >
               {d}d
             </button>
@@ -66,19 +66,19 @@ export default function Forecasts() {
         <div className="card">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 text-sm">
             <div>
-              <div className="text-white/50 text-xs">Avg monthly income</div>
+              <div className="text-ink/50 text-xs">Avg monthly income</div>
               <div className="text-income font-semibold tabular">${forecast.avg_monthly_income.toFixed(0)}</div>
             </div>
             <div>
-              <div className="text-white/50 text-xs">Avg monthly expense</div>
+              <div className="text-ink/50 text-xs">Avg monthly expense</div>
               <div className="text-expense font-semibold tabular">${forecast.avg_monthly_expense.toFixed(0)}</div>
             </div>
             <div>
-              <div className="text-white/50 text-xs">Upcoming recurring ({horizon}d)</div>
+              <div className="text-ink/50 text-xs">Upcoming recurring ({horizon}d)</div>
               <div className="font-semibold tabular">${forecast.upcoming_recurring_total.toFixed(0)}</div>
             </div>
             <div>
-              <div className="text-white/50 text-xs">Starting balance</div>
+              <div className="text-ink/50 text-xs">Starting balance</div>
               <div className="font-semibold tabular">${forecast.starting_balance.toFixed(0)}</div>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function Forecasts() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
           <h2 className="text-sm font-semibold mb-3">Scenario builder</h2>
-          <p className="text-xs text-white/50 mb-3">
+          <p className="text-xs text-ink/50 mb-3">
             Target a category name for a % change (e.g. -0.2 = cut 20%) or a goal name for an
             absolute $/month contribution change.
           </p>
@@ -140,7 +140,7 @@ export default function Forecasts() {
           </form>
           {nlResult && (
             <>
-              <div className="text-sm text-white/80 bg-surface-sunken rounded-lg p-3 mb-3">{nlResult.explanation}</div>
+              <div className="text-sm text-ink/80 bg-surface-sunken rounded-lg p-3 mb-3">{nlResult.explanation}</div>
               <ScenarioResultView result={nlResult.result} />
             </>
           )}
@@ -155,11 +155,11 @@ function ScenarioResultView({ result }: { result: ScenarioResult }) {
     <div className="mt-4 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div>
-          <div className="text-white/50 text-xs">Baseline net/mo</div>
+          <div className="text-ink/50 text-xs">Baseline net/mo</div>
           <div className="font-semibold tabular">${result.baseline_monthly_net.toFixed(2)}</div>
         </div>
         <div>
-          <div className="text-white/50 text-xs">Projected net/mo</div>
+          <div className="text-ink/50 text-xs">Projected net/mo</div>
           <div className={`font-semibold tabular ${result.monthly_net_delta >= 0 ? "text-income" : "text-expense"}`}>
             ${result.projected_monthly_net.toFixed(2)} ({result.monthly_net_delta >= 0 ? "+" : ""}
             {result.monthly_net_delta.toFixed(2)})
@@ -167,7 +167,7 @@ function ScenarioResultView({ result }: { result: ScenarioResult }) {
         </div>
       </div>
       {result.goal_impacts.filter((g) => g.extra_monthly_contribution !== 0).length > 0 && (
-        <div className="text-xs text-white/60">
+        <div className="text-xs text-ink/60">
           {result.goal_impacts
             .filter((g) => g.extra_monthly_contribution !== 0)
             .map((g) => (

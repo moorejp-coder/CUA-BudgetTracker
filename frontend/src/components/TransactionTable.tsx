@@ -25,7 +25,7 @@ export default function TransactionTable({
   return (
     <div className="card overflow-x-auto p-0">
       <table className="w-full text-sm">
-        <thead className="bg-surface-sunken text-white/50 text-xs uppercase tracking-wide">
+        <thead className="bg-surface-sunken text-ink/50 text-xs uppercase tracking-wide">
           <tr>
             <th className="w-10 px-4 py-3"></th>
             <th className="text-left px-3 py-3">Date</th>
@@ -42,7 +42,7 @@ export default function TransactionTable({
               <td className="px-4 py-2.5">
                 <input type="checkbox" checked={selected.has(t.id)} onChange={() => toggle(t.id)} />
               </td>
-              <td className="px-3 py-2.5 text-white/70 whitespace-nowrap">{t.date}</td>
+              <td className="px-3 py-2.5 text-ink/70 whitespace-nowrap">{t.date}</td>
               <td className="px-3 py-2.5 font-medium">{t.payee || "—"}</td>
               <td className="px-3 py-2.5">
                 <select
@@ -60,16 +60,16 @@ export default function TransactionTable({
                     ))}
                 </select>
               </td>
-              <td className="px-3 py-2.5 text-white/40 text-xs capitalize">{t.source}</td>
+              <td className="px-3 py-2.5 text-ink/40 text-xs capitalize">{t.source}</td>
               <td
                 className={`px-3 py-2.5 text-right tabular font-semibold ${
-                  t.type === "income" ? "text-income" : t.type === "expense" ? "text-expense" : "text-white/70"
+                  t.type === "income" ? "text-income" : t.type === "expense" ? "text-expense" : "text-ink/70"
                 }`}
               >
                 {t.type === "income" ? "+" : t.type === "expense" ? "-" : ""}${t.amount.toFixed(2)}
               </td>
               <td className="px-3 py-2.5 text-right">
-                <button onClick={() => onDelete(t.id)} className="text-white/30 hover:text-expense text-xs opacity-0 group-hover:opacity-100 transition">
+                <button onClick={() => onDelete(t.id)} className="text-ink/30 hover:text-expense text-xs opacity-0 group-hover:opacity-100 transition">
                   Delete
                 </button>
               </td>
@@ -77,7 +77,7 @@ export default function TransactionTable({
           ))}
           {transactions.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-3 py-10 text-center text-white/40">
+              <td colSpan={7} className="px-3 py-10 text-center text-ink/40">
                 No transactions match these filters.
               </td>
             </tr>

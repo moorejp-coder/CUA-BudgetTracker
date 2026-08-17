@@ -26,7 +26,7 @@ export default function Accounts() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Accounts</h1>
+      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Accounts</h1>
 
       <div className="card">
         <h2 className="text-sm font-semibold mb-3">Add account</h2>
@@ -59,7 +59,7 @@ export default function Accounts() {
               onChange={(e) => setForm({ ...form, current_balance: e.target.value })}
             />
           </div>
-          <label className="text-xs text-white/60 flex items-center gap-1.5 pb-2">
+          <label className="text-xs text-ink/60 flex items-center gap-1.5 pb-2">
             <input type="checkbox" checked={form.is_liability} onChange={(e) => setForm({ ...form, is_liability: e.target.checked })} />
             Liability (credit card / loan)
           </label>
@@ -75,15 +75,15 @@ export default function Accounts() {
             <div className="flex justify-between items-start">
               <div>
                 <div className="font-semibold">{a.name}</div>
-                <div className="text-xs text-white/40 capitalize">
+                <div className="text-xs text-ink/40 capitalize">
                   {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
                 </div>
               </div>
-              <button onClick={() => removeAccount(a.id)} className="text-white/30 hover:text-expense text-xs">
+              <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs">
                 Delete
               </button>
             </div>
-            <div className={`text-2xl font-bold tabular mt-3 ${a.is_liability ? "text-expense" : "text-white"}`}>
+            <div className={`text-2xl numeral mt-3 ${a.is_liability ? "text-expense" : "text-ink"}`}>
               ${a.current_balance.toFixed(2)}
             </div>
             <button className="text-accent text-xs mt-3" onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}>
@@ -92,7 +92,7 @@ export default function Accounts() {
             {snapshotFor === a.id && <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />}
           </div>
         ))}
-        {accounts.length === 0 && <p className="text-white/40 text-sm">No accounts yet — add one above.</p>}
+        {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above.</p>}
       </div>
     </div>
   );

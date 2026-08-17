@@ -47,7 +47,7 @@ function NavItemLink({ to, label, end, icon: Icon }: { to: string; label: string
       end={end}
       className={({ isActive }) =>
         `group relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
-          isActive ? "bg-surface-raised text-white" : "text-white/55 hover:bg-surface-raised/60 hover:text-white"
+          isActive ? "bg-surface-raised text-ink" : "text-ink/55 hover:bg-surface-raised/60 hover:text-ink"
         }`
       }
     >
@@ -58,7 +58,7 @@ function NavItemLink({ to, label, end, icon: Icon }: { to: string; label: string
               isActive ? "opacity-100" : "opacity-0"
             }`}
           />
-          <Icon size={17} strokeWidth={2} className={isActive ? "text-accent" : "text-white/40 group-hover:text-white/70"} />
+          <Icon size={17} strokeWidth={2} className={isActive ? "text-accent" : "text-ink/40 group-hover:text-ink/70"} />
           <span className="truncate">{label}</span>
         </>
       )}
@@ -76,13 +76,13 @@ export default function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-canvas text-white/90">
+    <div className="flex min-h-screen bg-canvas text-ink/90">
       <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas/95 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-sm font-bold text-white shadow-[0_0_0_1px_rgba(91,141,239,0.3),0_4px_12px_rgba(91,141,239,0.25)]">
-            $
+          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center font-display italic font-semibold text-canvas text-base shadow-[0_0_0_1px_rgba(201,154,75,0.3),0_4px_12px_rgba(201,154,75,0.25)]">
+            b
           </div>
-          <span className="font-semibold text-white">Budget Tracker</span>
+          <span className="font-display italic text-[17px] text-ink">Budget Tracker</span>
         </div>
         <button
           onClick={() => setNavOpen((v) => !v)}
@@ -106,10 +106,10 @@ export default function Layout() {
         }`}
       >
         <div className="hidden md:flex items-center gap-2.5 px-2 py-3 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-base font-bold text-white shadow-[0_0_0_1px_rgba(91,141,239,0.3),0_4px_14px_rgba(91,141,239,0.3)]">
-            $
+          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-display italic font-semibold text-canvas text-lg shadow-[0_0_0_1px_rgba(201,154,75,0.3),0_4px_14px_rgba(201,154,75,0.3)]">
+            b
           </div>
-          <span className="font-semibold text-white tracking-tight">Budget Tracker</span>
+          <span className="font-display italic text-lg text-ink">Budget Tracker</span>
         </div>
         <ul className="flex-1 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
@@ -117,7 +117,7 @@ export default function Layout() {
               <NavItemLink {...item} />
             </li>
           ))}
-          <li className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/30">
+          <li className="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink/30">
             AI Insights
           </li>
           {AI_NAV_ITEMS.map((item) => (
@@ -129,7 +129,7 @@ export default function Layout() {
         <div className="mt-4 pt-4 border-t border-border-subtle">
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-white/50 hover:text-expense hover:bg-expense-bg transition-colors duration-150"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-ink/50 hover:text-expense hover:bg-expense-bg transition-colors duration-150"
           >
             <LogOut size={17} strokeWidth={2} />
             Log out

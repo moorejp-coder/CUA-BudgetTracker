@@ -24,7 +24,7 @@ export default function Recurring() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Recurring &amp; Subscriptions</h1>
+      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Recurring &amp; Subscriptions</h1>
 
       {suggestions.length > 0 && (
         <div className="card">
@@ -48,7 +48,7 @@ export default function Recurring() {
         <h2 className="text-sm font-semibold mb-3">Confirmed recurring items</h2>
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
-          <thead className="text-white/50 text-xs uppercase">
+          <thead className="text-ink/50 text-xs uppercase">
             <tr>
               <th className="text-left py-2">Merchant</th>
               <th className="text-left py-2">Cadence</th>
@@ -71,7 +71,7 @@ export default function Recurring() {
             ))}
             {recurring.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-6 text-center text-white/40">
+                <td colSpan={5} className="py-6 text-center text-ink/40">
                   No confirmed recurring items yet.
                 </td>
               </tr>

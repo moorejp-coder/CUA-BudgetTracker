@@ -29,8 +29,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-white/50 text-sm">{format(new Date(), "MMMM yyyy")}</p>
+        <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Dashboard</h1>
+        <p className="text-ink/50 text-sm">{format(new Date(), "MMMM yyyy")}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -54,8 +54,8 @@ export default function Dashboard() {
               return (
                 <div key={b.category_id}>
                   <div className="flex items-center justify-between text-sm mb-1.5">
-                    <span className="font-medium text-white/85">{b.category_name}</span>
-                    <span className={`tabular text-xs ${b.over ? "text-expense" : "text-white/50"}`}>
+                    <span className="font-medium text-ink/85">{b.category_name}</span>
+                    <span className={`tabular text-xs ${b.over ? "text-expense" : "text-ink/50"}`}>
                       ${b.spent.toFixed(0)} / ${b.budget.toFixed(0)}
                     </span>
                   </div>
@@ -87,15 +87,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card animate-fade-in-up" style={{ animationDelay: "240ms" }}>
           <h2 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
-            <CalendarClock size={15} className="text-white/40" />
+            <CalendarClock size={15} className="text-ink/40" />
             Upcoming charges (30 days)
           </h2>
-          {upcoming.length === 0 && <p className="text-sm text-white/40">No upcoming recurring charges detected.</p>}
+          {upcoming.length === 0 && <p className="text-sm text-ink/40">No upcoming recurring charges detected.</p>}
           <ul className="space-y-0.5">
             {upcoming.map((u: any) => (
               <li key={u.id} className="flex justify-between items-center text-sm py-1.5 -mx-2 px-2 rounded-lg hover:bg-surface-raised/60 transition-colors">
-                <span className="text-white/85">{u.merchant}</span>
-                <span className="tabular text-white/50 text-xs">
+                <span className="text-ink/85">{u.merchant}</span>
+                <span className="tabular text-ink/50 text-xs">
                   ${u.expected_amount.toFixed(2)} · {u.date}
                 </span>
               </li>
