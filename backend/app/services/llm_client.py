@@ -75,7 +75,6 @@ async def _chat_claude(system: str, user: str, max_tokens: int) -> str | None:
         "system": system,
         "messages": [{"role": "user", "content": user}],
         "max_tokens": max_tokens,
-        "temperature": 0.2,
     }
     headers = {
         "x-api-key": settings.ANTHROPIC_API_KEY,
