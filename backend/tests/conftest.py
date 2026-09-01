@@ -4,9 +4,9 @@ import os
 import tempfile
 import uuid
 
-TEST_DB_PATH = os.path.join(tempfile.gettempdir(), "budget_tracker_test.db")
-if os.path.exists(TEST_DB_PATH):
-    os.remove(TEST_DB_PATH)
+TEST_DB_PATH = os.path.join(
+    tempfile.gettempdir(), f"budget_tracker_test_{os.getpid()}_{uuid.uuid4().hex[:8]}.db"
+)
 
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB_PATH}"
 os.environ["LLM_ENABLED"] = "false"  # tests exercise the deterministic fallback path by default
