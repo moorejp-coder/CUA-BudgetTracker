@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.category import Category
-from app.models.goal import Goal
 from app.models.user import User
 from app.schemas.assistant import (
     AnomaliesAssistantResponse,
@@ -26,13 +25,34 @@ from app.services import ai_gateway, analytics, forecasting
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 
+_MONTH_NAMES = {
+    "january": 1, "jan": 1, "february": 2, "feb": 2, "march": 3, "mar": 3,
+    "april": 4, "apr": 4, "may": 5, "june": 6, "jun": 6, "july": 7, "jul": 7,
+    "august": 8, "aug": 8, "september": 9, "sep": 9, "sept": 9, "october": 10,
+    "oct": 10, "november": 11, "nov": 11, "december": 12, "dec": 12,
+}
+
+
 def _resolve_period(question: str) -> str:
     today = date.today()
-    if "last month" in question.lower():
+    q = question.lower()
+
+    if "last month" in q:
         year, month = today.year, today.month - 1
         if month == 0:
             year, month = year - 1, 12
         return f"{year}-{month:02d}"
+
+    year_match = re.search(r"\b(20\d{2})\b", q)
+    for name, month in _MONTH_NAMES.items():
+        if re.search(rf"\b{name}\b", q):
+            year = int(year_match.group(1)) if year_match else today.year
+            # A month mentioned without a year that hasn't happened yet this year
+            # almost certainly refers to last year (e.g. asking about "august" in January).
+            if not year_match and (month, 1) > (today.month, 1):
+                year -= 1
+            return f"{year}-{month:02d}"
+
     return f"{today.year}-{today.month:02d}"
 
 
@@ -45,8 +65,6 @@ def _route_intents(question: str) -> list[str]:
     intents = []
     if re.search(r"\bbudget", q):
         intents.append("budget")
-    if re.search(r"\bgoal", q):
-        intents.append("goal")
     if re.search(r"\bsubscription|\brecurring", q):
         intents.append("subscriptions")
     if re.search(r"\bcash ?flow", q):
@@ -72,8 +90,6 @@ async def assistant_query(
     # baseline even when a more specific intent also matched.
     context.update(analytics.summary(db, user.id, period))
 
-    if "goal" in intents:
-        context["goals"] = analytics.goal_progress(db, user.id)
     if "subscriptions" in intents:
         subs = analytics.subscriptions(db, user.id)
         context["subscriptions"] = subs
@@ -96,9 +112,8 @@ async def assistant_scenario(
     payload: ScenarioQueryRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
     categories = [c.name for c in db.query(Category).filter(Category.user_id == user.id, Category.type == "expense").all()]
-    goals = [g.name for g in db.query(Goal).filter(Goal.user_id == user.id).all()]
 
-    parsed = await ai_gateway.parse_scenario(payload.question, categories, goals)
+    parsed = await ai_gateway.parse_scenario(payload.question, categories)
     if parsed is None:
         parsed = ai_gateway.parse_scenario_regex_fallback(payload.question, categories)
 
