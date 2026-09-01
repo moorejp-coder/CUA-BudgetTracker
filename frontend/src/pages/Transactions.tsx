@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
 import TransactionTable from "@/components/TransactionTable";
 
 export default function Transactions() {
   const qc = useQueryClient();
-  const [filters, setFilters] = useState({ q: "", category_id: "", type: "", account_id: "" });
+  const [searchParams] = useSearchParams();
+  const [filters, setFilters] = useState({
+    q: "",
+    category_id: "",
+    type: "",
+    account_id: searchParams.get("account_id") ?? "",
+  });
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showAdd, setShowAdd] = useState(false);

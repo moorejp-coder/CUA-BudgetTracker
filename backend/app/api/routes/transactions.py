@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
+from app.models.account import Account
 from app.models.tag import Tag
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -33,6 +34,22 @@ def _serialize(txn: Transaction) -> dict:
         "source": txn.source,
         "tags": [t.name for t in txn.tags],
     }
+
+
+def _signed_amount(amount: float, type: str) -> float:
+    return amount if type == "income" else -amount
+
+
+def _apply_transaction_effect(db: Session, txn: Transaction, sign: int) -> None:
+    account = db.get(Account, txn.account_id)
+    if account:
+        account.current_balance = float(account.current_balance) + sign * _signed_amount(
+            float(txn.amount), txn.type
+        )
+    if txn.type == "transfer" and txn.transfer_account_id:
+        transfer_account = db.get(Account, txn.transfer_account_id)
+        if transfer_account:
+            transfer_account.current_balance = float(transfer_account.current_balance) + sign * float(txn.amount)
 
 
 def _resolve_tags(db: Session, user: User, tag_names: list[str]) -> list[Tag]:
@@ -96,6 +113,8 @@ def create_transaction(
     txn = Transaction(user_id=user.id, source="manual", **data)
     txn.tags = _resolve_tags(db, user, payload.tags)
     db.add(txn)
+    db.flush()
+    _apply_transaction_effect(db, txn, sign=1)
     db.commit()
     db.refresh(txn)
     return _serialize(txn)
@@ -111,11 +130,13 @@ def update_transaction(
     txn = db.get(Transaction, transaction_id)
     if not txn or txn.user_id != user.id:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    _apply_transaction_effect(db, txn, sign=-1)
     data = payload.model_dump(exclude_unset=True, exclude={"tags"})
     for field, value in data.items():
         setattr(txn, field, value)
     if payload.tags is not None:
         txn.tags = _resolve_tags(db, user, payload.tags)
+    _apply_transaction_effect(db, txn, sign=1)
     db.commit()
     db.refresh(txn)
     return _serialize(txn)
@@ -145,5 +166,6 @@ def delete_transaction(
     txn = db.get(Transaction, transaction_id)
     if not txn or txn.user_id != user.id:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    _apply_transaction_effect(db, txn, sign=-1)
     db.delete(txn)
     db.commit()

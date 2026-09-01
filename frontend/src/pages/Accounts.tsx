@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AccountsApi } from "@/api/resources";
+import { Link } from "react-router-dom";
+import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
+import AccountBuckets from "@/components/AccountBuckets";
+import TransactionTable from "@/components/TransactionTable";
 
 const TYPES = ["checking", "savings", "credit_card", "loan", "investment", "cash", "other"];
 
@@ -9,6 +12,7 @@ export default function Accounts() {
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts"], queryFn: AccountsApi.list });
   const [form, setForm] = useState({ name: "", type: "checking", institution: "", current_balance: "", is_liability: false });
   const [snapshotFor, setSnapshotFor] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   async function addAccount(e: React.FormEvent) {
     e.preventDefault();
@@ -73,27 +77,84 @@ export default function Accounts() {
         {accounts.map((a) => (
           <div key={a.id} className="card">
             <div className="flex justify-between items-start">
-              <div>
-                <div className="font-semibold">{a.name}</div>
+              <button className="text-left" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
+                <div className="font-semibold hover:text-accent">{a.name}</div>
                 <div className="text-xs text-ink/40 capitalize">
                   {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
                 </div>
-              </div>
+              </button>
               <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs">
                 Delete
               </button>
             </div>
-            <div className={`text-2xl numeral mt-3 ${a.is_liability ? "text-expense" : "text-ink"}`}>
+            <button
+              className={`text-2xl numeral mt-3 block hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
+              onClick={() => setExpanded(expanded === a.id ? null : a.id)}
+            >
               ${a.current_balance.toFixed(2)}
-            </div>
+            </button>
             <button className="text-accent text-xs mt-3" onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}>
               {snapshotFor === a.id ? "Cancel" : "Update balance"}
             </button>
             {snapshotFor === a.id && <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />}
+            <AccountBuckets accountId={a.id} currentBalance={a.current_balance} />
+            {expanded === a.id && <AccountTransactionHistory accountId={a.id} />}
           </div>
         ))}
         {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above.</p>}
       </div>
+    </div>
+  );
+}
+
+function AccountTransactionHistory({ accountId }: { accountId: string }) {
+  const qc = useQueryClient();
+  const [page, setPage] = useState(1);
+  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: CategoriesApi.list });
+  const { data } = useQuery({
+    queryKey: ["transactions", { account_id: accountId }, page],
+    queryFn: () => TransactionsApi.list({ account_id: accountId, page, page_size: 10 }),
+  });
+
+  async function handleCategoryChange(id: string, categoryId: string) {
+    await TransactionsApi.update(id, { category_id: categoryId || null } as any);
+    qc.invalidateQueries({ queryKey: ["transactions"] });
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this transaction?")) return;
+    await TransactionsApi.remove(id);
+    qc.invalidateQueries({ queryKey: ["transactions"] });
+    qc.invalidateQueries({ queryKey: ["accounts"] });
+  }
+
+  return (
+    <div className="mt-4 pt-4 border-t border-border-subtle">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50">Transaction history</h3>
+        <Link to={`/transactions?account_id=${accountId}`} className="text-accent text-xs">
+          View all
+        </Link>
+      </div>
+      <TransactionTable
+        transactions={data?.items ?? []}
+        categories={categories}
+        onCategoryChange={handleCategoryChange}
+        onDelete={handleDelete}
+      />
+      {data && data.total > data.page_size && (
+        <div className="flex justify-center gap-3 text-sm mt-3">
+          <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            Previous
+          </button>
+          <span className="py-2 text-ink/50">
+            Page {page} of {Math.ceil(data.total / data.page_size)}
+          </span>
+          <button className="btn-secondary" disabled={page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

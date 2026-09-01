@@ -12,14 +12,16 @@ export default function TransactionTable({
   categories: Category[];
   onCategoryChange: (id: string, categoryId: string) => void;
   onDelete: (id: string) => void;
-  selected: Set<string>;
-  onSelectionChange: (next: Set<string>) => void;
+  selected?: Set<string>;
+  onSelectionChange?: (next: Set<string>) => void;
 }) {
+  const selectable = !!selected && !!onSelectionChange;
   const toggle = (id: string) => {
+    if (!selectable) return;
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
     else next.add(id);
-    onSelectionChange(next);
+    onSelectionChange!(next);
   };
 
   return (
@@ -27,7 +29,7 @@ export default function TransactionTable({
       <table className="w-full text-sm">
         <thead className="bg-surface-sunken text-ink/50 text-xs uppercase tracking-wide">
           <tr>
-            <th className="w-10 px-4 py-3"></th>
+            {selectable && <th className="w-10 px-4 py-3"></th>}
             <th className="text-left px-3 py-3">Date</th>
             <th className="text-left px-3 py-3">Payee</th>
             <th className="text-left px-3 py-3">Category</th>
@@ -39,9 +41,11 @@ export default function TransactionTable({
         <tbody>
           {transactions.map((t) => (
             <tr key={t.id} className="border-t border-border-subtle hover:bg-surface-raised group">
-              <td className="px-4 py-2.5">
-                <input type="checkbox" checked={selected.has(t.id)} onChange={() => toggle(t.id)} />
-              </td>
+              {selectable && (
+                <td className="px-4 py-2.5">
+                  <input type="checkbox" checked={selected!.has(t.id)} onChange={() => toggle(t.id)} />
+                </td>
+              )}
               <td className="px-3 py-2.5 text-ink/70 whitespace-nowrap">{t.date}</td>
               <td className="px-3 py-2.5 font-medium">{t.payee || "—"}</td>
               <td className="px-3 py-2.5">

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.api.routes.transactions import _apply_transaction_effect
 from app.db.session import get_db
 from app.models.csv_template import CsvImportTemplate
 from app.models.transaction import Transaction
@@ -78,6 +79,8 @@ def commit(payload: CsvCommitRequest, db: Session = Depends(get_db), user: User 
                 external_hash=h,
             )
             db.add(txn)
+            db.flush()
+            _apply_transaction_effect(db, txn, sign=1)
             imported += 1
         except Exception as e:  # noqa: BLE001 — surface per-row errors, keep importing
             errors.append(f"Row {i + 1}: {e}")
