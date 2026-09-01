@@ -29,6 +29,9 @@ class Account(IdMixin, TimestampMixin, Base):
     balance_snapshots: Mapped[list["AccountBalanceSnapshot"]] = relationship(
         back_populates="account", cascade="all, delete-orphan"
     )
+    buckets: Mapped[list["Bucket"]] = relationship(
+        back_populates="account", cascade="all, delete-orphan", order_by="Bucket.sort_order, Bucket.created_at"
+    )
 
 
 class AccountBalanceSnapshot(IdMixin, Base):

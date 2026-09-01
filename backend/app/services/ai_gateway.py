@@ -63,11 +63,6 @@ def _deterministic_answer(context: dict) -> str:
         names = ", ".join(b["category_name"] for b in over)
         text += f" You're currently over budget in: {names}."
 
-    goals = context.get("goals") or []
-    if goals:
-        parts = ", ".join(f"{g['name']} {g['pct_complete']:.0f}% (${g['current_amount']:.2f}/${g['target_amount']:.2f})" for g in goals)
-        text += f" Goal progress: {parts}."
-
     subs = context.get("subscriptions") or []
     if subs:
         total = context.get("subscriptions_total_monthly", sum(s.get("monthly_equivalent", 0) for s in subs))
@@ -124,7 +119,7 @@ def _deterministic_recap(context: dict) -> str:
 _JSON_BLOCK_RE = re.compile(r"\{.*\}", re.DOTALL)
 
 
-async def parse_scenario(question: str, category_names: list[str], goal_names: list[str]) -> dict[str, float] | None:
+async def parse_scenario(question: str, category_names: list[str]) -> dict[str, float] | None:
     """Ask the LLM to turn a free-text what-if question into {target: value} adjustments.
 
     Returns None if the LLM is unavailable or its output can't be parsed as such an object —
@@ -134,9 +129,9 @@ async def parse_scenario(question: str, category_names: list[str], goal_names: l
         "Extract numeric budget adjustments from the user's question as a flat JSON object "
         "mapping a target name to a number. If the target is an expense category, use a "
         "value between -1 and 1 representing the relative percentage change (e.g. -0.20 for "
-        "'cut by 20%'). If the target is a goal or a generic savings amount, use the raw "
-        "dollar amount per month (e.g. 200 for 'save $200 more a month'). "
-        f"Valid category names: {category_names}. Valid goal names: {goal_names}. "
+        "'cut by 20%'). If the target is a generic savings amount, use the raw dollar amount "
+        "per month (e.g. 200 for 'save $200 more a month'). "
+        f"Valid category names: {category_names}. "
         "Reply with ONLY the JSON object, no explanation."
     )
     reply = await llm_client.chat(system, question, max_tokens=150)
@@ -186,8 +181,7 @@ async def explain_scenario(question: str, scenario: dict, result: dict) -> tuple
     system = (
         SAFETY_PREAMBLE
         + " Explain the forecast results below using ONLY the provided numbers. Be concise "
-        "(2-4 sentences). State the projected monthly change in net cash flow, and if goal "
-        "impacts are present, mention how much sooner (or later) a goal would be reached."
+        "(2-4 sentences). State the projected monthly change in net cash flow."
     )
     prompt = f"Original question: {question}\n\nScenario: {_json(scenario)}\n\nForecast result: {_json(result)}"
     reply = await llm_client.chat(system, prompt, max_tokens=250)
@@ -199,14 +193,7 @@ async def explain_scenario(question: str, scenario: dict, result: dict) -> tuple
 def _deterministic_scenario_explanation(result: dict) -> str:
     delta = result.get("monthly_net_delta", 0)
     direction = "increase" if delta >= 0 else "decrease"
-    text = f"This scenario would {direction} your net monthly cash flow by ${abs(delta):.2f}."
-    for impact in result.get("goal_impacts", []):
-        if impact.get("months_saved"):
-            text += (
-                f" Your goal '{impact['goal_name']}' would be reached about "
-                f"{impact['months_saved']:.1f} months sooner."
-            )
-    return text
+    return f"This scenario would {direction} your net monthly cash flow by ${abs(delta):.2f}."
 
 
 async def summarize_subscriptions(context: dict) -> tuple[str, str]:
@@ -289,12 +276,6 @@ def _deterministic_nudge(event_type: str, context: dict) -> str:
             f"{context.get('category_name', 'This category')} has run over budget "
             f"{context.get('streak', 0)} periods in a row. Might be worth adjusting the "
             "budget amount or taking a closer look at what's driving it."
-        )
-    if event_type == "goal_behind":
-        return (
-            f"Your goal '{context.get('goal_name', '')}' is tracking behind pace — "
-            f"about {context.get('behind_pct', 0):.0f}% below where a steady contribution "
-            "would put you. A small top-up now can close the gap."
         )
     if event_type == "weekend_overspend":
         return (

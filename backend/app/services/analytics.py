@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from app.models.account import Account, AccountBalanceSnapshot
 from app.models.budget import Budget
 from app.models.category import Category
-from app.models.goal import Goal
 from app.models.recurring import RecurringItem
 from app.models.transaction import Transaction
 from app.services.recurring_detection import detect_recurring, normalize_merchant
@@ -406,39 +405,6 @@ def budget_variance(db: Session, user_id: str, period: str, compare_months: int 
     return {"period": period, "prior_period": prior_period, "categories": details}
 
 
-def goal_progress(db: Session, user_id: str) -> list[dict]:
-    goals = db.query(Goal).filter(Goal.user_id == user_id).all()
-    results = []
-    today = date.today()
-    for g in goals:
-        current = sum(float(a.current_balance) for a in g.accounts)
-        pct_complete = (current / float(g.target_amount) * 100) if g.target_amount else 0
-
-        expected_pct = None
-        behind_pct = None
-        if g.target_date and g.target_date > today:
-            total_days = max((g.target_date - g.created_at.date()).days, 1) if g.created_at else None
-            if total_days:
-                elapsed_days = (today - g.created_at.date()).days
-                expected_pct = min(100.0, max(0.0, elapsed_days / total_days * 100))
-                behind_pct = expected_pct - pct_complete
-
-        results.append(
-            {
-                "goal_id": g.id,
-                "name": g.name,
-                "target_amount": float(g.target_amount),
-                "current_amount": current,
-                "pct_complete": round(pct_complete, 1),
-                "target_date": g.target_date,
-                "expected_pct_by_now": round(expected_pct, 1) if expected_pct is not None else None,
-                "behind_pct": round(behind_pct, 1) if behind_pct is not None else None,
-                "monthly_contribution": float(g.monthly_contribution),
-            }
-        )
-    return results
-
-
 def weekday_weekend_pattern(db: Session, user_id: str, days: int = 90) -> dict:
     """Compares average per-day spend on weekends vs weekdays over a trailing window.
     Note: transactions only carry a date (no time-of-day), so this covers weekday/weekend
@@ -501,7 +467,6 @@ def behavior_signals(db: Session, user_id: str, period: str) -> dict:
     return {
         "period": period,
         "budget_adherence": budget_adherence(db, user_id, period),
-        "goal_progress": goal_progress(db, user_id),
         "weekday_weekend_pattern": weekday_weekend_pattern(db, user_id),
     }
 

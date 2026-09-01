@@ -6,7 +6,6 @@ import { NudgesApi } from "@/api/resources";
 const EVENT_LABELS: Record<string, { label: string; tone: string; link?: string }> = {
   budget_warning: { label: "Budget warning", tone: "bg-warning-bg text-warning", link: "/categories" },
   budget_overspend: { label: "Repeated overspend", tone: "bg-expense-bg text-expense", link: "/categories" },
-  goal_behind: { label: "Goal behind pace", tone: "bg-warning-bg text-warning", link: "/goals" },
   weekend_overspend: { label: "Weekend spending", tone: "bg-accent-bg text-accent", link: "/cashflow" },
 };
 
@@ -36,8 +35,8 @@ export default function Coach() {
         <div>
           <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Coach</h1>
           <p className="text-sm text-ink/50 mt-1">
-            Behavior-based nudges — budget pace, goal tracking, and spending patterns. Runs
-            automatically once a day in production.
+            Behavior-based nudges — budget pace and spending patterns. Runs automatically once
+            a day in production.
           </p>
         </div>
         <button className="btn-secondary" disabled={generating} onClick={generate}>

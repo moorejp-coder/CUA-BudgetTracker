@@ -24,45 +24,6 @@ def _add_txn(client, headers, account_id, category_id, amount, txn_type, txn_dat
     ).json()
 
 
-def test_forecast_goals_projects_completion_from_contribution_rate(client, auth_headers, seeded):
-    today = date.today()
-    resp = client.post(
-        f"{API}/goals",
-        json={
-            "name": "Emergency Fund",
-            "target_amount": 2000,
-            "monthly_contribution": 500,
-            "account_ids": [seeded["account"]["id"]],
-        },
-        headers=auth_headers,
-    )
-    assert resp.status_code == 201
-
-    resp = client.get(f"{API}/forecast/goals", headers=auth_headers)
-    assert resp.status_code == 200
-    data = resp.json()
-    goal = next(g for g in data if g["goal_name"] == "Emergency Fund")
-    # seeded account starts at $1000 current_balance -> $1000 remaining at $500/mo -> 2 months
-    assert goal["remaining_amount"] == 1000
-    assert goal["months_to_goal"] == 2.0
-    assert goal["projected_completion_date"] is not None
-
-
-def test_forecast_goals_no_contribution_never_completes(client, auth_headers, seeded):
-    resp = client.post(
-        f"{API}/goals",
-        json={"name": "Vague Goal", "target_amount": 5000, "monthly_contribution": 0, "account_ids": []},
-        headers=auth_headers,
-    )
-    assert resp.status_code == 201
-
-    resp = client.get(f"{API}/forecast/goals", headers=auth_headers)
-    assert resp.status_code == 200
-    goal = next(g for g in resp.json() if g["goal_name"] == "Vague Goal")
-    assert goal["months_to_goal"] is None
-    assert goal["projected_completion_date"] is None
-
-
 def test_forecast_cashflow_uses_trailing_averages_and_recurring(client, auth_headers, seeded):
     today = date.today()
     for i in range(3):

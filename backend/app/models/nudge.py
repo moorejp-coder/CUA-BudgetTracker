@@ -11,7 +11,6 @@ from app.models.mixins import IdMixin, TimestampMixin
 NUDGE_EVENT_TYPES = (
     "budget_warning",       # over 80% of category budget mid-period
     "budget_overspend",     # repeated overspending N consecutive periods
-    "goal_behind",          # falling behind on a savings goal
     "weekend_overspend",    # weekend spending materially higher than weekday baseline
 )
 

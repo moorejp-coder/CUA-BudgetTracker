@@ -6,7 +6,6 @@ import {
   LineChart,
   PiggyBank,
   Wallet,
-  Target,
   Repeat,
   Sparkles,
   TrendingUp,
@@ -27,7 +26,6 @@ const NAV_ITEMS: { to: string; label: string; end?: boolean; icon: LucideIcon }[
   { to: "/cashflow", label: "Cash Flow", icon: LineChart },
   { to: "/categories", label: "Categories & Budgets", icon: PiggyBank },
   { to: "/accounts", label: "Accounts", icon: Wallet },
-  { to: "/goals", label: "Goals", icon: Target },
   { to: "/recurring", label: "Recurring", icon: Repeat },
 ];
 

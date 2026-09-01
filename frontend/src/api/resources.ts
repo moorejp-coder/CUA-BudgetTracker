@@ -3,6 +3,10 @@ import type {
   Account,
   AssistantQueryResponse,
   BehaviorSignals,
+  Bucket,
+  BucketLedgerEvent,
+  BucketMutationResult,
+  BucketSummary,
   Budget,
   BudgetSuggestion,
   BudgetVarianceResponse,
@@ -10,8 +14,6 @@ import type {
   CashflowPoint,
   Category,
   CategorySpend,
-  Goal,
-  GoalForecastItem,
   HomeSavingsPlan,
   NetWorthPoint,
   Nudge,
@@ -37,6 +39,44 @@ export const AccountsApi = {
   remove: (id: string) => api.delete(`/accounts/${id}`),
   addSnapshot: (id: string, date: string, balance: number) =>
     api.post(`/accounts/${id}/balance-snapshot`, { date, balance }),
+};
+
+export interface BucketCreateInput {
+  name: string;
+  description?: string;
+  target_amount?: number | null;
+  target_date?: string | null;
+  color?: string | null;
+  icon?: string | null;
+}
+
+export const BucketsApi = {
+  list: (accountId: string) => api.get<Bucket[]>(`/accounts/${accountId}/buckets`).then((r) => r.data),
+  summary: (accountId: string) => api.get<BucketSummary>(`/accounts/${accountId}/bucket-summary`).then((r) => r.data),
+  ledger: (accountId: string, limit = 50) =>
+    api.get<BucketLedgerEvent[]>(`/accounts/${accountId}/bucket-ledger`, { params: { limit } }).then((r) => r.data),
+  create: (accountId: string, data: BucketCreateInput) =>
+    api.post<Bucket>(`/accounts/${accountId}/buckets`, data).then((r) => r.data),
+  update: (bucketId: string, data: Partial<BucketCreateInput> & { sort_order?: number }) =>
+    api.patch<Bucket>(`/buckets/${bucketId}`, data).then((r) => r.data),
+  archive: (bucketId: string) => api.post<Bucket>(`/buckets/${bucketId}/archive`).then((r) => r.data),
+  allocate: (bucketId: string, amount: number, idempotencyKey: string) =>
+    api
+      .post<BucketMutationResult>(`/buckets/${bucketId}/allocate`, { amount, idempotency_key: idempotencyKey })
+      .then((r) => r.data),
+  unassign: (bucketId: string, amount: number, idempotencyKey: string) =>
+    api
+      .post<BucketMutationResult>(`/buckets/${bucketId}/unassign`, { amount, idempotency_key: idempotencyKey })
+      .then((r) => r.data),
+  transfer: (sourceBucketId: string, destinationBucketId: string, amount: number, idempotencyKey: string) =>
+    api
+      .post<BucketMutationResult>("/bucket-transfers", {
+        source_bucket_id: sourceBucketId,
+        destination_bucket_id: destinationBucketId,
+        amount,
+        idempotency_key: idempotencyKey,
+      })
+      .then((r) => r.data),
 };
 
 export const CategoriesApi = {
@@ -85,13 +125,6 @@ export const RecurringApi = {
   upcoming: (days = 30) => api.get(`/recurring/upcoming`, { params: { days } }).then((r) => r.data),
 };
 
-export const GoalsApi = {
-  list: () => api.get<Goal[]>("/goals").then((r) => r.data),
-  create: (data: Partial<Goal> & { account_ids?: string[] }) => api.post<Goal>("/goals", data).then((r) => r.data),
-  update: (id: string, data: Partial<Goal>) => api.patch<Goal>(`/goals/${id}`, data).then((r) => r.data),
-  contribute: (id: string, amount: number) => api.post<Goal>(`/goals/${id}/contribute`, { amount }).then((r) => r.data),
-};
-
 export const AnalyticsApi = {
   summary: (month: string) => api.get<SummaryResponse>("/analytics/summary", { params: { month } }).then((r) => r.data),
   cashflow: (start: string, end: string) =>
@@ -138,7 +171,6 @@ export const ForecastApi = {
   cashflow: (days: number): Promise<CashflowForecast> => api.get("/forecast/cashflow", { params: { days } }).then((r) => r.data),
   scenario: (adjustments: ScenarioAdjustment[], base_months = 3): Promise<ScenarioResult> =>
     api.post("/forecast/scenario", { adjustments, base_months }).then((r) => r.data),
-  goals: (): Promise<GoalForecastItem[]> => api.get("/forecast/goals").then((r) => r.data),
 };
 
 export const RecapsApi = {

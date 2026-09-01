@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 
 from app.models.account import Account
 from app.models.category import Category
-from app.models.goal import Goal
 from app.models.recurring import RecurringItem
 from app.models.transaction import Transaction
 from app.services.recurring_detection import upcoming_charges
@@ -101,65 +100,15 @@ def cashflow_forecast(db: Session, user_id: str, horizon_days: int = 30) -> dict
     }
 
 
-def goal_forecast(db: Session, user_id: str) -> list[dict]:
-    """When each goal will be hit given its current monthly_contribution rate — a standalone
-    projection (the scenario engine also computes goal impact, but only relative to an
-    adjustment; this is the plain baseline)."""
-    goals = db.query(Goal).filter(Goal.user_id == user_id).all()
-    today = date.today()
-    results = []
-    for g in goals:
-        current = float(g.allocated_amount) + sum(float(a.current_balance) for a in g.accounts)
-        target = float(g.target_amount)
-        remaining = max(0.0, target - current)
-        rate = float(g.monthly_contribution)
-
-        months_to_goal = (remaining / rate) if rate > 0 else None
-        projected_date = None
-        if months_to_goal is not None:
-            month_idx = today.year * 12 + (today.month - 1) + round(months_to_goal)
-            projected_date = date(month_idx // 12, month_idx % 12 + 1, 1)
-
-        on_pace = None
-        if g.target_date:
-            if remaining <= 0:
-                on_pace = True
-            elif rate <= 0:
-                on_pace = False
-            else:
-                months_available = max(
-                    0, (g.target_date.year - today.year) * 12 + (g.target_date.month - today.month)
-                )
-                on_pace = months_to_goal is not None and months_to_goal <= months_available
-
-        results.append(
-            {
-                "goal_id": g.id,
-                "goal_name": g.name,
-                "target_amount": target,
-                "current_amount": current,
-                "remaining_amount": round(remaining, 2),
-                "monthly_contribution": rate,
-                "months_to_goal": round(months_to_goal, 1) if months_to_goal is not None else None,
-                "projected_completion_date": projected_date,
-                "target_date": g.target_date,
-                "on_pace": on_pace,
-            }
-        )
-    return results
-
-
 def run_scenario(db: Session, user_id: str, adjustments: list[dict], base_months: int = 3) -> dict:
     """`adjustments` is a list of {"target": str, "value": float}. A target matching an
     existing expense category name applies a relative change (|value| <= 1) or an absolute
     monthly $ change (|value| > 1) to that category's average spend. Any other target is
-    treated as a generic monthly contribution (e.g. toward a goal or general savings) that
-    reduces net cash flow by `value` and, if it matches a goal name, accelerates that goal.
+    treated as a generic monthly contribution (e.g. toward general savings) that reduces net
+    cash flow by `value`.
     """
     averages = monthly_averages(db, user_id, months=base_months)
     category_averages = category_monthly_averages(db, user_id, months=base_months)
-    goals = db.query(Goal).filter(Goal.user_id == user_id).all()
-    goals_by_name = {g.name.lower(): g for g in goals}
 
     baseline_expense = sum(c["avg_monthly"] for c in category_averages.values())
     category_projections = [
@@ -170,7 +119,6 @@ def run_scenario(db: Session, user_id: str, adjustments: list[dict], base_months
 
     unmatched_adjustments = []
     extra_monthly_outflow = 0.0
-    goal_contribution_by_goal: dict[str, float] = {}
 
     for adj in adjustments:
         target = adj["target"]
@@ -183,40 +131,13 @@ def run_scenario(db: Session, user_id: str, adjustments: list[dict], base_months
             projections_by_name[cat_match]["projected_monthly"] = round(new_value, 2)
             continue
 
-        goal = goals_by_name.get(target.lower())
-        if goal:
-            goal_contribution_by_goal[goal.id] = goal_contribution_by_goal.get(goal.id, 0) + value
-            extra_monthly_outflow += value
-            continue
-
-        unmatched_adjustments.append({"target": target, "value": value, "note": "no matching category or goal; treated as a generic monthly contribution"})
+        unmatched_adjustments.append({"target": target, "value": value, "note": "no matching category; treated as a generic monthly contribution"})
         extra_monthly_outflow += value
 
     projected_category_expense = sum(p["projected_monthly"] for p in category_projections)
     projected_expense = projected_category_expense + max(0.0, extra_monthly_outflow)
     baseline_net = averages["avg_income"] - baseline_expense
     projected_net = averages["avg_income"] - projected_category_expense - extra_monthly_outflow
-
-    goal_impacts = []
-    for g in goals:
-        extra = goal_contribution_by_goal.get(g.id, 0)
-        current = float(g.allocated_amount) + sum(float(a.current_balance) for a in g.accounts)
-        remaining = max(0.0, float(g.target_amount) - current)
-        base_rate = float(g.monthly_contribution) or 0.01
-        new_rate = base_rate + extra
-        months_at_base = remaining / base_rate if base_rate > 0 else None
-        months_at_new = remaining / new_rate if new_rate > 0 else None
-        months_saved = (months_at_base - months_at_new) if (months_at_base and months_at_new) else None
-        goal_impacts.append(
-            {
-                "goal_id": g.id,
-                "goal_name": g.name,
-                "extra_monthly_contribution": round(extra, 2),
-                "months_to_goal_baseline": round(months_at_base, 1) if months_at_base else None,
-                "months_to_goal_projected": round(months_at_new, 1) if months_at_new else None,
-                "months_saved": round(months_saved, 1) if months_saved else None,
-            }
-        )
 
     return {
         "baseline_monthly_income": round(averages["avg_income"], 2),
@@ -226,6 +147,5 @@ def run_scenario(db: Session, user_id: str, adjustments: list[dict], base_months
         "projected_monthly_net": round(projected_net, 2),
         "monthly_net_delta": round(projected_net - baseline_net, 2),
         "category_projections": category_projections,
-        "goal_impacts": goal_impacts,
         "unmatched_adjustments": unmatched_adjustments,
     }

@@ -7,7 +7,6 @@ import Transactions from "@/pages/Transactions";
 import CsvImport from "@/pages/CsvImport";
 import Categories from "@/pages/Categories";
 import Accounts from "@/pages/Accounts";
-import Goals from "@/pages/Goals";
 import Recurring from "@/pages/Recurring";
 import CashFlow from "@/pages/CashFlow";
 import Assistant from "@/pages/Assistant";
@@ -39,7 +38,6 @@ export default function App() {
         <Route path="/transactions/import" element={<CsvImport />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/accounts" element={<Accounts />} />
-        <Route path="/goals" element={<Goals />} />
         <Route path="/recurring" element={<Recurring />} />
         <Route path="/cashflow" element={<CashFlow />} />
         <Route path="/assistant" element={<Assistant />} />

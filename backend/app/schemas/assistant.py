@@ -35,7 +35,6 @@ class ScenarioResponse(BaseModel):
     projected_monthly_net: float
     monthly_net_delta: float
     category_projections: list[dict]
-    goal_impacts: list[dict]
     unmatched_adjustments: list[dict]
 
 

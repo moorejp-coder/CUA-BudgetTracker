@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
+function extractErrorMessage(e: any): string {
+  const detail = e?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((d) => d?.msg ?? JSON.stringify(d)).join(" ");
+  }
+  return "Something went wrong";
+}
+
 export default function Login() {
   const { login, register } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -18,7 +27,7 @@ export default function Login() {
       if (mode === "login") await login(email, password);
       else await register(email, password, displayName);
     } catch (e: any) {
-      setError(e?.response?.data?.detail ?? "Something went wrong");
+      setError(extractErrorMessage(e));
     } finally {
       setLoading(false);
     }

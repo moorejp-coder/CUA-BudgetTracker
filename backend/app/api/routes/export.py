@@ -11,7 +11,6 @@ from app.db.session import get_db
 from app.models.account import Account
 from app.models.budget import Budget
 from app.models.category import Category
-from app.models.goal import Goal
 from app.models.transaction import Transaction
 from app.models.user import User
 
@@ -39,10 +38,6 @@ def export_json(db: Session = Depends(get_db), user: User = Depends(get_current_
         "budgets": dump(
             db.query(Budget).filter(Budget.user_id == user.id).all(),
             ["id", "category_id", "period", "amount", "rollover"],
-        ),
-        "goals": dump(
-            db.query(Goal).filter(Goal.user_id == user.id).all(),
-            ["id", "name", "target_amount", "target_date", "monthly_contribution"],
         ),
     }
     buf = io.BytesIO(json.dumps(payload, indent=2).encode())

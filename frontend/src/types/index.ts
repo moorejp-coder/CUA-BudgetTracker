@@ -18,6 +18,61 @@ export interface Account {
   created_at: string;
 }
 
+export interface Bucket {
+  id: string;
+  account_id: string;
+  name: string;
+  description: string;
+  target_amount: number | null;
+  target_date: string | null;
+  current_balance: number;
+  progress_percentage: number | null;
+  color: string;
+  icon: string | null;
+  sort_order: number;
+  status: "active" | "archived";
+  created_at: string;
+}
+
+export interface SummaryBucket {
+  id: string;
+  name: string;
+  balance: number;
+  target_amount: number | null;
+  target_date: string | null;
+  progress_percentage: number | null;
+  color: string;
+  icon: string | null;
+  status: "active" | "archived";
+}
+
+export interface BucketSummary {
+  account_id: string;
+  account_balance: number;
+  assigned_balance: number;
+  unassigned_balance: number;
+  buckets: SummaryBucket[];
+}
+
+export interface BucketLedgerEvent {
+  id: string;
+  event_type: string;
+  label: string;
+  amount: number;
+  source_type: "unassigned" | "bucket";
+  source_id: string | null;
+  source_name: string;
+  destination_type: "unassigned" | "bucket";
+  destination_id: string | null;
+  destination_name: string;
+  created_at: string;
+}
+
+export interface BucketMutationResult {
+  event: BucketLedgerEvent;
+  summary: BucketSummary;
+}
+
 export interface Transaction {
   id: string;
   account_id: string;
@@ -66,17 +121,6 @@ export interface RecurringSuggestion {
   occurrences: number;
   last_date: string;
   next_expected_date: string;
-}
-
-export interface Goal {
-  id: string;
-  name: string;
-  target_amount: number;
-  target_date: string | null;
-  monthly_contribution: number;
-  allocated_amount: number;
-  current_amount: number;
-  account_ids: string[];
 }
 
 export interface SummaryResponse {
@@ -162,14 +206,6 @@ export interface ScenarioResult {
   projected_monthly_net: number;
   monthly_net_delta: number;
   category_projections: { category: string; baseline_monthly: number; projected_monthly: number }[];
-  goal_impacts: {
-    goal_id: string;
-    goal_name: string;
-    extra_monthly_contribution: number;
-    months_to_goal_baseline: number | null;
-    months_to_goal_projected: number | null;
-    months_saved: number | null;
-  }[];
   unmatched_adjustments: { target: string; value: number; note: string }[];
 }
 
@@ -220,17 +256,6 @@ export interface BehaviorSignals {
     over_budget_pct: number;
     details: { category_id: string; category_name: string; budget: number; spent: number; pct_used: number; over: boolean }[];
   };
-  goal_progress: {
-    goal_id: string;
-    name: string;
-    target_amount: number;
-    current_amount: number;
-    pct_complete: number;
-    target_date: string | null;
-    expected_pct_by_now: number | null;
-    behind_pct: number | null;
-    monthly_contribution: number;
-  }[];
   weekday_weekend_pattern: {
     weekday_avg_daily_spend: number;
     weekend_avg_daily_spend: number;
@@ -257,19 +282,6 @@ export interface BudgetVarianceResponse {
   period: string;
   prior_period: string;
   categories: BudgetVarianceRow[];
-}
-
-export interface GoalForecastItem {
-  goal_id: string;
-  goal_name: string;
-  target_amount: number;
-  current_amount: number;
-  remaining_amount: number;
-  monthly_contribution: number;
-  months_to_goal: number | null;
-  projected_completion_date: string | null;
-  target_date: string | null;
-  on_pace: boolean | null;
 }
 
 export interface CashflowForecast {

@@ -90,15 +90,15 @@ export default function Forecasts() {
         <div className="card">
           <h2 className="text-sm font-semibold mb-3">Scenario builder</h2>
           <p className="text-xs text-ink/50 mb-3">
-            Target a category name for a % change (e.g. -0.2 = cut 20%) or a goal name for an
-            absolute $/month contribution change.
+            Target a category name for a % change (e.g. -0.2 = cut 20%) or any other label for
+            an absolute $/month contribution change.
           </p>
           <div className="space-y-2">
             {rows.map((row, i) => (
               <div key={i} className="flex gap-2">
                 <input
                   className="input flex-1"
-                  placeholder="Category or goal name"
+                  placeholder="Category name"
                   value={row.target}
                   onChange={(e) => updateRow(i, "target", e.target.value)}
                 />
@@ -166,17 +166,6 @@ function ScenarioResultView({ result }: { result: ScenarioResult }) {
           </div>
         </div>
       </div>
-      {result.goal_impacts.filter((g) => g.extra_monthly_contribution !== 0).length > 0 && (
-        <div className="text-xs text-ink/60">
-          {result.goal_impacts
-            .filter((g) => g.extra_monthly_contribution !== 0)
-            .map((g) => (
-              <div key={g.goal_id}>
-                {g.goal_name}: {g.months_saved ? `${g.months_saved.toFixed(1)} months sooner` : "impact unclear"}
-              </div>
-            ))}
-        </div>
-      )}
     </div>
   );
 }

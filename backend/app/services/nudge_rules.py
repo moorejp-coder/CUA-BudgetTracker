@@ -9,7 +9,6 @@ from app.models.nudge import NudgeEvent
 from app.services import ai_gateway, analytics
 
 BUDGET_WARNING_THRESHOLD_PCT = 80.0
-GOAL_BEHIND_THRESHOLD_PCT = 15.0
 CONSECUTIVE_OVERSPEND_PERIODS = 3
 
 
@@ -71,23 +70,7 @@ def evaluate(db: Session, user_id: str, reference: date | None = None) -> list[d
                 }
             )
 
-    # 3) Goal falling behind pace.
-    for g in analytics.goal_progress(db, user_id):
-        if g["behind_pct"] is not None and g["behind_pct"] >= GOAL_BEHIND_THRESHOLD_PCT:
-            candidates.append(
-                {
-                    "event_type": "goal_behind",
-                    "dedupe_key": f"goal_behind:{g['goal_id']}:{period}",
-                    "context": {
-                        "goal_name": g["name"],
-                        "behind_pct": g["behind_pct"],
-                        "pct_complete": g["pct_complete"],
-                        "target_date": g["target_date"],
-                    },
-                }
-            )
-
-    # 4) Weekend spending materially higher than weekday spending.
+    # 3) Weekend spending materially higher than weekday spending.
     pattern = analytics.weekday_weekend_pattern(db, user_id)
     if pattern["notable"]:
         candidates.append(

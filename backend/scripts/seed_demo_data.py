@@ -1,5 +1,5 @@
 """Seed a "judge demo" login and a "test" login with identical preloaded data — several
-months of realistic accounts/categories/transactions/budgets/goals/recurring items, plus
+months of realistic accounts/categories/transactions/budgets/recurring items, plus
 one generated recap and one nudge pass so those views aren't empty on first login. The two
 profiles only differ by email/password/display name, so either one demos the same way.
 
@@ -28,7 +28,6 @@ from app.db.session import Base, SessionLocal, engine  # noqa: E402
 from app.models.account import Account, AccountBalanceSnapshot  # noqa: E402
 from app.models.budget import Budget  # noqa: E402
 from app.models.category import Category  # noqa: E402
-from app.models.goal import Goal, goal_accounts  # noqa: E402
 from app.models.nudge import NudgeEvent  # noqa: E402
 from app.models.recap import Recap  # noqa: E402
 from app.models.recurring import RecurringItem  # noqa: E402
@@ -64,13 +63,10 @@ def wipe_profile(db: Session, email: str) -> None:
         return
     uid = user.id
     account_ids = [a.id for a in db.query(Account.id).filter(Account.user_id == uid)]
-    goal_ids = [g.id for g in db.query(Goal.id).filter(Goal.user_id == uid)]
     txn_ids = [t.id for t in db.query(Transaction.id).filter(Transaction.user_id == uid)]
     if txn_ids:
         db.execute(delete(transaction_tags).where(transaction_tags.c.transaction_id.in_(txn_ids)))
-    if goal_ids:
-        db.execute(delete(goal_accounts).where(goal_accounts.c.goal_id.in_(goal_ids)))
-    for model in (Transaction, Budget, RecurringItem, Recap, NudgeEvent, Goal, Tag):
+    for model in (Transaction, Budget, RecurringItem, Recap, NudgeEvent, Tag):
         db.query(model).filter(model.user_id == uid).delete(synchronize_session=False)
     if account_ids:
         db.query(AccountBalanceSnapshot).filter(AccountBalanceSnapshot.account_id.in_(account_ids)).delete(
@@ -318,28 +314,6 @@ def make_budgets(db: Session, user: User, cats: dict[str, Category], period: str
     db.flush()
 
 
-def make_goals(db: Session, user: User, accounts: dict[str, Account]) -> None:
-    emergency = Goal(
-        user_id=user.id,
-        name="Emergency Fund",
-        target_amount=15000,
-        target_date=date(TODAY.year + 1, 6, 1),
-        monthly_contribution=500,
-    )
-    emergency.accounts = [accounts["savings"]]
-    db.add(emergency)
-
-    vacation = Goal(
-        user_id=user.id,
-        name="Japan Trip",
-        target_amount=4000,
-        target_date=date(TODAY.year, 12, 1),
-        monthly_contribution=200,
-    )
-    db.add(vacation)
-    db.flush()
-
-
 def make_recurring(db: Session, user: User, cats: dict[str, Category]) -> None:
     def next_month_day(day: int) -> date:
         y, m = TODAY.year, TODAY.month
@@ -389,7 +363,7 @@ async def generate_ai_content(db: Session, user: User) -> None:
 
 
 async def seed_profile(db: Session, *, email: str, password: str, display_name: str) -> None:
-    """Same dataset (accounts, categories, transactions, budgets, goals, recurring items,
+    """Same dataset (accounts, categories, transactions, budgets, recurring items,
     recap, nudges) for every profile — only login and display name differ."""
     print(f"Seeding {display_name} profile ({email})...")
     wipe_profile(db, email)
@@ -412,7 +386,6 @@ async def seed_profile(db: Session, *, email: str, password: str, display_name: 
     )
     period = f"{TODAY.year}-{TODAY.month:02d}"
     make_budgets(db, user, cats, period)
-    make_goals(db, user, accounts)
     make_recurring(db, user, cats)
     db.commit()
     await generate_ai_content(db, user)

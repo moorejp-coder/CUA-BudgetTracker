@@ -14,7 +14,7 @@ const SUGGESTIONS = [
   "How much did I spend on groceries last month?",
   "Am I over budget this month?",
   "What are my current subscriptions costing me?",
-  "How is my emergency fund goal tracking?",
+  "How has my cash flow trended recently?",
 ];
 
 export default function Assistant() {
@@ -68,7 +68,7 @@ export default function Assistant() {
       <div className="card flex-1 overflow-y-auto flex flex-col gap-3">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center py-10">
-            <p className="text-ink/40 text-sm">Ask anything about your budget, spending, or goals.</p>
+            <p className="text-ink/40 text-sm">Ask anything about your budget or spending.</p>
             <div className="flex flex-wrap gap-2 justify-center max-w-md">
               {SUGGESTIONS.map((s) => (
                 <button key={s} onClick={() => send(s)} className="btn-secondary text-xs px-3 py-1.5">
