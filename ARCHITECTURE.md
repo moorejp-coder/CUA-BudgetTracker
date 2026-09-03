@@ -202,3 +202,35 @@ GET    /export/csv
   extracts `{category_or_goal: adjustment}` JSON from the question — the actual forecast math
   runs entirely in `services/forecasting.py`, and only the *results* of that deterministic
   computation go back to the LLM for narration.
+
+### Assistant governance
+
+- **In scope:** answering questions about the user's own already-computed budgeting/spending
+  data (income, expenses, budgets, subscriptions, cash flow, net worth, anomalies); narrating
+  recap/nudge/scenario results built from that data. **Out of scope:** investment, tax, or
+  legal advice; anything requiring data not already surfaced through `analytics`/
+  `forecasting`. The assistant never has DB write access or a tool that mutates state — it is
+  read-only by construction, not by prompt request.
+- **Out-of-scope control is code-enforced, not prompt-only:** `ai_gateway.is_out_of_scope()`
+  regex-matches investment/tax/legal terms and returns a fixed redirect (`source: "policy"`)
+  *before* the question ever reaches the LLM. The safety preamble's "don't give investment
+  advice" instruction is a second layer for phrasing the model chooses on its own, not the
+  only line of defense — a prompt instruction is a request a model can drift from, so the
+  actual boundary lives in code.
+- **Escalation over guessing:** the system prompt in `answer_question` explicitly tells the
+  model to say "I don't have that data" and point to the relevant page rather than inventing
+  an answer when the supplied JSON doesn't cover the question. Every LLM-backed function
+  also has a deterministic fallback built from the same JSON, so an unreachable/disabled LLM
+  degrades to a plainer answer rather than a guess or an error.
+- **Ownership:** single self-hosted deployment, one maintainer (the person running it).
+  There's no separate "advising" tier to escalate to and no support org — degree-rules-style
+  drift isn't a risk here because there are no external rules to keep in sync, only the
+  user's own data. The equivalent maintenance surface is: `SAFETY_PREAMBLE` and
+  `OUT_OF_SCOPE_PATTERNS` in `ai_gateway.py` if the scope needs to change, and the `LLM_*`
+  env vars in `core/config.py` if the provider/model changes.
+- **Lifecycle / SLA posture:** this is intentionally not a service with an uptime commitment.
+  `LLM_ENABLED=false` (or an unreachable endpoint) is a fully supported, tested state — every
+  feature keeps working via its deterministic fallback (`source: "deterministic"`), and
+  `/llm/status` surfaces reachability in the UI so it's never silently degraded. That's the
+  whole SLA: correctness and availability of the deterministic path are guaranteed; LLM
+  narration quality is best-effort on top.

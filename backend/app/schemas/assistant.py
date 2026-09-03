@@ -8,7 +8,7 @@ class AssistantQueryRequest(BaseModel):
 class AssistantQueryResponse(BaseModel):
     answer: str
     data: dict
-    source: str  # llm | deterministic
+    source: str  # llm | deterministic | policy (out-of-scope redirect, never reaches the LLM)
     intents: list[str] = []
 
 

@@ -26,7 +26,9 @@ SAFETY_PREAMBLE = (
     "never assume data you were not given. You must NOT provide personalized investment, "
     "tax, or legal advice, and must not recommend specific securities, funds, or "
     "investment strategies; if asked, say that's outside what you can help with and "
-    "redirect to budgeting/spending habits. Keep a supportive, non-judgmental tone."
+    "redirect to budgeting/spending habits. Keep a supportive, non-judgmental tone. "
+    "Write in plain text only — no Markdown formatting (no **bold**, no *italics*, no "
+    "headers, no bullet/numbered lists unless explicitly asked for bullet points)."
 )
 
 
@@ -34,8 +36,42 @@ def _json(data: dict) -> str:
     return json.dumps(data, default=str)
 
 
+# Code-enforced scope boundary — NOT just a prompt instruction. The safety preamble asks
+# the model to decline these topics, but a prompt instruction is a request, not a control:
+# a model can still comply with an override buried in the question. These patterns catch
+# the request *before* it reaches the LLM at all, so the redirect is guaranteed regardless
+# of model behavior. Keep this narrow and false-positive-tolerant: a wrongly-redirected
+# budgeting question just gets a polite nudge, whereas a missed investment question could
+# read as the app giving advice it has no business giving.
+OUT_OF_SCOPE_PATTERNS = re.compile(
+    r"\b(invest(ing|ment)?|stock|share|etf|mutual fund|bond|crypto(currency)?|bitcoin|"
+    r"401\s?k|ira|roth|portfolio\s+(allocation|advice)|buy or sell|"
+    r"tax(es)?\s+(advice|strategy|deduction|filing)|file (my )?taxes|"
+    r"legal advice|sue|lawsuit|estate plan|will\b|lawyer|attorney)\b",
+    re.IGNORECASE,
+)
+
+OUT_OF_SCOPE_REDIRECT = (
+    "That's outside what this assistant can help with — it can't give investment, tax, or "
+    "legal advice. For questions like that, talk to a licensed advisor, accountant, or "
+    "attorney. I can help with budgeting and spending habits instead — try asking about a "
+    "category, your budget status, or cash flow."
+)
+
+
+def is_out_of_scope(question: str) -> bool:
+    return bool(OUT_OF_SCOPE_PATTERNS.search(question))
+
+
 async def answer_question(question: str, context: dict) -> tuple[str, str]:
-    system = SAFETY_PREAMBLE + " Answer the user's question using only the data below."
+    if is_out_of_scope(question):
+        return OUT_OF_SCOPE_REDIRECT, "policy"
+    system = SAFETY_PREAMBLE + (
+        " Answer the user's question using only the data below. If the data below doesn't "
+        "contain what's needed to answer, say so plainly rather than guessing — point the "
+        "user to the relevant page of the app (Transactions, Budgets, Accounts, etc.) "
+        "instead of inventing an answer."
+    )
     prompt = f"Data: {_json(context)}\n\nQuestion: {question}"
     reply = await llm_client.chat(system, prompt, max_tokens=250)
     if reply:
@@ -255,7 +291,8 @@ async def generate_nudge_message(event_type: str, context: dict) -> tuple[str, s
         "You are a supportive financial coach embedded in a personal budgeting app. Using "
         "ONLY the context JSON below, write a 2-3 sentence nudge that is constructive and "
         "non-judgmental. Do not give regulated investment advice; focus on budgeting and "
-        "spending habits. Do not invent numbers not present in the context."
+        "spending habits. Do not invent numbers not present in the context. Write in plain "
+        "text only — no Markdown formatting (no **bold**, no *italics*, no headers)."
     )
     prompt = f"Event type: {event_type}\nContext: {_json(context)}"
     reply = await llm_client.chat(system, prompt, max_tokens=150)

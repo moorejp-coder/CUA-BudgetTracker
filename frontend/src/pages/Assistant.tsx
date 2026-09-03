@@ -92,7 +92,9 @@ export default function Assistant() {
               {m.text}
               {m.role === "assistant" && !m.error && (
                 <div className="text-[10px] text-ink/30 mt-1.5 uppercase tracking-wide flex gap-2">
-                  <span>{m.source}</span>
+                  <span className={m.source === "policy" ? "text-warning" : undefined}>
+                    {m.source === "policy" ? "out of scope" : m.source}
+                  </span>
                   {m.intents?.map((intent) => (
                     <span key={intent} className="px-1.5 py-0.5 rounded bg-white/5">
                       {intent}

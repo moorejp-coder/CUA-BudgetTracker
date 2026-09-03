@@ -57,6 +57,21 @@ def test_assistant_query_routes_budget_intent(client, auth_headers, seeded):
     assert data["data"]["budget_status"][0]["over"] is True
 
 
+def test_assistant_query_redirects_out_of_scope_without_calling_llm(client, auth_headers, monkeypatch):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("out-of-scope question should never reach the LLM")
+
+    monkeypatch.setattr(llm_client, "chat", fail_if_called)
+
+    resp = client.post(
+        f"{API}/assistant/query", json={"question": "should I invest in index funds?"}, headers=auth_headers
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["source"] == "policy"
+    assert "advisor" in data["answer"] or "outside" in data["answer"]
+
+
 def test_assistant_query_uses_llm_when_reachable(client, auth_headers, monkeypatch):
     async def fake_chat(system, user, max_tokens=300):
         assert "ONLY" in system  # safety preamble made it into the prompt
