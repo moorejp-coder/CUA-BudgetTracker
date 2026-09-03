@@ -161,13 +161,22 @@ function AddTransactionModal({
     notes: "",
   });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError("");
     try {
-      await TransactionsApi.create({ ...form, amount: parseFloat(form.amount), type } as any);
+      await TransactionsApi.create({
+        ...form,
+        amount: parseFloat(form.amount),
+        type,
+        category_id: form.category_id || null,
+      } as any);
       onSaved();
+    } catch (err: any) {
+      setError(err?.response?.data?.detail ?? "Failed to save transaction");
     } finally {
       setSaving(false);
     }
@@ -232,6 +241,7 @@ function AddTransactionModal({
             <label className="label">Date</label>
             <input required type="date" className="input w-full" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           </div>
+          {error && <p className="text-sm text-expense">{error}</p>}
           <div className="flex gap-2 justify-end pt-2">
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
