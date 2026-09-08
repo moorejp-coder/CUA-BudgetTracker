@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
 import TransactionTable from "@/components/TransactionTable";
 
@@ -32,6 +32,11 @@ export default function Transactions() {
     qc.invalidateQueries({ queryKey: ["transactions"] });
   }
 
+  async function handleUpdate(id: string, data: any) {
+    await TransactionsApi.update(id, data);
+    qc.invalidateQueries({ queryKey: ["transactions"] });
+  }
+
   async function handleDelete(id: string) {
     await TransactionsApi.remove(id);
     qc.invalidateQueries({ queryKey: ["transactions"] });
@@ -49,9 +54,6 @@ export default function Transactions() {
       <div className="flex items-center justify-between">
         <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Transactions</h1>
         <div className="flex gap-2">
-          <Link to="/transactions/import" className="btn-secondary">
-            Import CSV
-          </Link>
           <button className="btn-primary" onClick={() => setShowAdd(true)}>
             + Add Transaction
           </button>
@@ -110,6 +112,7 @@ export default function Transactions() {
         categories={categories}
         accounts={accounts}
         onCategoryChange={handleCategoryChange}
+        onUpdate={handleUpdate}
         onDelete={handleDelete}
         selected={selected}
         onSelectionChange={setSelected}

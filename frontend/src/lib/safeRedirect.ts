@@ -8,7 +8,6 @@
 const ALLOWED_REDIRECT_PATHS = new Set([
   "/",
   "/transactions",
-  "/transactions/import",
   "/categories",
   "/accounts",
   "/recurring",

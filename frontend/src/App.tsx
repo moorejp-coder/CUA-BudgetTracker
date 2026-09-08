@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Transactions from "@/pages/Transactions";
-import CsvImport from "@/pages/CsvImport";
 import Categories from "@/pages/Categories";
 import Accounts from "@/pages/Accounts";
 import Recurring from "@/pages/Recurring";
@@ -48,7 +47,6 @@ export default function App() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/transactions" element={<Transactions />} />
-        <Route path="/transactions/import" element={<CsvImport />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/recurring" element={<Recurring />} />
