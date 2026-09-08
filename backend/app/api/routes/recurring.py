@@ -8,7 +8,13 @@ from app.models.category import Category
 from app.models.recurring import RecurringItem
 from app.models.transaction import Transaction
 from app.models.user import User
-from app.schemas.recurring import RecurringCreate, RecurringOut, RecurringSuggestion, RecurringUpdate
+from app.schemas.recurring import (
+    RecurringCreate,
+    RecurringOut,
+    RecurringSuggestion,
+    RecurringUpdate,
+    UpcomingCharge,
+)
 from app.services.recurring_detection import detect_recurring, upcoming_charges
 
 router = APIRouter(prefix="/recurring", tags=["recurring"])
@@ -77,7 +83,7 @@ def suggestions(db: Session = Depends(get_db), user: User = Depends(get_current_
     return [d for d in detected if d["merchant"] not in already_confirmed]
 
 
-@router.get("/upcoming")
+@router.get("/upcoming", response_model=list[UpcomingCharge])
 def upcoming(days: int = Query(30, ge=1, le=365), db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     items = db.query(RecurringItem).filter(RecurringItem.user_id == user.id, RecurringItem.active.is_(True)).all()
     return upcoming_charges(items, days=days)

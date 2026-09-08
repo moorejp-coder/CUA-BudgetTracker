@@ -44,3 +44,12 @@ class RecurringSuggestion(BaseModel):
     occurrences: int
     last_date: date
     next_expected_date: date
+
+
+class UpcomingCharge(BaseModel):
+    id: str
+    merchant: str
+    expected_amount: float
+    cadence: str
+    date: date
+    category_id: str | None = None
