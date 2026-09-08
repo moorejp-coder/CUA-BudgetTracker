@@ -8,12 +8,12 @@ _PERIOD_RE = r"^\d{4}-(0[1-9]|1[0-2])$"
 class BudgetCreate(BaseModel):
     category_id: str = Field(min_length=1, max_length=64)
     period: str = Field(pattern=_PERIOD_RE)  # "YYYY-MM"
-    amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False)
+    amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False, strict=True)
     rollover: bool = False
 
 
 class BudgetUpdate(BaseModel):
-    amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False)
+    amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False, strict=True)
     rollover: bool | None = None
 
 

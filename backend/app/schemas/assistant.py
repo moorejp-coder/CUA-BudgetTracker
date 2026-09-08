@@ -18,7 +18,7 @@ class ScenarioQueryRequest(BaseModel):
 
 class ScenarioAdjustment(BaseModel):
     target: str = Field(min_length=1, max_length=200)
-    value: float = Field(ge=-1_000_000, le=1_000_000)  # |value| <= 1 => relative % change; otherwise absolute $/month change
+    value: float = Field(ge=-1_000_000, le=1_000_000, strict=True)  # |value| <= 1 => relative % change; otherwise absolute $/month change
 
 
 class ScenarioRequest(BaseModel):

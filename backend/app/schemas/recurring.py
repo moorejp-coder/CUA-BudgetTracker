@@ -9,7 +9,7 @@ Cadence = Literal["weekly", "biweekly", "monthly", "quarterly", "annual"]
 class RecurringCreate(BaseModel):
     category_id: str | None = Field(default=None, min_length=1, max_length=64)
     merchant: str = Field(min_length=1, max_length=200)
-    expected_amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False)
+    expected_amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False, strict=True)
     cadence: Cadence = "monthly"
     next_expected_date: date | None = None
 
@@ -17,7 +17,7 @@ class RecurringCreate(BaseModel):
 class RecurringUpdate(BaseModel):
     category_id: str | None = Field(default=None, min_length=1, max_length=64)
     merchant: str | None = Field(default=None, min_length=1, max_length=200)
-    expected_amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False)
+    expected_amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False, strict=True)
     cadence: Cadence | None = None
     next_expected_date: date | None = None
     is_confirmed: bool | None = None

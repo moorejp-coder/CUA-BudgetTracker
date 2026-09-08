@@ -15,7 +15,7 @@ class TransactionCreate(BaseModel):
     category_id: EntityId | None = None
     transfer_account_id: EntityId | None = None
     date: date_type
-    amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False)
+    amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False, strict=True)
     type: TransactionType
     payee: str = Field("", max_length=200)
     notes: str = Field("", max_length=1000)
@@ -27,7 +27,7 @@ class TransactionUpdate(BaseModel):
     category_id: EntityId | None = None
     transfer_account_id: EntityId | None = None
     date: date_type | None = None
-    amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False)
+    amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False, strict=True)
     type: TransactionType | None = None
     payee: str | None = Field(default=None, max_length=200)
     notes: str | None = Field(default=None, max_length=1000)

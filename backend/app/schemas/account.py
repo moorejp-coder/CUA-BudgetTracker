@@ -7,7 +7,7 @@ AccountType = Literal[
     "checking", "savings", "credit_card", "investment", "loan", "cash", "other"
 ]
 
-_BALANCE_BOUNDS = {"ge": -1_000_000_000, "le": 1_000_000_000, "allow_inf_nan": False}
+_BALANCE_BOUNDS = {"ge": -1_000_000_000, "le": 1_000_000_000, "allow_inf_nan": False, "strict": True}
 
 
 class AccountCreate(BaseModel):
