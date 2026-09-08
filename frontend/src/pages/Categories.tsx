@@ -200,17 +200,27 @@ export default function Categories() {
         <div className="space-y-5">
           {expenseCategories.map((c) => {
             const budget = budgets.find((b) => b.category.id === c.id);
-            return budget ? (
-              <BudgetProgress key={c.id} budget={budget} />
-            ) : (
-              <div key={c.id} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2.5">
-                  <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
-                    <CategoryIcon name={c.name} />
-                  </span>
-                  {c.name}
-                </span>
-                <BudgetInlineForm onSet={(amount, rollover) => setBudgetAmount(c.id, amount, undefined, rollover)} />
+            return (
+              <div key={c.id} className="space-y-2">
+                {budget && <BudgetProgress budget={budget} />}
+                {!budget && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2.5">
+                      <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
+                        <CategoryIcon name={c.name} />
+                      </span>
+                      {c.name}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <BudgetInlineForm
+                    key={budget?.id ?? c.id}
+                    initialAmount={budget?.amount}
+                    initialRollover={budget?.rollover}
+                    onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
+                  />
+                </div>
               </div>
             );
           })}
@@ -220,9 +230,17 @@ export default function Categories() {
   );
 }
 
-function BudgetInlineForm({ onSet }: { onSet: (amount: number, rollover: boolean) => void }) {
-  const [amount, setAmount] = useState("");
-  const [rollover, setRollover] = useState(false);
+function BudgetInlineForm({
+  onSet,
+  initialAmount,
+  initialRollover,
+}: {
+  onSet: (amount: number, rollover: boolean) => void;
+  initialAmount?: number;
+  initialRollover?: boolean;
+}) {
+  const [amount, setAmount] = useState(initialAmount != null ? String(initialAmount) : "");
+  const [rollover, setRollover] = useState(initialRollover ?? false);
   return (
     <div className="flex items-center gap-2">
       <input
