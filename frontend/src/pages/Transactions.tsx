@@ -108,6 +108,7 @@ export default function Transactions() {
       <TransactionTable
         transactions={data?.items ?? []}
         categories={categories}
+        accounts={accounts}
         onCategoryChange={handleCategoryChange}
         onDelete={handleDelete}
         selected={selected}
@@ -154,12 +155,13 @@ function AddTransactionModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [type, setType] = useState<"income" | "expense">("expense");
+  const [type, setType] = useState<"income" | "expense" | "transfer">("expense");
   const [form, setForm] = useState({
     amount: "",
     payee: "",
     account_id: accounts[0]?.id ?? "",
     category_id: "",
+    transfer_account_id: "",
     date: new Date().toISOString().slice(0, 10),
     notes: "",
   });
@@ -168,6 +170,10 @@ function AddTransactionModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (type === "transfer" && (!form.transfer_account_id || form.transfer_account_id === form.account_id)) {
+      setError("Choose a different account to transfer to");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -175,7 +181,8 @@ function AddTransactionModal({
         ...form,
         amount: parseFloat(form.amount),
         type,
-        category_id: form.category_id || null,
+        category_id: type === "transfer" ? null : form.category_id || null,
+        transfer_account_id: type === "transfer" ? form.transfer_account_id : null,
       } as any);
       onSaved();
     } catch (err: any) {
@@ -191,13 +198,19 @@ function AddTransactionModal({
         <h2 className="text-lg font-bold mb-4">Add Transaction</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex rounded-lg border border-border overflow-hidden">
-            {(["expense", "income"] as const).map((t) => (
+            {(["expense", "income", "transfer"] as const).map((t) => (
               <button
                 type="button"
                 key={t}
                 onClick={() => setType(t)}
                 className={`flex-1 py-2 text-sm font-semibold capitalize ${
-                  type === t ? (t === "income" ? "bg-income text-black" : "bg-expense text-black") : "text-ink/50"
+                  type === t
+                    ? t === "income"
+                      ? "bg-income text-black"
+                      : t === "expense"
+                        ? "bg-expense text-black"
+                        : "bg-ink/20 text-ink"
+                    : "text-ink/50"
                 }`}
               >
                 {t}
@@ -220,7 +233,7 @@ function AddTransactionModal({
             <input required className="input w-full" value={form.payee} onChange={(e) => setForm({ ...form, payee: e.target.value })} />
           </div>
           <div>
-            <label className="label">Account</label>
+            <label className="label">{type === "transfer" ? "From account" : "Account"}</label>
             <select required className="input w-full" value={form.account_id} onChange={(e) => setForm({ ...form, account_id: e.target.value })}>
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -229,17 +242,38 @@ function AddTransactionModal({
               ))}
             </select>
           </div>
-          <div>
-            <label className="label">Category</label>
-            <select className="input w-full" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
-              <option value="">Uncategorized</option>
-              {categories.filter((c: any) => c.type === type).map((c: any) => (
-                <option key={c.id} value={c.id}>
-                  {c.emoji} {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {type === "transfer" ? (
+            <div>
+              <label className="label">To account</label>
+              <select
+                required
+                className="input w-full"
+                value={form.transfer_account_id}
+                onChange={(e) => setForm({ ...form, transfer_account_id: e.target.value })}
+              >
+                <option value="">Select account…</option>
+                {accounts
+                  .filter((a: any) => a.id !== form.account_id)
+                  .map((a: any) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="label">Category</label>
+              <select className="input w-full" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
+                <option value="">Uncategorized</option>
+                {categories.filter((c: any) => c.type === type).map((c: any) => (
+                  <option key={c.id} value={c.id}>
+                    {c.emoji} {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="label">Date</label>
             <input required type="date" className="input w-full" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />

@@ -77,6 +77,7 @@ export interface Transaction {
   id: string;
   account_id: string;
   category: Category | null;
+  transfer_account_id: string | null;
   date: string;
   amount: number;
   type: "income" | "expense" | "transfer";

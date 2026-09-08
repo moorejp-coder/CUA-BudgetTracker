@@ -1,9 +1,10 @@
-import type { Category, Transaction } from "@/types";
+import type { Account, Category, Transaction } from "@/types";
 import { formatCurrency } from "@/lib/format";
 
 export default function TransactionTable({
   transactions,
   categories,
+  accounts = [],
   onCategoryChange,
   onDelete,
   selected,
@@ -12,6 +13,7 @@ export default function TransactionTable({
 }: {
   transactions: Transaction[];
   categories: Category[];
+  accounts?: Account[];
   onCategoryChange: (id: string, categoryId: string) => void;
   onDelete: (id: string) => void;
   selected?: Set<string>;
@@ -19,6 +21,15 @@ export default function TransactionTable({
   /** Force the no-scroll card layout — use when the table renders in a narrower container (e.g. embedded in a grid card) rather than the full page width. */
   compact?: boolean;
 }) {
+  const accountName = (id: string) => accounts.find((a) => a.id === id)?.name ?? "another account";
+
+  const categoryOrTransfer = (t: Transaction) =>
+    t.type === "transfer" ? (
+      <span className="text-xs text-ink/50 whitespace-nowrap">→ {accountName(t.transfer_account_id ?? "")}</span>
+    ) : (
+      categorySelect(t)
+    );
+
   const selectable = !!selected && !!onSelectionChange;
   const toggle = (id: string) => {
     if (!selectable) return;
@@ -74,7 +85,7 @@ export default function TransactionTable({
               </div>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">{categorySelect(t)}</div>
+              <div className="min-w-0 flex-1">{categoryOrTransfer(t)}</div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className="text-ink/40 text-xs capitalize">{t.source}</span>
                 <button
@@ -116,7 +127,7 @@ export default function TransactionTable({
                 )}
                 <td className="px-3 py-2.5 text-ink/70 whitespace-nowrap">{t.date}</td>
                 <td className="px-3 py-2.5 font-medium">{t.payee || "—"}</td>
-                <td className="px-3 py-2.5">{categorySelect(t)}</td>
+                <td className="px-3 py-2.5">{categoryOrTransfer(t)}</td>
                 <td className="px-3 py-2.5 text-ink/40 text-xs capitalize">{t.source}</td>
                 <td className="px-3 py-2.5 text-right">{amount(t)}</td>
                 <td className="px-3 py-2.5 text-right">

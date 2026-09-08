@@ -112,6 +112,7 @@ function AccountTransactionHistory({ accountId }: { accountId: string }) {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: CategoriesApi.list });
+  const { data: accounts = [] } = useQuery({ queryKey: ["accounts"], queryFn: AccountsApi.list });
   const { data } = useQuery({
     queryKey: ["transactions", { account_id: accountId }, page],
     queryFn: () => TransactionsApi.list({ account_id: accountId, page, page_size: 10 }),
@@ -140,6 +141,7 @@ function AccountTransactionHistory({ accountId }: { accountId: string }) {
       <TransactionTable
         transactions={data?.items ?? []}
         categories={categories}
+        accounts={accounts}
         onCategoryChange={handleCategoryChange}
         onDelete={handleDelete}
         compact

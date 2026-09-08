@@ -53,6 +53,7 @@ def _serialize(txn: Transaction) -> dict:
         "id": txn.id,
         "account_id": txn.account_id,
         "category": txn.category,
+        "transfer_account_id": txn.transfer_account_id,
         "date": txn.date,
         "amount": float(txn.amount),
         "type": txn.type,
@@ -161,8 +162,20 @@ def update_transaction(
     _check_account_owned(db, user, payload.account_id)
     _check_category_owned(db, user, payload.category_id)
     _check_account_owned(db, user, payload.transfer_account_id)
-    _apply_transaction_effect(db, txn, sign=-1)
     data = payload.model_dump(exclude_unset=True, exclude={"tags"})
+
+    resulting_type = data.get("type", txn.type)
+    resulting_account_id = data.get("account_id", txn.account_id)
+    resulting_transfer_account_id = data.get("transfer_account_id", txn.transfer_account_id)
+    if resulting_type == "transfer":
+        if not resulting_transfer_account_id:
+            raise HTTPException(status_code=422, detail="transfer_account_id is required for transfer transactions")
+        if resulting_transfer_account_id == resulting_account_id:
+            raise HTTPException(status_code=422, detail="transfer_account_id must differ from account_id")
+    elif "transfer_account_id" not in data and txn.transfer_account_id is not None:
+        data["transfer_account_id"] = None
+
+    _apply_transaction_effect(db, txn, sign=-1)
     for field, value in data.items():
         setattr(txn, field, value)
     if payload.tags is not None:
