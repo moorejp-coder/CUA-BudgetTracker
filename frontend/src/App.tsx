@@ -15,9 +15,14 @@ import Subscriptions from "@/pages/Subscriptions";
 import Anomalies from "@/pages/Anomalies";
 import Coach from "@/pages/Coach";
 import Recaps from "@/pages/Recaps";
+import Settings from "@/pages/Settings";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  // Auth state comes from an async /auth/me check now (cookies aren't JS-readable), so
+  // there's a brief window on first load where we don't know yet — render nothing rather
+  // than flashing the login page for an already-logged-in user.
+  if (loading) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 }
@@ -46,6 +51,7 @@ export default function App() {
         <Route path="/anomalies" element={<Anomalies />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/recaps" element={<Recaps />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

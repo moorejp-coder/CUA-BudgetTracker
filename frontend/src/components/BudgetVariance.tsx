@@ -18,11 +18,11 @@ function VarianceBadge({ amount, pct }: { amount: number; pct: number | null }) 
 
 export default function BudgetVariance({ row }: { row: BudgetVarianceRow }) {
   return (
-    <div className="flex items-center justify-between text-sm py-1.5 border-b border-white/5 last:border-0">
+    <div className="flex items-center justify-between text-sm py-1.5 border-b border-border-subtle last:border-0">
       <span className="font-medium">{row.category_name}</span>
       <div className="flex items-center gap-6 tabular text-xs">
         <div className="text-right">
-          <div className="text-ink/40">vs target (${row.target_budget.toFixed(0)})</div>
+          <div className="text-ink/40">vs target ({row.target_budget.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })})</div>
           <VarianceBadge amount={row.variance_vs_target} pct={row.variance_vs_target_pct} />
         </div>
         <div className="text-right">

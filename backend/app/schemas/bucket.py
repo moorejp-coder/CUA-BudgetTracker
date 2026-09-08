@@ -5,22 +5,22 @@ from pydantic import BaseModel, Field
 
 
 class BucketCreate(BaseModel):
-    name: str
-    description: str = ""
-    target_amount: Decimal | None = None
+    name: str = Field(min_length=1, max_length=200)
+    description: str = Field("", max_length=2000)
+    target_amount: Decimal | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False)
     target_date: date_type | None = None
-    color: str | None = None
-    icon: str | None = None
+    color: str | None = Field(default=None, max_length=32)
+    icon: str | None = Field(default=None, max_length=32)
 
 
 class BucketUpdate(BaseModel):
-    name: str | None = None
-    description: str | None = None
-    target_amount: Decimal | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
+    target_amount: Decimal | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False)
     target_date: date_type | None = None
-    color: str | None = None
-    icon: str | None = None
-    sort_order: int | None = None
+    color: str | None = Field(default=None, max_length=32)
+    icon: str | None = Field(default=None, max_length=32)
+    sort_order: int | None = Field(default=None, ge=0, le=10_000)
 
 
 class BucketOut(BaseModel):
@@ -42,6 +42,9 @@ class BucketOut(BaseModel):
 
 
 class AllocateRequest(BaseModel):
+    # Positivity/precision are intentionally left to the ledger service (to_money() /
+    # require_positive()) rather than enforced here — it returns a domain-specific 400
+    # with a precise reason, which a schema-level 422 would preempt and flatten.
     amount: Decimal
     idempotency_key: str = Field(min_length=1, max_length=200)
 
@@ -52,8 +55,8 @@ class UnassignRequest(BaseModel):
 
 
 class BucketTransferRequest(BaseModel):
-    source_bucket_id: str
-    destination_bucket_id: str
+    source_bucket_id: str = Field(min_length=1, max_length=64)
+    destination_bucket_id: str = Field(min_length=1, max_length=64)
     amount: Decimal
     idempotency_key: str = Field(min_length=1, max_length=200)
 

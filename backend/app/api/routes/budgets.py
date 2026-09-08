@@ -1,11 +1,12 @@
 from calendar import monthrange
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.authz import require_resource
 from app.db.session import get_db
 from app.models.budget import Budget
 from app.models.category import Category
@@ -14,6 +15,16 @@ from app.models.user import User
 from app.schemas.budget import BudgetCreate, BudgetOut, BudgetUpdate
 
 router = APIRouter(prefix="/budgets", tags=["budgets"])
+
+_PERIOD_RE = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+get_owned_budget = require_resource(
+    Budget,
+    "budget_id",
+    lambda budget, user: budget.user_id == user.id,
+    denied_status=404,
+    not_found_detail="Budget not found",
+)
 
 
 def _period_bounds(period: str) -> tuple[date, date]:
@@ -74,7 +85,9 @@ def _serialize(db: Session, user: User, budget: Budget) -> dict:
 
 
 @router.get("", response_model=list[BudgetOut])
-def list_budgets(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_budgets(
+    period: str = Query(pattern=_PERIOD_RE), db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     budgets = db.query(Budget).filter(Budget.user_id == user.id, Budget.period == period).all()
     return [_serialize(db, user, b) for b in budgets]
 
@@ -93,11 +106,11 @@ def create_budget(payload: BudgetCreate, db: Session = Depends(get_db), user: Us
 
 @router.patch("/{budget_id}", response_model=BudgetOut)
 def update_budget(
-    budget_id: str, payload: BudgetUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    payload: BudgetUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    budget: Budget = Depends(get_owned_budget),
 ):
-    budget = db.get(Budget, budget_id)
-    if not budget or budget.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Budget not found")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(budget, field, value)
     db.commit()

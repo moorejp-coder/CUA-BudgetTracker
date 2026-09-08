@@ -1,4 +1,5 @@
-import { Component, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
+import { api } from "@/api/client";
 
 interface Props {
   children: ReactNode;
@@ -8,6 +9,21 @@ interface State {
   hasError: boolean;
 }
 
+export function reportClientError(message: string, stack?: string, componentStack?: string) {
+  // Fire-and-forget — this must never itself throw or the error report becomes another
+  // unhandled error. Reported server-side (see backend/app/api/routes/client_errors.py)
+  // rather than left in the browser console, so a crash is visible without needing the
+  // affected user to open devtools and paste it to you.
+  api
+    .post("/client-errors", {
+      message: message.slice(0, 2000),
+      stack: (stack || "").slice(0, 8000),
+      component_stack: (componentStack || "").slice(0, 8000),
+      url: window.location.href.slice(0, 500),
+    })
+    .catch(() => {});
+}
+
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 
@@ -15,8 +31,10 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: unknown) {
-    console.error("Unhandled UI error:", error);
+  componentDidCatch(error: unknown, info: ErrorInfo) {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    reportClientError(message, stack, info.componentStack ?? undefined);
   }
 
   render() {

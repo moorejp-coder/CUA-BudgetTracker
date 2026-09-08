@@ -9,6 +9,8 @@ Selected via LLM_PROVIDER in settings. Every caller MUST handle `None` back from
 — that's the "LLM unavailable" signal, and every feature that uses this client has a
 deterministic fallback for that case.
 """
+import re
+
 import httpx
 
 from app.core.config import get_settings
@@ -46,13 +48,23 @@ def _local_headers() -> dict:
     return {"Authorization": f"Bearer {settings.LLM_API_KEY}"}
 
 
+def _strip_markdown(text: str) -> str:
+    """Strips common Markdown emphasis/heading syntax the model may add despite instructions."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)", r"\1", text)
+    text = re.sub(r"^#{1,6}\s+", "", text, flags=re.MULTILINE)
+    return text
+
+
 async def chat(system: str, user: str, max_tokens: int = 300) -> str | None:
     """Returns the model's text response, or None if the LLM is disabled/unreachable."""
     if not settings.LLM_ENABLED:
         return None
     if settings.LLM_PROVIDER == "claude":
-        return await _chat_claude(system, user, max_tokens)
-    return await _chat_local(system, user, max_tokens)
+        reply = await _chat_claude(system, user, max_tokens)
+    else:
+        reply = await _chat_local(system, user, max_tokens)
+    return _strip_markdown(reply) if reply else reply
 
 
 async def _chat_local(system: str, user: str, max_tokens: int) -> str | None:

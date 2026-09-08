@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
 import AccountBuckets from "@/components/AccountBuckets";
 import TransactionTable from "@/components/TransactionTable";
+import { formatCurrency } from "@/lib/format";
 
 const TYPES = ["checking", "savings", "credit_card", "loan", "investment", "cash", "other"];
 
@@ -91,7 +92,7 @@ export default function Accounts() {
               className={`text-2xl numeral mt-3 block hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
               onClick={() => setExpanded(expanded === a.id ? null : a.id)}
             >
-              ${a.current_balance.toFixed(2)}
+              {formatCurrency(a.current_balance)}
             </button>
             <button className="text-accent text-xs mt-3" onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}>
               {snapshotFor === a.id ? "Cancel" : "Update balance"}
@@ -141,6 +142,7 @@ function AccountTransactionHistory({ accountId }: { accountId: string }) {
         categories={categories}
         onCategoryChange={handleCategoryChange}
         onDelete={handleDelete}
+        compact
       />
       {data && data.total > data.page_size && (
         <div className="flex justify-center gap-3 text-sm mt-3">

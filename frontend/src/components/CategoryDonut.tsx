@@ -1,7 +1,8 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { CategorySpend } from "@/types";
+import { formatCurrency } from "@/lib/format";
 
-const fmt0 = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+const fmt0 = (n: number) => formatCurrency(n, 0);
 
 export default function CategoryDonut({ data }: { data: CategorySpend[] }) {
   if (!data.length) {
@@ -36,9 +37,9 @@ export default function CategoryDonut({ data }: { data: CategorySpend[] }) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ background: "#211c15", border: "1px solid #332c21", borderRadius: 8, fontSize: 12 }}
-              itemStyle={{ color: "#fff" }}
-              formatter={(value: number, name: string) => [`$${value.toFixed(2)}`, name]}
+              contentStyle={{ background: "#fffefd", border: "1px solid #e9dcc5", borderRadius: 8, fontSize: 12 }}
+              itemStyle={{ color: "#1d201d" }}
+              formatter={(value: number, name: string) => [formatCurrency(value), name]}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -53,7 +54,7 @@ export default function CategoryDonut({ data }: { data: CategorySpend[] }) {
             <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: c.color }} />
             <span aria-hidden>{c.emoji}</span>
             <span>{c.name}</span>
-            <span className="tabular text-ink/45">${c.total.toFixed(0)}</span>
+            <span className="tabular text-ink/45">{fmt0(c.total)}</span>
           </div>
         ))}
       </div>

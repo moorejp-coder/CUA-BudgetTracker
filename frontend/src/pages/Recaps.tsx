@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RecapsApi } from "@/api/resources";
 import type { Recap } from "@/types";
+import { formatCurrency } from "@/lib/format";
 
 export default function Recaps() {
   const qc = useQueryClient();
@@ -80,11 +81,11 @@ export default function Recaps() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
                 <div className="bg-surface-sunken rounded-lg p-3">
                   <div className="text-xs text-ink/50">Income</div>
-                  <div className="text-lg numeral text-income">${Number(active.context.income ?? 0).toFixed(0)}</div>
+                  <div className="text-lg numeral text-income">{formatCurrency(Number(active.context.income ?? 0), 0)}</div>
                 </div>
                 <div className="bg-surface-sunken rounded-lg p-3">
                   <div className="text-xs text-ink/50">Expenses</div>
-                  <div className="text-lg numeral text-expense">${Number(active.context.expenses ?? 0).toFixed(0)}</div>
+                  <div className="text-lg numeral text-expense">{formatCurrency(Number(active.context.expenses ?? 0), 0)}</div>
                 </div>
                 <div className="bg-surface-sunken rounded-lg p-3">
                   <div className="text-xs text-ink/50">Savings rate</div>

@@ -16,6 +16,17 @@ from app.models.user import User
 
 router = APIRouter(prefix="/export", tags=["export"])
 
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_safe(value) -> str:
+    """Neutralize spreadsheet formula injection: a leading =, +, -, @ (or tab/CR) makes
+    Excel/Sheets interpret the cell as a formula when the exported CSV is reopened there."""
+    text = str(value)
+    if text.startswith(_FORMULA_PREFIXES):
+        return "'" + text
+    return text
+
 
 @router.get("/json")
 def export_json(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
@@ -56,7 +67,16 @@ def export_csv(db: Session = Depends(get_db), user: User = Depends(get_current_u
     writer.writerow(["date", "amount", "type", "payee", "category", "account_id", "notes", "source"])
     for t in txns:
         writer.writerow(
-            [t.date, t.amount, t.type, t.payee, t.category.name if t.category else "", t.account_id, t.notes, t.source]
+            [
+                t.date,
+                t.amount,
+                t.type,
+                _csv_safe(t.payee),
+                _csv_safe(t.category.name if t.category else ""),
+                t.account_id,
+                _csv_safe(t.notes),
+                t.source,
+            ]
         )
     out = io.BytesIO(buf.getvalue().encode())
     return StreamingResponse(

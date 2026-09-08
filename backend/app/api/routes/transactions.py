@@ -5,8 +5,10 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.authz import require_resource
 from app.db.session import get_db
 from app.models.account import Account
+from app.models.category import Category
 from app.models.tag import Tag
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -15,10 +17,35 @@ from app.schemas.transaction import (
     Page,
     TransactionCreate,
     TransactionOut,
+    TransactionType,
     TransactionUpdate,
 )
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+get_owned_transaction = require_resource(
+    Transaction,
+    "transaction_id",
+    lambda txn, user: txn.user_id == user.id,
+    denied_status=404,
+    not_found_detail="Transaction not found",
+)
+
+
+def _check_account_owned(db: Session, user: User, account_id: str | None) -> None:
+    if account_id is None:
+        return
+    account = db.get(Account, account_id)
+    if not account or account.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+
+def _check_category_owned(db: Session, user: User, category_id: str | None) -> None:
+    if category_id is None:
+        return
+    category = db.get(Category, category_id)
+    if not category or category.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Category not found")
 
 
 def _serialize(txn: Transaction) -> dict:
@@ -66,15 +93,15 @@ def _resolve_tags(db: Session, user: User, tag_names: list[str]) -> list[Tag]:
 
 @router.get("", response_model=Page)
 def list_transactions(
-    account_id: str | None = None,
-    category_id: str | None = None,
-    tag: str | None = None,
-    type: str | None = None,
-    q: str | None = None,
+    account_id: str | None = Query(default=None, min_length=1, max_length=64),
+    category_id: str | None = Query(default=None, min_length=1, max_length=64),
+    tag: str | None = Query(default=None, min_length=1, max_length=60),
+    type: TransactionType | None = None,
+    q: str | None = Query(default=None, min_length=1, max_length=200),
     start: date | None = None,
     end: date | None = None,
-    page: int = 1,
-    page_size: int = Query(50, le=200),
+    page: int = Query(1, ge=1, le=100_000),
+    page_size: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -109,6 +136,10 @@ def list_transactions(
 def create_transaction(
     payload: TransactionCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
+    _check_account_owned(db, user, payload.account_id)
+    _check_category_owned(db, user, payload.category_id)
+    if payload.type == "transfer":
+        _check_account_owned(db, user, payload.transfer_account_id)
     data = payload.model_dump(exclude={"tags"})
     txn = Transaction(user_id=user.id, source="manual", **data)
     txn.tags = _resolve_tags(db, user, payload.tags)
@@ -122,14 +153,14 @@ def create_transaction(
 
 @router.patch("/{transaction_id}", response_model=TransactionOut)
 def update_transaction(
-    transaction_id: str,
     payload: TransactionUpdate,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
+    txn: Transaction = Depends(get_owned_transaction),
 ):
-    txn = db.get(Transaction, transaction_id)
-    if not txn or txn.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+    _check_account_owned(db, user, payload.account_id)
+    _check_category_owned(db, user, payload.category_id)
+    _check_account_owned(db, user, payload.transfer_account_id)
     _apply_transaction_effect(db, txn, sign=-1)
     data = payload.model_dump(exclude_unset=True, exclude={"tags"})
     for field, value in data.items():
@@ -146,6 +177,7 @@ def update_transaction(
 def bulk_update(
     payload: BulkUpdateRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
+    _check_category_owned(db, user, payload.category_id)
     query = db.query(Transaction).filter(
         Transaction.user_id == user.id, Transaction.id.in_(payload.transaction_ids)
     )
@@ -160,12 +192,7 @@ def bulk_update(
 
 
 @router.delete("/{transaction_id}", status_code=204)
-def delete_transaction(
-    transaction_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)
-):
-    txn = db.get(Transaction, transaction_id)
-    if not txn or txn.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+def delete_transaction(db: Session = Depends(get_db), txn: Transaction = Depends(get_owned_transaction)):
     _apply_transaction_effect(db, txn, sign=-1)
     db.delete(txn)
     db.commit()

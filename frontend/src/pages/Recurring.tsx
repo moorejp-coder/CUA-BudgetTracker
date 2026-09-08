@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RecurringApi } from "@/api/resources";
+import { formatCurrency } from "@/lib/format";
 
 export default function Recurring() {
   const qc = useQueryClient();
@@ -33,7 +34,7 @@ export default function Recurring() {
             {suggestions.map((s, i) => (
               <li key={i} className="flex items-center justify-between text-sm">
                 <span>
-                  {s.merchant} · ${s.expected_amount.toFixed(2)} · {s.cadence} ({s.occurrences}x seen)
+                  {s.merchant} · {formatCurrency(s.expected_amount)} · {s.cadence} ({s.occurrences}x seen)
                 </span>
                 <button className="btn-secondary text-xs px-3 py-1" onClick={() => confirmSuggestion(s)}>
                   Confirm
@@ -63,7 +64,7 @@ export default function Recurring() {
                 <td className="py-2">{r.merchant}</td>
                 <td className="py-2 capitalize">{r.cadence}</td>
                 <td className="py-2">{r.next_expected_date ?? "—"}</td>
-                <td className="py-2 text-right tabular">${r.expected_amount.toFixed(2)}</td>
+                <td className="py-2 text-right tabular">{formatCurrency(r.expected_amount)}</td>
                 <td className="py-2 text-right">
                   <input type="checkbox" checked={r.active} onChange={() => toggleActive(r.id, r.active)} />
                 </td>

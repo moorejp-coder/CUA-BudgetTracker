@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AssistantApi, ForecastApi } from "@/api/resources";
 import ForecastChart from "@/components/ForecastChart";
 import type { ScenarioAdjustment, ScenarioQueryResponse, ScenarioResult } from "@/types";
+import { formatCurrency } from "@/lib/format";
 
 export default function Forecasts() {
   const [horizon, setHorizon] = useState(30);
@@ -67,19 +68,19 @@ export default function Forecasts() {
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 text-sm">
             <div>
               <div className="text-ink/50 text-xs">Avg monthly income</div>
-              <div className="text-income font-semibold tabular">${forecast.avg_monthly_income.toFixed(0)}</div>
+              <div className="text-income font-semibold tabular">{formatCurrency(forecast.avg_monthly_income, 0)}</div>
             </div>
             <div>
               <div className="text-ink/50 text-xs">Avg monthly expense</div>
-              <div className="text-expense font-semibold tabular">${forecast.avg_monthly_expense.toFixed(0)}</div>
+              <div className="text-expense font-semibold tabular">{formatCurrency(forecast.avg_monthly_expense, 0)}</div>
             </div>
             <div>
               <div className="text-ink/50 text-xs">Upcoming recurring ({horizon}d)</div>
-              <div className="font-semibold tabular">${forecast.upcoming_recurring_total.toFixed(0)}</div>
+              <div className="font-semibold tabular">{formatCurrency(forecast.upcoming_recurring_total, 0)}</div>
             </div>
             <div>
               <div className="text-ink/50 text-xs">Starting balance</div>
-              <div className="font-semibold tabular">${forecast.starting_balance.toFixed(0)}</div>
+              <div className="font-semibold tabular">{formatCurrency(forecast.starting_balance, 0)}</div>
             </div>
           </div>
           <ForecastChart forecast={forecast} />
@@ -156,13 +157,13 @@ function ScenarioResultView({ result }: { result: ScenarioResult }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div>
           <div className="text-ink/50 text-xs">Baseline net/mo</div>
-          <div className="font-semibold tabular">${result.baseline_monthly_net.toFixed(2)}</div>
+          <div className="font-semibold tabular">{formatCurrency(result.baseline_monthly_net)}</div>
         </div>
         <div>
           <div className="text-ink/50 text-xs">Projected net/mo</div>
           <div className={`font-semibold tabular ${result.monthly_net_delta >= 0 ? "text-income" : "text-expense"}`}>
-            ${result.projected_monthly_net.toFixed(2)} ({result.monthly_net_delta >= 0 ? "+" : ""}
-            {result.monthly_net_delta.toFixed(2)})
+            {formatCurrency(result.projected_monthly_net)} ({result.monthly_net_delta >= 0 ? "+" : ""}
+            {formatCurrency(result.monthly_net_delta)})
           </div>
         </div>
       </div>

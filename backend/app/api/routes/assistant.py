@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -150,7 +150,7 @@ async def assistant_subscriptions(db: Session = Depends(get_db), user: User = De
 
 @router.get("/anomalies", response_model=AnomaliesAssistantResponse)
 async def assistant_anomalies(
-    days: int = 30, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    days: int = Query(30, ge=1, le=365), db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ):
     end = date.today()
     start = end - timedelta(days=days)

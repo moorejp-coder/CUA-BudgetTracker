@@ -1,4 +1,5 @@
 from datetime import date as date_type, datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -17,4 +18,4 @@ class RecapOut(BaseModel):
 
 
 class RecapGenerateRequest(BaseModel):
-    period_type: str = "month"  # week | month
+    period_type: Literal["week", "month"] = "month"

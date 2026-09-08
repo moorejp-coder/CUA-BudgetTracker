@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AssistantQueryRequest(BaseModel):
-    question: str
+    question: str = Field(min_length=1, max_length=1000)
 
 
 class AssistantQueryResponse(BaseModel):
@@ -13,18 +13,18 @@ class AssistantQueryResponse(BaseModel):
 
 
 class ScenarioQueryRequest(BaseModel):
-    question: str
+    question: str = Field(min_length=1, max_length=1000)
 
 
 class ScenarioAdjustment(BaseModel):
-    target: str
-    value: float  # |value| <= 1 => relative % change; otherwise absolute $/month change
+    target: str = Field(min_length=1, max_length=200)
+    value: float = Field(ge=-1_000_000, le=1_000_000)  # |value| <= 1 => relative % change; otherwise absolute $/month change
 
 
 class ScenarioRequest(BaseModel):
-    adjustments: list[ScenarioAdjustment]
-    base_months: int = 3
-    horizon_days: int = 90
+    adjustments: list[ScenarioAdjustment] = Field(max_length=50)
+    base_months: int = Field(3, ge=1, le=24)
+    horizon_days: int = Field(90, ge=1, le=365)
 
 
 class ScenarioResponse(BaseModel):

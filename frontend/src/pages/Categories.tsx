@@ -4,8 +4,14 @@ import { format } from "date-fns";
 import { AnalyticsApi, BudgetsApi, CategoriesApi } from "@/api/resources";
 import BudgetProgress from "@/components/BudgetProgress";
 import BudgetVariance from "@/components/BudgetVariance";
+import { getCategoryIcon } from "@/lib/categoryIcon";
 
-const PALETTE = ["#c99a4b", "#4fae7b", "#4fa3c4", "#c6604a", "#9b7ebd", "#d4b483", "#6e8fa3", "#b5a45c", "#a85c7c", "#7a7268"];
+function CategoryIcon({ name }: { name: string }) {
+  const Icon = getCategoryIcon(name);
+  return <Icon />;
+}
+
+const PALETTE = ["#cf8e27", "#3f825f", "#6ea4bb", "#c85d43", "#9b7ebd", "#d4b483", "#6e8fa3", "#b5a45c", "#a85c7c", "#7a7268"];
 
 export default function Categories() {
   const qc = useQueryClient();
@@ -90,9 +96,11 @@ export default function Categories() {
           <ul className="space-y-2">
             {expenseCategories.map((c) => (
               <li key={c.id} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />
-                  {c.emoji} {c.name}
+                <span className="flex items-center gap-2.5">
+                  <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
+                    <CategoryIcon name={c.name} />
+                  </span>
+                  {c.name}
                 </span>
                 <button onClick={() => removeCategory(c.id)} className="text-ink/30 hover:text-expense text-xs">
                   Delete
@@ -106,9 +114,11 @@ export default function Categories() {
           <ul className="space-y-2">
             {incomeCategories.map((c) => (
               <li key={c.id} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />
-                  {c.emoji} {c.name}
+                <span className="flex items-center gap-2.5">
+                  <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
+                    <CategoryIcon name={c.name} />
+                  </span>
+                  {c.name}
                 </span>
                 <button onClick={() => removeCategory(c.id)} className="text-ink/30 hover:text-expense text-xs">
                   Delete
@@ -131,7 +141,7 @@ export default function Categories() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {suggestion.buckets.map((b) => (
-              <div key={b.key} className="rounded-lg bg-white/5 p-3">
+              <div key={b.key} className="rounded-lg bg-surface-raised p-3">
                 <div className="text-xs text-ink/50">
                   {b.label} · {Math.round(b.pct * 100)}%
                 </div>
@@ -153,35 +163,35 @@ export default function Categories() {
             {homePlan.has_debt && " You currently have outstanding debt, so treat this as an optimistic ceiling."}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-surface-raised p-3">
               <div className="text-xs text-ink/50">Max monthly payment</div>
               <div className="text-lg font-semibold text-ink">
                 {homePlan.max_monthly_mortgage_payment.toLocaleString(undefined, { style: "currency", currency: "USD" })}
               </div>
               <div className="text-[11px] text-ink/40 mt-1">50% of monthly income</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-surface-raised p-3">
               <div className="text-xs text-ink/50">Max home price</div>
               <div className="text-lg font-semibold text-ink">
                 {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD" })}
               </div>
               <div className="text-[11px] text-ink/40 mt-1">Max payment ÷ $7.40 per $1,000 borrowed</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-surface-raised p-3">
               <div className="text-xs text-ink/50">Needed to close</div>
               <div className="text-lg font-semibold text-ink">
                 {homePlan.amount_needed_to_close.toLocaleString(undefined, { style: "currency", currency: "USD" })}
               </div>
               <div className="text-[11px] text-ink/40 mt-1">10% down + 2% closing costs</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-surface-raised p-3">
               <div className="text-xs text-ink/50">Suggested savings</div>
               <div className="text-lg font-semibold text-ink">
                 {homePlan.suggested_monthly_savings.toLocaleString(undefined, { style: "currency", currency: "USD" })}/mo
               </div>
               <div className="text-[11px] text-ink/40 mt-1">30% of monthly income</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-3">
+            <div className="rounded-lg bg-surface-raised p-3">
               <div className="text-xs text-ink/50">Time to save from $0</div>
               <div className="text-lg font-semibold text-ink">
                 {homePlan.months_to_save_from_zero !== null ? `${homePlan.months_to_save_from_zero} months` : "—"}
@@ -228,9 +238,11 @@ export default function Categories() {
               <BudgetProgress key={c.id} budget={budget} />
             ) : (
               <div key={c.id} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />
-                  {c.emoji} {c.name}
+                <span className="flex items-center gap-2.5">
+                  <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
+                    <CategoryIcon name={c.name} />
+                  </span>
+                  {c.name}
                 </span>
                 <BudgetInlineForm onSet={(amount, rollover) => setBudgetAmount(c.id, amount, undefined, rollover)} />
               </div>

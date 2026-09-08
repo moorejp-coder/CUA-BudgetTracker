@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AssistantApi } from "@/api/resources";
+import { formatCurrency } from "@/lib/format";
 
 export default function Anomalies() {
   const { data, isLoading } = useQuery({
@@ -45,7 +46,7 @@ export default function Anomalies() {
                     <td className="py-2 whitespace-nowrap">{a.date}</td>
                     <td className="py-2">{a.payee || "—"}</td>
                     <td className="py-2">{a.category_name ?? "Uncategorized"}</td>
-                    <td className="py-2 text-right numeral text-expense">${a.amount.toFixed(2)}</td>
+                    <td className="py-2 text-right numeral text-expense">{formatCurrency(a.amount)}</td>
                     <td className="py-2 text-ink/50 text-xs">{a.reason}</td>
                   </tr>
                 ))}

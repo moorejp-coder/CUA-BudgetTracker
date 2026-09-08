@@ -21,8 +21,8 @@ const Store = (() => {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) return JSON.parse(raw);
-    } catch (e) {
-      console.error("Failed to load budget data", e);
+    } catch {
+      // Corrupt/unreadable localStorage data — fall through to defaults below.
     }
     return { categories: DEFAULT_CATEGORIES, transactions: [], budgets: {} };
   }

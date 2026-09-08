@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { AnalyticsApi } from "@/api/resources";
 import CashflowChart from "@/components/CashflowChart";
+import { formatCurrency } from "@/lib/format";
 
 export default function CashFlow() {
   const [months, setMonths] = useState(12);
@@ -29,16 +30,16 @@ export default function CashFlow() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Total income</div>
-          <div className="text-2xl font-bold text-income tabular">${totalIncome.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-income tabular">{formatCurrency(totalIncome, 0)}</div>
         </div>
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Total expenses</div>
-          <div className="text-2xl font-bold text-expense tabular">${totalExpense.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-expense tabular">{formatCurrency(totalExpense, 0)}</div>
         </div>
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Net</div>
           <div className={`text-2xl numeral ${totalIncome - totalExpense < 0 ? "text-expense" : "text-income"}`}>
-            ${(totalIncome - totalExpense).toFixed(0)}
+            {formatCurrency(totalIncome - totalExpense, 0)}
           </div>
         </div>
       </div>

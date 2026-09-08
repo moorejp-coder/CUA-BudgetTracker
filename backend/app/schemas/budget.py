@@ -1,17 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.category import CategoryOut
 
+_PERIOD_RE = r"^\d{4}-(0[1-9]|1[0-2])$"
+
 
 class BudgetCreate(BaseModel):
-    category_id: str
-    period: str  # "YYYY-MM"
-    amount: float
+    category_id: str = Field(min_length=1, max_length=64)
+    period: str = Field(pattern=_PERIOD_RE)  # "YYYY-MM"
+    amount: float = Field(gt=0, le=1_000_000_000, allow_inf_nan=False)
     rollover: bool = False
 
 
 class BudgetUpdate(BaseModel):
-    amount: float | None = None
+    amount: float | None = Field(default=None, gt=0, le=1_000_000_000, allow_inf_nan=False)
     rollover: bool | None = None
 
 

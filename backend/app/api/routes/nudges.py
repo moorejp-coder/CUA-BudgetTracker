@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.authz import require_resource
 from app.db.session import get_db
 from app.models.nudge import NudgeEvent
 from app.models.user import User
@@ -11,6 +12,14 @@ from app.schemas.nudge import NudgeOut
 from app.services import nudge_rules
 
 router = APIRouter(prefix="/nudges", tags=["nudges"])
+
+get_owned_nudge = require_resource(
+    NudgeEvent,
+    "nudge_id",
+    lambda nudge, user: nudge.user_id == user.id,
+    denied_status=404,
+    not_found_detail="Nudge not found",
+)
 
 
 @router.get("", response_model=list[NudgeOut])
@@ -31,10 +40,7 @@ async def generate_nudges(db: Session = Depends(get_db), user: User = Depends(ge
 
 
 @router.post("/{nudge_id}/dismiss", response_model=NudgeOut)
-def dismiss_nudge(nudge_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    nudge = db.get(NudgeEvent, nudge_id)
-    if not nudge or nudge.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Nudge not found")
+def dismiss_nudge(db: Session = Depends(get_db), nudge: NudgeEvent = Depends(get_owned_nudge)):
     nudge.dismissed_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(nudge)

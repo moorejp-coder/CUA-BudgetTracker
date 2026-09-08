@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -11,9 +11,19 @@ from app.services import analytics as svc
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
+_PERIOD_RE = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+
+def _period_query() -> str:
+    """A fresh Query() instance per call — FastAPI's dependency analysis breaks if the
+    same FieldInfo object is reused as the default for more than one parameter."""
+    return Query(pattern=_PERIOD_RE)
+
 
 @router.get("/summary", response_model=SummaryResponse)
-def get_summary(month: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_summary(
+    month: str = _period_query(), db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     return svc.summary(db, user.id, month)
 
 
@@ -36,8 +46,8 @@ def get_net_worth(start: date, end: date, db: Session = Depends(get_db), user: U
 
 @router.get("/budget-variance")
 def get_budget_variance(
-    period: str,
-    compare_months: int = 1,
+    period: str = _period_query(),
+    compare_months: int = Query(1, ge=1, le=24),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -61,15 +71,21 @@ def get_anomalies(start: date, end: date, db: Session = Depends(get_db), user: U
 
 
 @router.get("/behavior-signals")
-def get_behavior_signals(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_behavior_signals(
+    period: str = _period_query(), db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     return svc.behavior_signals(db, user.id, period)
 
 
 @router.get("/budget-suggestion")
-def get_budget_suggestion(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_budget_suggestion(
+    period: str = _period_query(), db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     return svc.budget_suggestion(db, user.id, period)
 
 
 @router.get("/home-savings-plan")
-def get_home_savings_plan(period: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_home_savings_plan(
+    period: str = _period_query(), db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
     return svc.home_savings_plan(db, user.id, period)

@@ -11,7 +11,10 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite:///./data/app.db"
 
-    SECRET_KEY: str = "change-me-in-production-please"
+    # No default on purpose — a fallback here would be a hardcoded secret that silently
+    # signs every JWT if a deployment forgets to set this. Must come from the environment;
+    # generate one with: python -c "import secrets; print(secrets.token_hex(32))"
+    SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30
     JWT_ALGORITHM: str = "HS256"
@@ -38,6 +41,12 @@ class Settings(BaseSettings):
     # (e.g. multiple `--reload` workers) — the /recaps/generate and /nudges/generate
     # endpoints still work manually either way.
     SCHEDULER_ENABLED: bool = False
+
+    # Submission-flood guard (AbuseProtectionMiddleware): >SUBMIT_MAX writes to the same
+    # endpoint from the same caller within the window get a 429. Off by default under
+    # pytest — the test suite makes many legitimate sequential requests from one IP — the
+    # honeypot and attack-pattern checks in the same middleware stay on regardless.
+    ABUSE_RATE_LIMIT_ENABLED: bool = True
 
 
 @lru_cache

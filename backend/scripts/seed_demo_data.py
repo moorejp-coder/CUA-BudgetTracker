@@ -393,15 +393,21 @@ async def seed_profile(db: Session, *, email: str, password: str, display_name: 
 
 
 async def main() -> None:
+    # Overridable via env so these credentials don't have to live in source — falls back
+    # to the standing demo values (fine for a throwaway local/demo database; set the env
+    # vars instead if this ever seeds anything shared or persistent).
+    judge_password = os.environ.get("DEMO_JUDGE_PASSWORD", "JudgeDemo2026!")
+    test_password = os.environ.get("DEMO_TEST_PASSWORD", "TestUser2026!")
+
     db = SessionLocal()
     try:
-        await seed_profile(db, email="judge@example.com", password="JudgeDemo2026!", display_name="Judge Demo")
-        await seed_profile(db, email="test@example.com", password="TestUser2026!", display_name="Test User")
+        await seed_profile(db, email="judge@example.com", password=judge_password, display_name="Judge Demo")
+        await seed_profile(db, email="test@example.com", password=test_password, display_name="Test User")
     finally:
         db.close()
     print("\nDone.")
-    print("  Judge demo -> judge@example.com / JudgeDemo2026!")
-    print("  Test       -> test@example.com  / TestUser2026!")
+    print(f"  Judge demo -> judge@example.com / {judge_password}")
+    print(f"  Test       -> test@example.com  / {test_password}")
 
 
 if __name__ == "__main__":

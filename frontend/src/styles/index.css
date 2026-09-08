@@ -12,7 +12,7 @@
 @tailwind utilities;
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -20,7 +20,7 @@ body {
 }
 
 * {
-  scrollbar-color: #332c21 transparent;
+  scrollbar-color: #e9dcc5 transparent;
   scrollbar-width: thin;
 }
 
@@ -30,16 +30,21 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #332c21;
+  background: #e9dcc5;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #45392a;
+  background: #ddc9a3;
+}
+
+::selection {
+  background: #f1d9ae;
+  color: #1d201d;
 }
 
 :focus-visible {
-  outline: 2px solid rgba(201, 154, 75, 0.6);
+  outline: 2px solid rgba(207, 142, 39, 0.6);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -56,27 +61,75 @@ body {
 }
 
 .card {
-  @apply bg-surface border border-border-subtle rounded-xl2 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.4)] transition-colors duration-150;
+  @apply bg-surface border border-border-subtle rounded-xl2 p-5 shadow-[0_1px_2px_rgba(57,45,28,0.04),0_10px_28px_rgba(74,54,27,0.035)] transition-colors duration-150;
 }
 
 .card-interactive {
-  @apply hover:border-border hover:bg-surface-raised/60 cursor-pointer;
+  @apply hover:border-border hover:bg-surface-raised/50 cursor-pointer;
 }
 
 .btn-primary {
-  @apply bg-accent text-white font-semibold px-4 py-2 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:brightness-110 active:brightness-95 transition disabled:opacity-50 disabled:pointer-events-none;
+  @apply bg-income text-white font-semibold px-4 py-2 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_5px_16px_rgba(63,130,95,0.16)] hover:bg-income-deep active:brightness-95 transition disabled:opacity-50 disabled:pointer-events-none;
 }
 
 .btn-secondary {
-  @apply bg-transparent border border-border text-white/80 font-medium px-4 py-2 rounded-lg hover:bg-surface-raised hover:border-white/20 active:bg-surface transition;
+  @apply bg-transparent border border-border text-ink/70 font-medium px-4 py-2 rounded-lg hover:bg-surface-raised hover:border-accent/40 hover:text-ink active:bg-surface transition;
 }
 
 .input {
-  @apply bg-surface-sunken border border-border rounded-lg px-3 py-2 text-sm text-white/90 outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition;
+  @apply bg-surface border border-border rounded-lg px-3 py-2 text-sm text-ink outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition;
 }
 
 .label {
-  @apply text-xs text-white/60 mb-1.5 block;
+  @apply text-xs text-ink/60 mb-1.5 block;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  border: 1px solid #d9a84f;
+  border-radius: 0.72rem;
+  background: #dfa94b;
+  color: #1f201b;
+  box-shadow:
+    0 6px 18px rgba(150, 100, 28, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.eyebrow {
+  color: #cf8e27;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.panel-title {
+  color: #1d201d;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.panel-subtitle {
+  margin-top: 0.2rem;
+  color: #787b75;
+  font-size: 0.78rem;
+}
+
+.category-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.62rem;
+  background: #f5f0e7;
+  color: #555b55;
+}
+
+.category-icon svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 @keyframes fade-in {

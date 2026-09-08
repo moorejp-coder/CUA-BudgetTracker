@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.authz import require_resource
 from app.db.session import get_db
 from app.models.recap import Recap
 from app.models.user import User
@@ -10,6 +11,14 @@ from app.services.recap_builder import generate_and_store
 
 router = APIRouter(prefix="/recaps", tags=["recaps"])
 
+get_owned_recap = require_resource(
+    Recap,
+    "recap_id",
+    lambda recap, user: recap.user_id == user.id,
+    denied_status=404,
+    not_found_detail="Recap not found",
+)
+
 
 @router.get("", response_model=list[RecapOut])
 def list_recaps(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
@@ -17,10 +26,7 @@ def list_recaps(db: Session = Depends(get_db), user: User = Depends(get_current_
 
 
 @router.get("/{recap_id}", response_model=RecapOut)
-def get_recap(recap_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    recap = db.get(Recap, recap_id)
-    if not recap or recap.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Recap not found")
+def get_recap(recap: Recap = Depends(get_owned_recap)):
     return recap
 
 

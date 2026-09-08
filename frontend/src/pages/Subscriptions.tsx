@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AssistantApi } from "@/api/resources";
+import { formatCurrency } from "@/lib/format";
 
 export default function Subscriptions() {
   const { data, isLoading } = useQuery({ queryKey: ["assistant-subscriptions"], queryFn: AssistantApi.subscriptions });
@@ -16,7 +17,7 @@ export default function Subscriptions() {
             <div className="card">
               <div className="text-xs text-ink/60 mb-1">Total monthly subscription cost</div>
               <div className="text-2xl numeral">
-                ${data.subscriptions.reduce((s, sub) => s + sub.monthly_equivalent, 0).toFixed(2)}
+                {formatCurrency(data.subscriptions.reduce((s, sub) => s + sub.monthly_equivalent, 0))}
               </div>
             </div>
             <div className="card">
@@ -52,8 +53,8 @@ export default function Subscriptions() {
                   <tr key={s.id} className="border-t border-border-subtle">
                     <td className="py-2">{s.merchant}</td>
                     <td className="py-2 capitalize">{s.cadence}</td>
-                    <td className="py-2 text-right tabular">${s.amount.toFixed(2)}</td>
-                    <td className="py-2 text-right tabular font-semibold">${s.monthly_equivalent.toFixed(2)}</td>
+                    <td className="py-2 text-right tabular">{formatCurrency(s.amount)}</td>
+                    <td className="py-2 text-right tabular font-semibold">{formatCurrency(s.monthly_equivalent)}</td>
                   </tr>
                 ))}
                 {data.subscriptions.length === 0 && (
@@ -76,7 +77,7 @@ export default function Subscriptions() {
                   {data.anomalies.new_subscriptions.map((s, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{s.merchant}</span>
-                      <span className="tabular text-ink/60">${s.expected_amount.toFixed(2)} · {s.cadence}</span>
+                      <span className="tabular text-ink/60">{formatCurrency(s.expected_amount)} · {s.cadence}</span>
                     </li>
                   ))}
                   {data.anomalies.new_subscriptions.length === 0 && <p className="text-ink/40 text-xs">None</p>}
@@ -89,7 +90,7 @@ export default function Subscriptions() {
                     <li key={i} className="flex justify-between">
                       <span>{p.merchant}</span>
                       <span className="tabular text-warning">
-                        ${p.previous_average.toFixed(2)} → ${p.latest_amount.toFixed(2)} (+{p.increase_pct.toFixed(0)}%)
+                        {formatCurrency(p.previous_average)} → {formatCurrency(p.latest_amount)} (+{p.increase_pct.toFixed(0)}%)
                       </span>
                     </li>
                   ))}

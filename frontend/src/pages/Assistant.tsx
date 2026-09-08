@@ -96,7 +96,7 @@ export default function Assistant() {
                     {m.source === "policy" ? "out of scope" : m.source}
                   </span>
                   {m.intents?.map((intent) => (
-                    <span key={intent} className="px-1.5 py-0.5 rounded bg-white/5">
+                    <span key={intent} className="px-1.5 py-0.5 rounded bg-surface-raised">
                       {intent}
                     </span>
                   ))}

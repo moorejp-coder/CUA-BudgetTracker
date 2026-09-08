@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BucketsApi } from "@/api/resources";
 import type { Bucket, SummaryBucket } from "@/types";
+import { formatCurrency } from "@/lib/format";
 
 function newIdempotencyKey(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -17,7 +18,7 @@ function extractErrorMessage(e: any): string {
 }
 
 function money(n: number): string {
-  return `$${n.toFixed(2)}`;
+  return formatCurrency(n);
 }
 
 export default function AccountBuckets({ accountId, currentBalance }: { accountId: string; currentBalance: number }) {
@@ -76,7 +77,7 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
 
           {buckets.length === 0 ? (
             <p className="text-ink/40 text-xs mb-3">
-              No goals yet — all ${currentBalance.toFixed(2)} is available to allocate. Create a goal to start
+              No goals yet — all {formatCurrency(currentBalance)} is available to allocate. Create a goal to start
               setting money aside.
             </p>
           ) : (
@@ -216,7 +217,7 @@ function BucketCard({
           <div className="h-1.5 rounded-full bg-surface-sunken overflow-hidden mt-1">
             <div
               className="h-full rounded-full transition-all"
-              style={{ width: `${Math.min(100, pct ?? 0)}%`, background: overfunded ? "#4fae7b" : bucket.color }}
+              style={{ width: `${Math.min(100, pct ?? 0)}%`, background: overfunded ? "#3f825f" : bucket.color }}
             />
           </div>
           {overfunded && <p className="text-income text-xs mt-1">Goal exceeded — consider raising the target or moving the extra out.</p>}

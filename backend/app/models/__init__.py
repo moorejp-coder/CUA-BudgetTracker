@@ -9,6 +9,8 @@ from app.models.recurring import RecurringItem
 from app.models.csv_template import CsvImportTemplate
 from app.models.recap import Recap
 from app.models.nudge import NudgeEvent
+from app.models.revoked_token import RevokedToken
+from app.models.password_reset_token import PasswordResetToken
 
 __all__ = [
     "User",
@@ -25,4 +27,6 @@ __all__ = [
     "CsvImportTemplate",
     "Recap",
     "NudgeEvent",
+    "RevokedToken",
+    "PasswordResetToken",
 ]

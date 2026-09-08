@@ -1,6 +1,6 @@
 from datetime import date as date_type
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SummaryResponse(BaseModel):
@@ -36,7 +36,7 @@ class NetWorthPoint(BaseModel):
 
 
 class LlmCategorizeRequest(BaseModel):
-    description: str
+    description: str = Field(min_length=1, max_length=500)
 
 
 class LlmCategorizeResponse(BaseModel):
@@ -46,7 +46,7 @@ class LlmCategorizeResponse(BaseModel):
 
 
 class LlmAskRequest(BaseModel):
-    question: str
+    question: str = Field(min_length=1, max_length=1000)
 
 
 class LlmAskResponse(BaseModel):

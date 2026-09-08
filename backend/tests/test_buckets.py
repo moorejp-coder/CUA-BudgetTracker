@@ -8,6 +8,7 @@ is asserted after every successful mutation via `_assert_invariant`.
 import threading
 import uuid
 
+from app.core.cookies import CSRF_COOKIE
 from tests.conftest import API
 
 
@@ -40,12 +41,13 @@ def _key() -> str:
     return uuid.uuid4().hex
 
 
-def _second_user_headers(client):
+def _second_user_headers(client2):
+    """Logs a fresh second user into `client2` (its own cookie jar, distinct from the
+    primary `client` fixture) and returns the CSRF header for making requests as them."""
     email = f"user-{uuid.uuid4().hex[:10]}@example.com"
-    client.post(f"{API}/auth/register", json={"email": email, "password": "testpass123"})
-    resp = client.post(f"{API}/auth/login", json={"email": email, "password": "testpass123"})
-    token = resp.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+    client2.post(f"{API}/auth/register", json={"email": email, "password": "testpass123"})
+    csrf = client2.cookies.get(CSRF_COOKIE)
+    return {"X-CSRF-Token": csrf} if csrf else {}
 
 
 # ---------------------------------------------------------------------------
@@ -238,18 +240,18 @@ def test_invalid_precision_rejected(client, auth_headers, seeded):
 # ---------------------------------------------------------------------------
 
 
-def test_unauthorized_account_access(client, auth_headers, seeded):
+def test_unauthorized_account_access(client, client2, auth_headers, seeded):
     account_id = _account_id(seeded)
-    other_headers = _second_user_headers(client)
-    resp = client.get(f"{API}/accounts/{account_id}/buckets", headers=other_headers)
+    other_headers = _second_user_headers(client2)
+    resp = client2.get(f"{API}/accounts/{account_id}/buckets", headers=other_headers)
     assert resp.status_code == 404
 
 
-def test_unauthorized_bucket_access(client, auth_headers, seeded):
+def test_unauthorized_bucket_access(client, client2, auth_headers, seeded):
     account_id = _account_id(seeded)
     bucket = _create_bucket(client, auth_headers, account_id)
-    other_headers = _second_user_headers(client)
-    resp = client.post(
+    other_headers = _second_user_headers(client2)
+    resp = client2.post(
         f"{API}/buckets/{bucket['id']}/allocate",
         json={"amount": "10.00", "idempotency_key": _key()},
         headers=other_headers,
@@ -257,15 +259,15 @@ def test_unauthorized_bucket_access(client, auth_headers, seeded):
     assert resp.status_code == 404
 
 
-def test_cross_account_transfer_prevented(client, auth_headers, seeded):
+def test_cross_account_transfer_prevented(client, client2, auth_headers, seeded):
     account_id = _account_id(seeded)
-    other_headers = _second_user_headers(client)
-    other_account = client.post(
+    other_headers = _second_user_headers(client2)
+    other_account = client2.post(
         f"{API}/accounts", json={"name": "Other Savings", "type": "savings", "current_balance": 500}, headers=other_headers
     ).json()
 
     mine = _create_bucket(client, auth_headers, account_id)
-    theirs = _create_bucket(client, other_headers, other_account["id"], name="Theirs")
+    theirs = _create_bucket(client2, other_headers, other_account["id"], name="Theirs")
 
     # Can't even see the other user's bucket, so the cross-account attempt 404s before
     # it could ever reach the cross-account balance check.

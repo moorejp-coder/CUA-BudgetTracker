@@ -16,6 +16,8 @@ import {
   LogOut,
   Menu,
   X,
+  ArrowRight,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,18 +46,15 @@ function NavItemLink({ to, label, end, icon: Icon }: { to: string; label: string
       to={to}
       end={end}
       className={({ isActive }) =>
-        `group relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
-          isActive ? "bg-surface-raised text-ink" : "text-ink/55 hover:bg-surface-raised/60 hover:text-ink"
+        `group relative flex items-center gap-2.5 px-3 py-2 rounded-[0.7rem] text-sm font-medium transition-colors duration-150 ${
+          isActive
+            ? "bg-surface-raised text-ink shadow-[inset_3px_0_0_#cf8e27]"
+            : "text-ink/55 hover:bg-surface-raised/60 hover:text-ink"
         }`
       }
     >
       {({ isActive }) => (
         <>
-          <span
-            className={`absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-accent transition-all duration-150 ${
-              isActive ? "opacity-100" : "opacity-0"
-            }`}
-          />
           <Icon size={17} strokeWidth={2} className={isActive ? "text-accent" : "text-ink/40 group-hover:text-ink/70"} />
           <span className="truncate">{label}</span>
         </>
@@ -77,9 +76,7 @@ export default function Layout() {
     <div className="flex min-h-screen bg-canvas text-ink/90">
       <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas/95 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center font-display italic font-semibold text-canvas text-base shadow-[0_0_0_1px_rgba(201,154,75,0.3),0_4px_12px_rgba(201,154,75,0.25)]">
-            b
-          </div>
+          <div className="brand-mark w-7 h-7 font-display italic font-semibold text-base">b</div>
           <span className="font-display italic text-[17px] text-ink">Budget Tracker</span>
         </div>
         <button
@@ -93,7 +90,7 @@ export default function Layout() {
 
       {navOpen && (
         <div
-          className="md:hidden fixed inset-0 z-20 bg-black/60 top-[57px] animate-fade-in"
+          className="md:hidden fixed inset-0 z-20 bg-black/30 top-[57px] animate-fade-in"
           onClick={() => setNavOpen(false)}
         />
       )}
@@ -104,12 +101,10 @@ export default function Layout() {
         }`}
       >
         <div className="hidden md:flex items-center gap-2.5 px-2 py-3 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-display italic font-semibold text-canvas text-lg shadow-[0_0_0_1px_rgba(201,154,75,0.3),0_4px_14px_rgba(201,154,75,0.3)]">
-            b
-          </div>
+          <div className="brand-mark w-8 h-8 font-display italic font-semibold text-lg">b</div>
           <span className="font-display italic text-lg text-ink">Budget Tracker</span>
         </div>
-        <ul className="flex-1 space-y-0.5 overflow-y-auto">
+        <ul className="flex-1 space-y-0.5 overflow-y-auto scrollbar-none">
           {NAV_ITEMS.map((item) => (
             <li key={item.to}>
               <NavItemLink {...item} />
@@ -124,7 +119,18 @@ export default function Layout() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 pt-4 border-t border-border-subtle">
+        <div className="mt-4 rounded-[0.8rem] border border-border bg-[#fffdf9] p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+            <Sparkles size={16} className="text-accent" />
+            Let AI help you save more
+          </div>
+          <p className="mt-3 text-sm leading-6 text-ink/60">Get personalized tips based on your spending.</p>
+          <NavLink to="/assistant" className="mt-4 flex items-center gap-2 text-sm font-semibold text-accent">
+            Ask Assistant <ArrowRight size={14} />
+          </NavLink>
+        </div>
+        <div className="mt-3 pt-3 border-t border-border-subtle">
+          <NavItemLink to="/settings" label="Settings" icon={Settings} />
           <button
             onClick={logout}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-ink/50 hover:text-expense hover:bg-expense-bg transition-colors duration-150"
