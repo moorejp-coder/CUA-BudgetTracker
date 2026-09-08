@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AnalyticsApi, CategoriesApi, RecurringApi } from "@/api/resources";
-import CashflowChart from "@/components/CashflowChart";
 import NetWorthChart from "@/components/NetWorthChart";
 import { formatCurrency } from "@/lib/format";
 import { getCategoryIcon } from "@/lib/categoryIcon";
@@ -14,7 +13,6 @@ export default function Dashboard() {
   const end = format(new Date(), "yyyy-MM-dd");
 
   const { data: summary } = useQuery({ queryKey: ["summary", period], queryFn: () => AnalyticsApi.summary(period) });
-  const { data: cashflow = [] } = useQuery({ queryKey: ["cashflow", start, end], queryFn: () => AnalyticsApi.cashflow(start, end) });
   const { data: netWorth = [] } = useQuery({ queryKey: ["net-worth", start, end], queryFn: () => AnalyticsApi.netWorth(start, end) });
   const { data: upcoming = [] } = useQuery({ queryKey: ["upcoming"], queryFn: () => RecurringApi.upcoming(30) });
   const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: CategoriesApi.list });
@@ -97,18 +95,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <section className="card p-5">
-          <p className="panel-title">Cash flow (6 months)</p>
-          <div className="mt-3 flex gap-5 text-sm text-ink/55">
-            <span className="flex items-center gap-2"><i className="size-2 rounded-full bg-income inline-block" />Income</span>
-            <span className="flex items-center gap-2"><i className="size-2 rounded-full bg-expense inline-block" />Expenses</span>
-          </div>
-          <div className="mt-2">
-            <CashflowChart data={cashflow} />
-          </div>
-        </section>
-
+      <div className="grid gap-4">
         <section className="card p-5">
           <div className="flex items-start justify-between gap-3">
             <p className="panel-title">Spending by category</p>
@@ -148,7 +135,7 @@ export default function Dashboard() {
         </section>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <section className="card p-5">
           <p className="panel-title">Upcoming charges (30 days)</p>
           <div className="mt-4 space-y-3">
@@ -165,29 +152,6 @@ export default function Dashboard() {
           </div>
           <Link to="/recurring" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent">
             View all upcoming <ArrowRight size={14} />
-          </Link>
-        </section>
-
-        <section className="card flex flex-col p-5">
-          <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-accent" />
-            <p className="panel-title">AI insight</p>
-          </div>
-          <div className="mt-4 flex flex-1 items-center justify-between gap-3 rounded-[0.7rem] border border-income-bg bg-[#f3f7ef] p-4">
-            <div>
-              <p className="font-semibold text-ink">
-                {net >= 0 ? "Great job staying on track!" : "Spending is a bit high this month."}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-ink/70">
-                {income > 0
-                  ? `You've spent ${Math.round((expense / income) * 100)}% of your income so far this period.`
-                  : "Add transactions to start seeing insights here."}
-              </p>
-            </div>
-            <img src="/plant.png" alt="" className="h-20 w-20 flex-none object-contain opacity-90" />
-          </div>
-          <Link to="/coach" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent">
-            Explore more insights <ArrowRight size={14} />
           </Link>
         </section>
 
