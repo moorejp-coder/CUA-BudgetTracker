@@ -130,8 +130,9 @@ def spend_by_category(db: Session, user_id: str, start: date, end: date) -> list
 
 
 def net_worth(db: Session, user_id: str, start: date, end: date) -> list[dict]:
-    accounts = db.query(Account).filter(Account.user_id == user_id).all()
+    accounts = db.query(Account).filter(Account.user_id == user_id, Account.archived.is_(False)).all()
     points_by_date: dict[date, dict[str, float]] = defaultdict(lambda: {"assets": 0.0, "liabilities": 0.0})
+    today = date.today()
 
     for account in accounts:
         snapshots = (
@@ -143,6 +144,11 @@ def net_worth(db: Session, user_id: str, start: date, end: date) -> list[dict]:
         bucket = "liabilities" if account.is_liability else "assets"
         for snap in snapshots:
             points_by_date[snap.date][bucket] += float(snap.balance)
+
+        # Accounts are kept in sync with a live current_balance as transactions post, so even
+        # without a manually recorded snapshot we can plot today's real balance.
+        if start <= today <= end and not any(snap.date == today for snap in snapshots):
+            points_by_date[today][bucket] += float(account.current_balance)
 
     result = []
     for d in sorted(points_by_date.keys()):
