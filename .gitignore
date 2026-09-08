@@ -1,6 +1,3 @@
-# Root (docker compose)
-/.env
-
 # Backend
 backend/.venv/
 backend/data/

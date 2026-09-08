@@ -5,41 +5,16 @@ services:
       - ./backend/.env
     volumes:
       - budget-data:/app/data
-    # Internal only — reached via the frontend's /api/ proxy (frontend/nginx.conf), which
-    # is in turn reached via Caddy's HTTPS. Not published to the host: a plain-HTTP port
-    # open to the internet is exactly what got jamesbudget.duckdns.org flagged as deceptive.
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
     restart: unless-stopped
 
   frontend:
     build: ./frontend
     depends_on:
       - backend
-    # Internal only — Caddy is the sole public entrypoint (see below). Use
-    # `docker compose exec frontend curl localhost` or a temporary `ports:` override for
-    # local debugging without HTTPS.
-    expose:
-      - "80"
-    restart: unless-stopped
-
-  # Public HTTPS entrypoint. Terminates TLS with an auto-provisioned Let's Encrypt cert
-  # for $DOMAIN and reverse-proxies everything to the frontend container (which in turn
-  # proxies /api/ to the backend — see frontend/nginx.conf). Set DOMAIN in a root .env
-  # file (see .env.example) before `docker compose up`.
-  caddy:
-    image: caddy:2-alpine
-    environment:
-      - DOMAIN=${DOMAIN:?set DOMAIN to your public hostname, e.g. jamesbudget.duckdns.org}
-    depends_on:
-      - frontend
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
+      - "8080:80"
     restart: unless-stopped
 
   # Optional: switch DATABASE_URL in backend/.env to use this instead of SQLite.
@@ -56,6 +31,4 @@ services:
 
 volumes:
   budget-data:
-  caddy-data:
-  caddy-config:
   # postgres-data:

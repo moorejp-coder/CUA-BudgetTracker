@@ -25,4 +25,4 @@ echo "Deploy complete. Recent backend logs:"
 sudo docker logs budget-tracker-backend-1 --tail 15
 EOF
 
-echo "Done. Check https://\${DOMAIN:-jamesbudget.duckdns.org}"
+echo "Done. Check https://jamesbudget.duckdns.org"

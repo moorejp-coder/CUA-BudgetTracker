@@ -5,7 +5,7 @@ third-party aggregators — you enter transactions manually or import CSVs expor
 bank's own website. Everything runs on a server you control.
 
 **Live demo:** https://jamesbudget.duckdns.org (AWS EC2, Free Tier — static via Elastic IP,
-HTTPS via Caddy)
+HTTPS via certbot-managed nginx on the host)
 
 See [PROJECT_SUMMARY.pdf](PROJECT_SUMMARY.pdf) for a one-page overview (problem, solution, AI
 usage, key learnings). For more detail: [ARCHITECTURE.md](ARCHITECTURE.md) for the stack/ER
@@ -53,18 +53,15 @@ cp backend/.env.example backend/.env
 # (safe here since Docker runs a single backend process — see "AI features" below)
 # Also add your production URL (e.g. "https://jamesbudget.duckdns.org") to CORS_ORIGINS.
 
-cp .env.example .env
-# edit .env: set DOMAIN to your public hostname (e.g. jamesbudget.duckdns.org) — Caddy
-# uses this to request a Let's Encrypt certificate and serve HTTPS automatically. The
-# domain must already resolve to this host (port 80/443 reachable from the internet).
-
 docker compose up --build
 ```
 
-- App: https://\<DOMAIN\> (Caddy is the only port published to the host — 80 and 443;
-  everything else runs on the internal Docker network)
-- Backend API + docs: not published directly; exec into the container or temporarily add a
-  `ports:` entry to the `backend` service in `docker-compose.yml` if you need direct access
+- Frontend: http://localhost:8080
+- Backend API + docs: http://localhost:8000/docs
+
+In production, put a TLS-terminating reverse proxy (nginx+certbot, Caddy, Cloudflare, etc.)
+in front of port 8080 rather than exposing it directly — the live deployment uses
+certbot-managed nginx on the host for this.
 
 First run: register an account from the login screen (this creates your user in the local
 SQLite database, which lives in the `budget-data` Docker volume).
