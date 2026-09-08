@@ -45,7 +45,7 @@ export default function Categories() {
 
   async function setBudgetAmount(categoryId: string, amount: number, existing?: string, rollover?: boolean) {
     if (existing) {
-      await BudgetsApi.update(existing, { amount });
+      await BudgetsApi.update(existing, { amount, rollover: rollover ?? false });
     } else {
       await BudgetsApi.create({ category_id: categoryId, period, amount, rollover: rollover ?? false });
     }
@@ -235,12 +235,24 @@ function BudgetInlineForm({
   initialAmount,
   initialRollover,
 }: {
-  onSet: (amount: number, rollover: boolean) => void;
+  onSet: (amount: number, rollover: boolean) => Promise<unknown>;
   initialAmount?: number;
   initialRollover?: boolean;
 }) {
   const [amount, setAmount] = useState(initialAmount != null ? String(initialAmount) : "");
   const [rollover, setRollover] = useState(initialRollover ?? false);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSet() {
+    if (!amount || saving) return;
+    setSaving(true);
+    try {
+      await onSet(parseFloat(amount), rollover);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="flex items-center gap-2">
       <input
@@ -254,11 +266,8 @@ function BudgetInlineForm({
         <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
         rollover
       </label>
-      <button
-        className="btn-secondary text-xs px-2 py-1"
-        onClick={() => amount && onSet(parseFloat(amount), rollover)}
-      >
-        Set
+      <button className="btn-secondary text-xs px-2 py-1 disabled:opacity-50" onClick={handleSet} disabled={saving}>
+        {saving ? "Saving…" : "Set"}
       </button>
     </div>
   );

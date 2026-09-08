@@ -97,6 +97,17 @@ def create_budget(payload: BudgetCreate, db: Session = Depends(get_db), user: Us
     category = db.get(Category, payload.category_id)
     if not category or category.user_id != user.id:
         raise HTTPException(status_code=404, detail="Category not found")
+    existing = (
+        db.query(Budget)
+        .filter(Budget.user_id == user.id, Budget.category_id == payload.category_id, Budget.period == payload.period)
+        .first()
+    )
+    if existing:
+        existing.amount = payload.amount
+        existing.rollover = payload.rollover
+        db.commit()
+        db.refresh(existing)
+        return _serialize(db, user, existing)
     budget = Budget(user_id=user.id, **payload.model_dump())
     db.add(budget)
     db.commit()

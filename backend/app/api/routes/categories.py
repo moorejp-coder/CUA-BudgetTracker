@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.authz import require_resource
 from app.db.session import get_db
+from app.models.budget import Budget
 from app.models.category import Category
+from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.category import CategoryCreate, CategoryOut, CategoryUpdate
 
@@ -62,5 +65,7 @@ def update_category(
 
 @router.delete("/{category_id}", status_code=204)
 def delete_category(db: Session = Depends(get_db), category: Category = Depends(get_owned_category)):
+    db.query(Budget).filter(Budget.category_id == category.id).delete()
+    db.execute(update(Transaction).where(Transaction.category_id == category.id).values(category_id=None))
     db.delete(category)
     db.commit()
