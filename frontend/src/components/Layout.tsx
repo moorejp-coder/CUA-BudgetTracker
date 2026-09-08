@@ -74,7 +74,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen bg-canvas text-ink/90">
-      <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas/95 backdrop-blur">
+      <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas/95 backdrop-blur safe-top">
         <div className="flex items-center gap-2">
           <div className="brand-mark w-7 h-7 font-display italic font-semibold text-base">b</div>
           <span className="font-display italic text-[17px] text-ink">Budget Tracker</span>
@@ -90,13 +90,13 @@ export default function Layout() {
 
       {navOpen && (
         <div
-          className="md:hidden fixed inset-0 z-20 bg-black/30 top-[57px] animate-fade-in"
+          className="md:hidden fixed inset-0 z-20 bg-black/30 top-[calc(57px+env(safe-area-inset-top))] animate-fade-in"
           onClick={() => setNavOpen(false)}
         />
       )}
 
       <nav
-        className={`w-60 shrink-0 border-r border-border-subtle p-4 flex flex-col fixed md:static inset-y-0 left-0 z-20 bg-canvas transition-transform duration-200 pt-[73px] md:pt-4 ${
+        className={`w-60 shrink-0 border-r border-border-subtle p-4 flex flex-col fixed md:static inset-y-0 left-0 z-20 bg-canvas transition-transform duration-200 pt-[calc(73px+env(safe-area-inset-top))] md:pt-4 safe-bottom ${
           navOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -140,7 +140,7 @@ export default function Layout() {
           </button>
         </div>
       </nav>
-      <main className="flex-1 p-4 md:p-8 pt-[73px] md:pt-8 max-w-[1280px] min-w-0">
+      <main className="flex-1 p-4 md:p-8 pt-[calc(73px+env(safe-area-inset-top))] md:pt-8 max-w-[1280px] min-w-0 safe-bottom">
         <Outlet />
       </main>
     </div>

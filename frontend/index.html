@@ -2,7 +2,7 @@
 <html lang="en" class="dark" style="color-scheme: dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Budget Tracker</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
@@ -12,6 +12,13 @@
   <link rel="manifest" href="/icons/manifest.json" />
   <meta name="msapplication-config" content="/icons/browserconfig.xml" />
   <meta name="theme-color" content="#4a7c3a" />
+
+  <!-- iOS "Add to Home Screen" behavior -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Budget" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
 </head>
 <body class="bg-canvas text-white/90">
   <div id="root"></div>

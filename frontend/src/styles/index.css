@@ -13,10 +13,37 @@
 
 html {
   color-scheme: light;
+  height: 100%;
 }
 
 body {
   font-feature-settings: "tnum" 1;
+  min-height: 100%;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS Safari from auto-zooming when a form field is focused
+   (it does this for any font-size under 16px) while running as a
+   home-screen app. Matches specificity of the .input utility class
+   (which sets text-sm) so this override actually wins. */
+@media (max-width: 767px) {
+  input.input,
+  select.input,
+  textarea.input,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 * {

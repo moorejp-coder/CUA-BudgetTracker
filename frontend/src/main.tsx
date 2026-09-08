@@ -21,6 +21,16 @@ window.addEventListener("unhandledrejection", (event) => {
   reportClientError(`Unhandled promise rejection: ${message}`, stack);
 });
 
+// Only in production builds — in dev this would intercept and cache Vite's
+// module requests, making HMR behave unpredictably.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      reportClientError(`Service worker registration failed: ${error.message}`, error.stack);
+    });
+  });
+}
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
 });
