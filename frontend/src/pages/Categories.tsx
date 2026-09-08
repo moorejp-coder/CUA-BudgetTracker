@@ -211,13 +211,14 @@ export default function Categories() {
             return budget ? (
               <BudgetProgress key={c.id} budget={budget} right={form} />
             ) : (
-              <div key={c.id} className="flex items-center justify-between text-sm gap-3">
-                <span className="flex items-center gap-2.5 shrink-0">
+              <div key={c.id} className="grid grid-cols-[minmax(0,1fr)_100px_auto] items-center text-sm gap-3">
+                <span className="flex items-center gap-2.5 min-w-0 truncate">
                   <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
                     <CategoryIcon name={c.name} />
                   </span>
                   {c.name}
                 </span>
+                <span />
                 {form}
               </div>
             );

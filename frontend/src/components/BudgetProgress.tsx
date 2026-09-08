@@ -15,8 +15,8 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
 
   return (
     <div>
-      <div className="flex items-center justify-between text-sm gap-3">
-        <span className="flex items-center gap-2 font-medium shrink-0">
+      <div className="grid grid-cols-[minmax(0,1fr)_100px_auto] items-center text-sm gap-3">
+        <span className="flex items-center gap-2 font-medium min-w-0 truncate">
           <span
             className="category-icon"
             style={{ background: `${budget.category.color}1a`, color: budget.category.color }}
@@ -25,7 +25,7 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
           </span>
           {budget.category.name}
         </span>
-        <span className="tabular text-ink/60 text-xs shrink-0">
+        <span className="tabular text-ink/60 text-xs text-right">
           {formatCurrency(budget.spent, 0)} / {formatCurrency(effectiveLimit, 0)}
         </span>
         {right}
