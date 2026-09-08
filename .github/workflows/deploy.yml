@@ -1,0 +1,28 @@
+name: Deploy to live server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -euo pipefail
+            cd budget-tracker
+            echo "Pulling latest code..."
+            git pull origin main
+            echo "Rebuilding and restarting containers..."
+            sudo docker compose up -d --build
+            echo "Pruning old images..."
+            sudo docker image prune -f
+            echo "Deploy complete. Recent backend logs:"
+            sudo docker logs budget-tracker-backend-1 --tail 15
