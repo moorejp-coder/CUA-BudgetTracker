@@ -17,6 +17,7 @@ os.environ["ABUSE_RATE_LIMIT_ENABLED"] = "false"  # tests make many legit reques
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
+from app.core.config import get_settings  # noqa: E402
 from app.core.cookies import CSRF_COOKIE  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -38,6 +39,10 @@ def client():
     # across the whole run (see _cleanup_db above); only the client/cookie-jar is fresh
     # per test, matching how a real browser isolates one user's session from another's.
     with TestClient(app) as c:
+        # A real browser always attaches Origin on a credentialed fetch/XHR; TestClient
+        # doesn't, so set one here to match AbuseProtectionMiddleware's origin check
+        # instead of stamping it onto every individual request in every test.
+        c.headers["Origin"] = get_settings().CORS_ORIGINS[0]
         yield c
 
 
@@ -48,6 +53,7 @@ def client2():
     hold one active session at a time now that auth lives in cookies rather than a
     per-request Authorization header, so those tests need a second browser-equivalent."""
     with TestClient(app) as c:
+        c.headers["Origin"] = get_settings().CORS_ORIGINS[0]
         yield c
 
 

@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/hooks/useAuth";
 import Login from "@/pages/Login";
@@ -19,11 +19,19 @@ import Settings from "@/pages/Settings";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
   // Auth state comes from an async /auth/me check now (cookies aren't JS-readable), so
   // there's a brief window on first load where we don't know yet — render nothing rather
   // than flashing the login page for an already-logged-in user.
   if (loading) return null;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    // `state` here is React Router's in-memory navigation state, not a URL — it can't be
+    // set by an external link, only by this app's own redirect. Login reads it (and the
+    // ?redirect= query param, which CAN come from an external link) through the same
+    // getSafeRedirect() whitelist either way, but this path never needs that check to be
+    // safe in the first place.
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
   return children;
 }
 

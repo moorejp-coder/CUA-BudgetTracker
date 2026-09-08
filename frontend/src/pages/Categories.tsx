@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AnalyticsApi, BudgetsApi, CategoriesApi } from "@/api/resources";
 import BudgetProgress from "@/components/BudgetProgress";
-import BudgetVariance from "@/components/BudgetVariance";
 import { getCategoryIcon } from "@/lib/categoryIcon";
 
 function CategoryIcon({ name }: { name: string }) {
@@ -25,12 +24,6 @@ export default function Categories() {
   const { data: homePlan } = useQuery({
     queryKey: ["home-savings-plan", period],
     queryFn: () => AnalyticsApi.homeSavingsPlan(period),
-  });
-
-  const [compareMonths, setCompareMonths] = useState(1);
-  const { data: variance } = useQuery({
-    queryKey: ["budget-variance", period, compareMonths],
-    queryFn: () => AnalyticsApi.budgetVariance(period, compareMonths),
   });
 
   const [newCat, setNewCat] = useState({ name: "", type: "expense" as "income" | "expense", emoji: "" });
@@ -198,33 +191,6 @@ export default function Categories() {
               </div>
               <div className="text-[11px] text-ink/40 mt-1">Needed to close ÷ suggested savings</div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {variance && variance.categories.length > 0 && (
-        <div className="card">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold">Budget variance — {period}</h2>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setCompareMonths(1)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 1 ? "bg-accent text-ink" : "btn-secondary"}`}
-              >
-                vs last month
-              </button>
-              <button
-                onClick={() => setCompareMonths(3)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${compareMonths === 3 ? "bg-accent text-ink" : "btn-secondary"}`}
-              >
-                vs last quarter
-              </button>
-            </div>
-          </div>
-          <div>
-            {variance.categories.map((row) => (
-              <BudgetVariance key={row.category_id} row={row} />
-            ))}
           </div>
         </div>
       )}

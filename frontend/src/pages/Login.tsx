@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/api/client";
 
@@ -22,6 +23,13 @@ const TITLES: Record<Mode, string> = {
 
 export default function Login() {
   const { login, register } = useAuth();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  // Two possible sources for "where to go back to": ?redirect= on the URL (could come from
+  // an external/emailed link — untrusted) and location.state.from (set only by this app's
+  // own RequireAuth redirect when a session expires mid-visit — trusted, but validated the
+  // same way regardless since it costs nothing and keeps this one code path uniform).
+  const redirectTo = searchParams.get("redirect") ?? (location.state as { from?: string } | null)?.from;
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,9 +59,9 @@ export default function Login() {
     setLoading(true);
     try {
       if (mode === "login") {
-        await login(email, password);
+        await login(email, password, redirectTo);
       } else if (mode === "register") {
-        await register(email, password, displayName, website);
+        await register(email, password, displayName, website, redirectTo);
       } else if (mode === "forgot") {
         await api.post("/auth/forgot-password", { email });
         // This app has no email sending set up — it's self-hosted, so the reset link is

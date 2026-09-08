@@ -1,16 +1,22 @@
-"""ASGI middleware that guards every mutating API request against four abuse patterns:
+"""ASGI middleware that guards every mutating API request against five abuse patterns:
 
-1. Cross-site request forgery — session cookies are httpOnly, so this double-submits a
+1. Cross-origin origin spoofing — the browser sets the Origin header (falling back to
+   Referer for the rare client that omits it) and neither can be forged by page JavaScript,
+   unlike a request body or a custom header a naive attacker page might try to replay. A
+   mutating request whose Origin/Referer isn't this app's own frontend is rejected before
+   the CSRF-cookie check even runs, so this also covers browsers/proxies that (mis)handle
+   SameSite cookies in a way the CSRF check alone wouldn't catch.
+2. Cross-site request forgery — session cookies are httpOnly, so this double-submits a
    companion csrf_token cookie (readable by JS, set alongside the auth cookies) against an
    X-CSRF-Token header the frontend must echo back. A cross-site attacker page can trigger
    the browser to send the cookie automatically but can't read its value to put in the
    header, so a mismatch means the request didn't originate from this app's own frontend.
-2. Submission flooding — more than SUBMIT_MAX writes to the same endpoint from the same
+3. Submission flooding — more than SUBMIT_MAX writes to the same endpoint from the same
    caller (user if authenticated, else IP) within SUBMIT_WINDOW_SECONDS get a 429.
-3. Attack-shaped input — string values containing SQL-injection or script-injection
+4. Attack-shaped input — string values containing SQL-injection or script-injection
    signatures, or absurdly long strings, are logged and rejected with a 400 before the
    request ever reaches route/schema validation.
-4. A honeypot field — HONEYPOT_FIELD is never rendered for real users (see the frontend
+5. A honeypot field — HONEYPOT_FIELD is never rendered for real users (see the frontend
    registration form) but a bot that blindly fills every input will populate it; any
    non-empty value there gets the request rejected.
 
@@ -23,6 +29,7 @@ import logging
 import re
 import time
 from collections import defaultdict, deque
+from urllib.parse import urlsplit
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -105,6 +112,34 @@ def _client_key(request: Request) -> str:
     return f"ip:{ip}"
 
 
+def _origin_ok(request: Request) -> bool:
+    """Origin can't be read or set by an attacker's cross-site page — the browser attaches
+    it itself, so this is one of the few signals a CSRF attempt genuinely cannot fake.
+    Referer is the fallback for the rare legitimate client that omits Origin; if neither
+    header is present we fail closed, since every browser sends at least one on a
+    credentialed fetch/XHR to a mutating endpoint — a request with both missing is not a
+    case this app's own frontend produces.
+
+    Checked against CORS_ORIGINS — the same allowlist CORSMiddleware already trusts. Even
+    when the frontend and API share an origin behind a reverse proxy in production (see
+    cookies.py), browsers still attach Origin on same-origin, non-GET fetch/XHR requests,
+    so CORS_ORIGINS must include that public origin for this check to pass — it is not
+    solely a cross-origin-dev setting once this check is in place. Deliberately NOT derived
+    from the request's own scheme/host: behind nginx, Uvicorn sees the proxy's plain-HTTP
+    internal connection rather than the browser's real (likely HTTPS) origin, so a
+    self-computed fallback would be wrong in exactly the deployment this app ships with."""
+    origin = request.headers.get("origin")
+    if not origin:
+        referer = request.headers.get("referer")
+        if not referer:
+            return False
+        parsed = urlsplit(referer)
+        if not parsed.scheme or not parsed.netloc:
+            return False
+        origin = f"{parsed.scheme}://{parsed.netloc}"
+    return origin in get_settings().CORS_ORIGINS
+
+
 def _csrf_ok(request: Request) -> bool:
     if request.url.path in _CSRF_EXEMPT_PATHS:
         return True
@@ -157,6 +192,13 @@ class AbuseProtectionMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         key = _client_key(request)
+
+        if not _origin_ok(request):
+            logger.warning(
+                "origin/referer check failed: caller=%s path=%s origin=%s referer=%s",
+                key, path, request.headers.get("origin"), request.headers.get("referer"),
+            )
+            return JSONResponse(status_code=403, content={"detail": "Request origin not allowed."})
 
         if not _csrf_ok(request):
             logger.warning("csrf check failed: caller=%s path=%s", key, path)

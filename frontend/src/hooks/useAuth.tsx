@@ -1,12 +1,19 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/api/client";
+import { getSafeRedirect } from "@/lib/safeRedirect";
 
 interface AuthContextValue {
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string, website?: string) => Promise<void>;
+  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    displayName: string,
+    website?: string,
+    redirectTo?: string
+  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -28,16 +35,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string, redirectTo?: string) {
     await api.post("/auth/login", { email, password });
     setIsAuthenticated(true);
-    navigate("/");
+    // redirectTo may originate from a ?redirect= query param on the login URL, which an
+    // external link controls — getSafeRedirect only lets through a path matching one of
+    // this app's own routes, so a crafted link can't send the user on to another site
+    // right after they've just authenticated.
+    navigate(getSafeRedirect(redirectTo));
   }
 
-  async function register(email: string, password: string, display_name: string, website = "") {
+  async function register(
+    email: string,
+    password: string,
+    display_name: string,
+    website = "",
+    redirectTo?: string
+  ) {
     await api.post("/auth/register", { email, password, display_name, website });
     setIsAuthenticated(true);
-    navigate("/");
+    navigate(getSafeRedirect(redirectTo));
   }
 
   function logout() {

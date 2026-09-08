@@ -209,7 +209,7 @@
     slices.forEach(s => {
       const item = document.createElement("div");
       item.className = "legend-item";
-      item.innerHTML = `<span class="legend-swatch" style="background:${s.color}"></span>${s.name} — ${fmtMoney(s.value)}`;
+      item.innerHTML = `<span class="legend-swatch" style="background:${sanitizeColor(s.color)}"></span>${escapeHTML(s.name)} — ${fmtMoney(s.value)}`;
       legend.appendChild(item);
     });
 
@@ -236,10 +236,10 @@
       row.className = "txn-row";
       row.innerHTML = `
         <div class="txn-main">
-          <span class="cat-dot" style="background:${color}"></span>
+          <span class="cat-dot" style="background:${sanitizeColor(color)}"></span>
           <div>
             <div class="txn-desc">${escapeHTML(txn.description)}</div>
-            <div class="txn-meta">${catName} · ${txn.date}</div>
+            <div class="txn-meta">${escapeHTML(catName)} · ${txn.date}</div>
           </div>
         </div>
         <div class="txn-amount ${txn.type}">${txn.type === "income" ? "+" : "-"}${fmtMoney(txn.amount)}</div>
@@ -276,7 +276,7 @@
       tr.innerHTML = `
         <td>${txn.date}</td>
         <td>${escapeHTML(txn.description)}</td>
-        <td><span class="badge" style="color:${color}"><span class="cat-dot" style="background:${color}"></span>${catName}</span></td>
+        <td><span class="badge" style="color:${sanitizeColor(color)}"><span class="cat-dot" style="background:${sanitizeColor(color)}"></span>${escapeHTML(catName)}</span></td>
         <td>${txn.type === "income" ? "Income" : "Expense"}</td>
         <td class="right txn-amount ${txn.type}">${txn.type === "income" ? "+" : "-"}${fmtMoney(txn.amount)}</td>
         <td>
@@ -313,7 +313,7 @@
       card.className = "category-card";
       card.innerHTML = `
         <div class="category-card-info">
-          <span class="category-swatch" style="background:${cat.color}"></span>
+          <span class="category-swatch" style="background:${sanitizeColor(cat.color)}"></span>
           <div>
             <div class="category-name">${escapeHTML(cat.name)}</div>
             <div class="category-type">${cat.type === "income" ? "Income" : "Expense"}</div>
@@ -350,12 +350,12 @@
       row.className = "budget-row";
       row.innerHTML = `
         <div class="budget-row-top">
-          <span class="cat-name"><span class="cat-dot" style="background:${cat.color}"></span>${escapeHTML(cat.name)}</span>
+          <span class="cat-name"><span class="cat-dot" style="background:${sanitizeColor(cat.color)}"></span>${escapeHTML(cat.name)}</span>
           <span>
             <input type="number" class="budget-input" min="0" step="1" placeholder="No limit" value="${limit || ""}" data-id="${cat.id}">
           </span>
         </div>
-        <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:${over ? "var(--expense)" : cat.color}"></div></div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:${over ? "var(--expense)" : sanitizeColor(cat.color)}"></div></div>
         <div class="budget-sub">${fmtMoney(spent)} spent${limit ? " of " + fmtMoney(limit) : ""}${over ? " — over budget" : ""}</div>
       `;
       list.appendChild(row);
@@ -373,6 +373,13 @@
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  // Category colors are user-editable (color picker) and also fully attacker-controllable
+  // via JSON import, so they must be validated before landing in a style="" attribute —
+  // otherwise a crafted color string can break out of the attribute and inject HTML.
+  function sanitizeColor(color) {
+    return /^#[0-9a-fA-F]{3,8}$/.test(color) ? color : "#9aa1ae";
   }
 
   function renderAll() {

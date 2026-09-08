@@ -42,7 +42,14 @@ api.interceptors.response.use(
         return api(original);
       } catch {
         refreshing = null;
-        if (window.location.pathname !== "/login") window.location.href = "/login";
+        // window.location.pathname is always this document's own path (the browser
+        // guarantees that — it can't be an attacker-supplied string), so it's safe to embed
+        // here as-is; Login.tsx still runs it through the same getSafeRedirect() whitelist
+        // as the ?redirect= it also accepts, so this isn't relied on as the only check.
+        if (window.location.pathname !== "/login") {
+          const redirect = encodeURIComponent(window.location.pathname);
+          window.location.href = `/login?redirect=${redirect}`;
+        }
         return Promise.reject(error);
       }
     }
