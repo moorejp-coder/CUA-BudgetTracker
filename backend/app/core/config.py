@@ -42,10 +42,12 @@ class Settings(BaseSettings):
     # endpoints still work manually either way.
     SCHEDULER_ENABLED: bool = False
 
-    # Submission-flood guard (AbuseProtectionMiddleware): >SUBMIT_MAX writes to the same
-    # endpoint from the same caller within the window get a 429. Off by default under
-    # pytest — the test suite makes many legitimate sequential requests from one IP — the
-    # honeypot and attack-pattern checks in the same middleware stay on regardless.
+    # Gates RateLimitMiddleware (app/core/rate_limit.py): the blanket per-category request
+    # volume caps (auth/read/write/upload — see AUTH_LIMIT etc. there), each returning 429
+    # + Retry-After once exceeded. Off by default under pytest — the test suite makes many
+    # legitimate sequential requests from one IP/process — but AbuseProtectionMiddleware's
+    # honeypot, attack-pattern, CSRF, and origin checks are unaffected by this flag and
+    # stay on regardless.
     ABUSE_RATE_LIMIT_ENABLED: bool = True
 
 

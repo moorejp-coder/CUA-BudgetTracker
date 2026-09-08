@@ -27,6 +27,7 @@ from app.api.routes import (
 )
 from app.core.abuse_protection import AbuseProtectionMiddleware
 from app.core.config import get_settings
+from app.core.rate_limit import RateLimitMiddleware
 from app.db.session import Base, engine
 from app.services import scheduler
 
@@ -35,9 +36,13 @@ settings = get_settings()
 app = FastAPI(title=settings.APP_NAME, version="0.1.0")
 
 # Added before CORSMiddleware so CORS ends up outermost (Starlette wraps middleware in
-# reverse-registration order) — a request the abuse guard blocks still needs CORS headers
-# on its response, or the browser hides the real 429/400 behind an opaque network error.
+# reverse-registration order) — a request either guard blocks still needs CORS headers on
+# its response, or the browser hides the real 429/400 behind an opaque network error.
+# RateLimitMiddleware added before AbuseProtectionMiddleware so it ends up outermost of
+# the two: a request already over its blanket volume cap is rejected before paying for
+# AbuseProtectionMiddleware's CSRF/origin/attack-pattern checks.
 app.add_middleware(AbuseProtectionMiddleware)
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

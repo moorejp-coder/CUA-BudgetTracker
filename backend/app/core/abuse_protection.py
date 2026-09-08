@@ -1,4 +1,4 @@
-"""ASGI middleware that guards every mutating API request against five abuse patterns:
+"""ASGI middleware that guards every mutating API request against four abuse patterns:
 
 1. Cross-origin origin spoofing — the browser sets the Origin header (falling back to
    Referer for the rare client that omits it) and neither can be forged by page JavaScript,
@@ -11,14 +11,18 @@
    X-CSRF-Token header the frontend must echo back. A cross-site attacker page can trigger
    the browser to send the cookie automatically but can't read its value to put in the
    header, so a mismatch means the request didn't originate from this app's own frontend.
-3. Submission flooding — more than SUBMIT_MAX writes to the same endpoint from the same
-   caller (user if authenticated, else IP) within SUBMIT_WINDOW_SECONDS get a 429.
-4. Attack-shaped input — string values containing SQL-injection or script-injection
+3. Attack-shaped input — string values containing SQL-injection or script-injection
    signatures, or absurdly long strings, are logged and rejected with a 400 before the
    request ever reaches route/schema validation.
-5. A honeypot field — HONEYPOT_FIELD is never rendered for real users (see the frontend
+4. A honeypot field — HONEYPOT_FIELD is never rendered for real users (see the frontend
    registration form) but a bot that blindly fills every input will populate it; any
    non-empty value there gets the request rejected.
+
+Blanket request-volume limiting (the "more than N writes per minute" kind of guard) used
+to live here too, as a flat 10/min-per-endpoint cap. It's been superseded by
+RateLimitMiddleware (see app/core/rate_limit.py), which applies the app's documented
+per-category limits (auth/read/write/upload) uniformly and returns a Retry-After header —
+this module no longer duplicates that.
 
 Runs before FastAPI's own request parsing, so it protects every endpoint uniformly rather
 than requiring each schema to opt in.
@@ -27,8 +31,6 @@ import hmac
 import json
 import logging
 import re
-import time
-from collections import defaultdict, deque
 from urllib.parse import urlsplit
 
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -56,13 +58,9 @@ _CSRF_EXEMPT_PATHS = {
     "/api/v1/auth/validate-reset-token",
     # A crash can happen before login (e.g. on the login page itself), when there's no
     # CSRF cookie yet to check against — and a forged report here has no state to protect,
-    # just a log line; the existing submission-flood limit still caps abuse.
+    # just a log line; RateLimitMiddleware's write-category limit still caps abuse.
     "/api/v1/client-errors",
 }
-
-SUBMIT_WINDOW_SECONDS = 60
-SUBMIT_MAX = 10
-_submit_attempts: dict[str, deque[float]] = defaultdict(deque)
 
 # Independent of any per-field schema limit — a blanket ceiling so a field with no (or a
 # generous) max_length still can't be used to smuggle a multi-megabyte string.
@@ -150,17 +148,6 @@ def _csrf_ok(request: Request) -> bool:
     return hmac.compare_digest(cookie_value, header_value)
 
 
-def _check_submit_rate(key: str, path: str) -> bool:
-    bucket = _submit_attempts[f"{key}:{path}"]
-    now = time.time()
-    while bucket and now - bucket[0] > SUBMIT_WINDOW_SECONDS:
-        bucket.popleft()
-    if len(bucket) >= SUBMIT_MAX:
-        return False
-    bucket.append(now)
-    return True
-
-
 def _scan(value, path: str = "body", depth: int = 0):
     """Yields (field_path, reason) for the first suspicious string found under `value`."""
     if depth > _MAX_SCAN_DEPTH:
@@ -203,13 +190,6 @@ class AbuseProtectionMiddleware(BaseHTTPMiddleware):
         if not _csrf_ok(request):
             logger.warning("csrf check failed: caller=%s path=%s", key, path)
             return JSONResponse(status_code=403, content={"detail": "CSRF token missing or invalid."})
-
-        if get_settings().ABUSE_RATE_LIMIT_ENABLED and not _check_submit_rate(key, path):
-            logger.warning("submission rate limit exceeded: caller=%s path=%s", key, path)
-            return JSONResponse(
-                status_code=429,
-                content={"detail": "Too many submissions — please slow down and try again in a minute."},
-            )
 
         if request.method in _BODY_METHODS:
             body = await request.body()
