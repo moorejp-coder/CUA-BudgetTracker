@@ -4,7 +4,8 @@ A private, self-hosted Copilot Money–style budgeting app. No Plaid, no bank AP
 third-party aggregators — you enter transactions manually or import CSVs exported from your
 bank's own website. Everything runs on a server you control.
 
-**Live demo:** http://54.175.240.105 (AWS EC2, Free Tier — static via Elastic IP)
+**Live demo:** https://jamesbudget.duckdns.org (AWS EC2, Free Tier — static via Elastic IP,
+HTTPS via Caddy)
 
 See [PROJECT_SUMMARY.pdf](PROJECT_SUMMARY.pdf) for a one-page overview (problem, solution, AI
 usage, key learnings). For more detail: [ARCHITECTURE.md](ARCHITECTURE.md) for the stack/ER
@@ -50,12 +51,20 @@ cp backend/.env.example backend/.env
 # edit backend/.env: set a real SECRET_KEY, LLM_BASE_URL if you run a local model, and
 # SCHEDULER_ENABLED=true if you want automatic weekly/monthly recaps + daily nudges
 # (safe here since Docker runs a single backend process — see "AI features" below)
+# Also add your production URL (e.g. "https://jamesbudget.duckdns.org") to CORS_ORIGINS.
+
+cp .env.example .env
+# edit .env: set DOMAIN to your public hostname (e.g. jamesbudget.duckdns.org) — Caddy
+# uses this to request a Let's Encrypt certificate and serve HTTPS automatically. The
+# domain must already resolve to this host (port 80/443 reachable from the internet).
 
 docker compose up --build
 ```
 
-- Frontend: http://localhost:8080
-- Backend API + docs: http://localhost:8000/docs
+- App: https://\<DOMAIN\> (Caddy is the only port published to the host — 80 and 443;
+  everything else runs on the internal Docker network)
+- Backend API + docs: not published directly; exec into the container or temporarily add a
+  `ports:` entry to the `backend` service in `docker-compose.yml` if you need direct access
 
 First run: register an account from the login screen (this creates your user in the local
 SQLite database, which lives in the `budget-data` Docker volume).
