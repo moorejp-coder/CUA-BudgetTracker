@@ -1,8 +1,9 @@
 name: Deploy to live server
 
+# Manual only: the local git post-commit hook already auto-deploys every commit to main
+# over SSH, so a push trigger here raced it and caused intermittent Docker container
+# name conflicts on the server. Use "Run workflow" for an ad-hoc redeploy instead.
 on:
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 jobs:
