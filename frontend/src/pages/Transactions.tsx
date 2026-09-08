@@ -21,7 +21,10 @@ export default function Transactions() {
   const { data: accounts = [] } = useQuery({ queryKey: ["accounts"], queryFn: AccountsApi.list });
   const { data } = useQuery({
     queryKey: ["transactions", filters, page],
-    queryFn: () => TransactionsApi.list({ ...filters, page, page_size: 50 }),
+    queryFn: () => {
+      const cleaned = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
+      return TransactionsApi.list({ ...cleaned, page, page_size: 50 });
+    },
   });
 
   async function handleCategoryChange(id: string, categoryId: string) {

@@ -2,16 +2,21 @@ import type { Budget } from "@/types";
 import { formatCurrency } from "@/lib/format";
 import { getCategoryIcon } from "@/lib/categoryIcon";
 
-export default function BudgetProgress({ budget }: { budget: Budget }) {
+export default function BudgetProgress({ budget, right }: { budget: Budget; right?: React.ReactNode }) {
   const effectiveLimit = budget.amount + budget.rolled_over_amount;
   const pct = effectiveLimit > 0 ? Math.min(100, (budget.spent / effectiveLimit) * 100) : 0;
   const over = budget.spent > effectiveLimit;
   const Icon = getCategoryIcon(budget.category.name);
+  const note = over
+    ? "Over budget"
+    : budget.rollover && budget.rolled_over_amount > 0
+      ? `+${formatCurrency(budget.rolled_over_amount, 0)} rolled over`
+      : null;
 
   return (
     <div>
-      <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="flex items-center gap-2 font-medium">
+      <div className="flex items-center justify-between text-sm gap-3">
+        <span className="flex items-center gap-2 font-medium shrink-0">
           <span
             className="category-icon"
             style={{ background: `${budget.category.color}1a`, color: budget.category.color }}
@@ -20,20 +25,20 @@ export default function BudgetProgress({ budget }: { budget: Budget }) {
           </span>
           {budget.category.name}
         </span>
-        <span className="tabular text-ink/60">
+        <span className="tabular text-ink/60 text-xs shrink-0">
           {formatCurrency(budget.spent, 0)} / {formatCurrency(effectiveLimit, 0)}
         </span>
+        {right}
       </div>
-      <div className="h-2 rounded-full bg-surface-sunken overflow-hidden">
+      <div className="h-1.5 rounded-full bg-surface-sunken overflow-hidden mt-1.5">
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${pct}%`, background: over ? "#c85d43" : budget.category.color }}
         />
       </div>
-      {budget.rollover && budget.rolled_over_amount > 0 && (
-        <div className="text-xs text-ink/40 mt-1">+{formatCurrency(budget.rolled_over_amount, 0)} rolled over</div>
+      {note && (
+        <div className={`text-xs mt-0.5 ${over ? "text-expense" : "text-ink/40"}`}>{note}</div>
       )}
-      {over && <div className="text-xs text-expense mt-1">Over budget</div>}
     </div>
   );
 }

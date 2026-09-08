@@ -197,30 +197,28 @@ export default function Categories() {
 
       <div className="card">
         <h2 className="text-sm font-semibold mb-4">Monthly budgets — {period}</h2>
-        <div className="space-y-5">
+        <div className="space-y-3">
           {expenseCategories.map((c) => {
             const budget = budgets.find((b) => b.category.id === c.id);
-            return (
-              <div key={c.id} className="space-y-2">
-                {budget && <BudgetProgress budget={budget} />}
-                {!budget && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2.5">
-                      <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
-                        <CategoryIcon name={c.name} />
-                      </span>
-                      {c.name}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-end">
-                  <BudgetInlineForm
-                    key={budget?.id ?? c.id}
-                    initialAmount={budget?.amount}
-                    initialRollover={budget?.rollover}
-                    onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
-                  />
-                </div>
+            const form = (
+              <BudgetInlineForm
+                key={budget?.id ?? c.id}
+                initialAmount={budget?.amount}
+                initialRollover={budget?.rollover}
+                onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
+              />
+            );
+            return budget ? (
+              <BudgetProgress key={c.id} budget={budget} right={form} />
+            ) : (
+              <div key={c.id} className="flex items-center justify-between text-sm gap-3">
+                <span className="flex items-center gap-2.5 shrink-0">
+                  <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
+                    <CategoryIcon name={c.name} />
+                  </span>
+                  {c.name}
+                </span>
+                {form}
               </div>
             );
           })}
@@ -254,20 +252,23 @@ function BudgetInlineForm({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 shrink-0">
       <input
-        className="input w-24 text-right"
-        placeholder="No limit"
+        className="input w-16 text-right text-xs py-1"
+        placeholder="—"
         type="number"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <label className="text-xs text-ink/50 flex items-center gap-1">
-        <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
-        rollover
+      <label className="text-[11px] text-ink/50 flex items-center gap-0.5" title="Roll over unused budget">
+        <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />R
       </label>
-      <button className="btn-secondary text-xs px-2 py-1 disabled:opacity-50" onClick={handleSet} disabled={saving}>
-        {saving ? "Saving…" : "Set"}
+      <button
+        className="btn-secondary text-xs px-1.5 py-1 disabled:opacity-50"
+        onClick={handleSet}
+        disabled={saving}
+      >
+        {saving ? "…" : "Set"}
       </button>
     </div>
   );
