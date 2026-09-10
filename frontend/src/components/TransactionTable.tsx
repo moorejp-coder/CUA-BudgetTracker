@@ -25,14 +25,14 @@ export default function TransactionTable({
   compact?: boolean;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState({ date: "", payee: "", amount: "" });
+  const [draft, setDraft] = useState({ date: "", payee: "", amount: "", account_id: "" });
 
   const accountName = (id: string) => accounts.find((a) => a.id === id)?.name ?? "another account";
   const editable = !!onUpdate;
 
   const startEdit = (t: Transaction) => {
     setEditingId(t.id);
-    setDraft({ date: t.date, payee: t.payee, amount: String(t.amount) });
+    setDraft({ date: t.date, payee: t.payee, amount: String(t.amount), account_id: t.account_id });
   };
 
   const cancelEdit = () => setEditingId(null);
@@ -42,10 +42,25 @@ export default function TransactionTable({
     onUpdate!(id, {
       date: draft.date,
       payee: draft.payee,
+      account_id: draft.account_id,
       ...(Number.isFinite(amount) ? { amount } : {}),
     });
     setEditingId(null);
   };
+
+  const accountSelect = (
+    <select
+      className="input"
+      value={draft.account_id}
+      onChange={(e) => setDraft({ ...draft, account_id: e.target.value })}
+    >
+      {accounts.map((a) => (
+        <option key={a.id} value={a.id}>
+          {a.name}
+        </option>
+      ))}
+    </select>
+  );
 
   const categoryOrTransfer = (t: Transaction) =>
     t.type === "transfer" ? (
@@ -118,6 +133,7 @@ export default function TransactionTable({
                 value={draft.payee}
                 onChange={(e) => setDraft({ ...draft, payee: e.target.value })}
               />
+              {accountSelect}
               <div className="flex gap-2 justify-end">
                 <button className="btn-secondary text-xs" onClick={cancelEdit}>
                   Cancel
@@ -192,11 +208,14 @@ export default function TransactionTable({
                     />
                   </td>
                   <td className="px-3 py-2.5">
-                    <input
-                      className="input w-full"
-                      value={draft.payee}
-                      onChange={(e) => setDraft({ ...draft, payee: e.target.value })}
-                    />
+                    <div className="flex flex-col gap-1">
+                      <input
+                        className="input w-full"
+                        value={draft.payee}
+                        onChange={(e) => setDraft({ ...draft, payee: e.target.value })}
+                      />
+                      {accountSelect}
+                    </div>
                   </td>
                   <td className="px-3 py-2.5">{categoryOrTransfer(t)}</td>
                   <td className="px-3 py-2.5 text-right">
