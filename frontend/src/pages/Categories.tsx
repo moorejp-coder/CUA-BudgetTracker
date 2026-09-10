@@ -239,7 +239,7 @@ function BudgetInlineForm({
   initialRollover?: boolean;
 }) {
   const [amount, setAmount] = useState(initialAmount != null ? String(initialAmount) : "");
-  const [rollover, setRollover] = useState(initialRollover ?? false);
+  const rollover = initialRollover ?? false;
   const [saving, setSaving] = useState(false);
 
   async function handleSet() {
@@ -261,15 +261,6 @@ function BudgetInlineForm({
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <label className="text-xs text-ink/50 flex items-center gap-1.5" title="Roll over unused budget">
-        <input
-          type="checkbox"
-          className="h-3.5 w-3.5 accent-accent"
-          checked={rollover}
-          onChange={(e) => setRollover(e.target.checked)}
-        />
-        <span>R</span>
-      </label>
       <button
         className="btn-secondary text-xs px-1.5 py-1 disabled:opacity-50"
         onClick={handleSet}
