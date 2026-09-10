@@ -47,7 +47,7 @@ body {
 }
 
 * {
-  scrollbar-color: #e9dcc5 transparent;
+  scrollbar-color: theme("colors.border.DEFAULT") transparent;
   scrollbar-width: thin;
 }
 
@@ -57,21 +57,21 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e9dcc5;
+  background: theme("colors.border.DEFAULT");
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ddc9a3;
+  background: theme("colors.border-strong");
 }
 
 ::selection {
-  background: #f1d9ae;
-  color: #1d201d;
+  background: theme("colors.accent-soft");
+  color: theme("colors.ink");
 }
 
 :focus-visible {
-  outline: 2px solid rgba(207, 142, 39, 0.6);
+  outline: 2px solid color-mix(in srgb, theme("colors.accent") 60%, transparent);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -114,17 +114,17 @@ body {
 .brand-mark {
   display: grid;
   place-items: center;
-  border: 1px solid #d9a84f;
+  border: 1px solid theme("colors.brand.mark-border");
   border-radius: 0.72rem;
-  background: #dfa94b;
-  color: #1f201b;
+  background: theme("colors.brand.mark");
+  color: theme("colors.ink");
   box-shadow:
-    0 6px 18px rgba(150, 100, 28, 0.18),
+    0 6px 18px color-mix(in srgb, theme("colors.brand.mark-border") 45%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .eyebrow {
-  color: #cf8e27;
+  color: theme("colors.accent");
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -132,14 +132,14 @@ body {
 }
 
 .panel-title {
-  color: #1d201d;
+  color: theme("colors.ink");
   font-size: 1rem;
   font-weight: 650;
 }
 
 .panel-subtitle {
   margin-top: 0.2rem;
-  color: #787b75;
+  color: color-mix(in srgb, theme("colors.ink") 55%, white);
   font-size: 0.78rem;
 }
 
@@ -150,8 +150,8 @@ body {
   width: 2rem;
   height: 2rem;
   border-radius: 0.62rem;
-  background: #f5f0e7;
-  color: #555b55;
+  background: theme("colors.surface-raised");
+  color: color-mix(in srgb, theme("colors.ink") 75%, white);
 }
 
 .category-icon svg {

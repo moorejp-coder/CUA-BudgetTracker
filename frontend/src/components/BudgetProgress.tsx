@@ -8,15 +8,15 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
   const over = budget.spent > effectiveLimit;
   const Icon = getCategoryIcon(budget.category.name);
   const note = over
-    ? "Over budget"
+    ? `${formatCurrency(budget.spent - effectiveLimit, 0)} over budget`
     : budget.rollover && budget.rolled_over_amount > 0
       ? `+${formatCurrency(budget.rolled_over_amount, 0)} rolled over`
       : null;
 
   return (
-    <div>
+    <div className="group -mx-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-surface-raised/60">
       <div className="grid grid-cols-[minmax(0,1fr)_110px_auto] items-center text-sm gap-4">
-        <span className="flex items-center gap-2 font-medium min-w-0 truncate">
+        <span className="flex items-center gap-2.5 font-medium min-w-0 truncate">
           <span
             className="category-icon"
             style={{ background: `${budget.category.color}1a`, color: budget.category.color }}
@@ -25,20 +25,23 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
           </span>
           {budget.category.name}
         </span>
-        <span className="tabular text-ink/60 text-xs text-right whitespace-nowrap">
-          {formatCurrency(budget.spent, 0)} / {formatCurrency(effectiveLimit, 0)}
+        <span className="numeral text-[13px] text-ink/60 text-right whitespace-nowrap">
+          {formatCurrency(budget.spent, 0)} <span className="text-ink/35">/</span> {formatCurrency(effectiveLimit, 0)}
         </span>
         {right}
       </div>
-      <div className="h-1.5 rounded-full bg-surface-sunken overflow-hidden mt-1.5">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, background: over ? "#c85d43" : budget.category.color }}
-        />
+      <div className="flex items-center gap-2 mt-2">
+        <div className="h-2 flex-1 rounded-full bg-surface-sunken overflow-hidden shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">
+          <div
+            className="h-full rounded-full transition-[width] duration-300 ease-out"
+            style={{ width: `${Math.max(pct, budget.spent > 0 ? 3 : 0)}%`, background: over ? "#c85d43" : budget.category.color }}
+          />
+        </div>
+        <span className={`numeral text-[11px] w-9 text-right tabular-nums ${over ? "text-expense" : "text-ink/35"}`}>
+          {Math.round(pct)}%
+        </span>
       </div>
-      {note && (
-        <div className={`text-xs mt-0.5 ${over ? "text-expense" : "text-ink/40"}`}>{note}</div>
-      )}
+      {note && <div className={`text-xs mt-1 ${over ? "text-expense font-medium" : "text-ink/40"}`}>{note}</div>}
     </div>
   );
 }

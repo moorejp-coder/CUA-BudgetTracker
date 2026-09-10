@@ -24,7 +24,13 @@ export default {
         "info-bg": "rgba(110,164,187,0.12)",
         accent: "#cf8e27",
         "accent-bg": "#fff5e3",
+        "accent-soft": "#f1d9ae",
         ink: "#1d201d",
+        "border-strong": "#ddc9a3",
+        brand: {
+          mark: "#dfa94b",
+          "mark-border": "#d9a84f",
+        },
       },
       fontFamily: {
         sans: ["Inter", "-apple-system", "Segoe UI", "sans-serif"],

@@ -23,7 +23,7 @@ export default function StatCard({
     tone === "income" ? "bg-income-bg text-income" : tone === "expense" ? "bg-expense-bg text-expense" : "bg-accent-bg text-accent";
 
   return (
-    <div className="card animate-fade-in-up hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]" style={style}>
+    <div className="card animate-fade-in-up hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(74,54,27,0.10)]" style={style}>
       <div className="flex items-center justify-between mb-2">
         <div className="text-xs font-medium text-ink/60">{label}</div>
         {Icon && (

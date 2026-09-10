@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import { AnalyticsApi, CategoriesApi, RecurringApi } from "@/api/resources";
 import NetWorthChart from "@/components/NetWorthChart";
 import { formatCurrency } from "@/lib/format";
@@ -57,7 +57,7 @@ export default function Dashboard() {
             </p>
             <p className="mt-3 text-xs text-ink/50">of {formatCurrency(budgeted, 0)} budgeted</p>
             <div className="mt-3 flex items-center gap-3">
-              <div className="h-1.5 flex-1 rounded-full bg-[var(--track,#ebe9e5)] overflow-hidden">
+              <div className="h-1.5 flex-1 rounded-full bg-surface-sunken overflow-hidden">
                 <div className="h-full rounded-full bg-income" style={{ width: `${remainingPct}%` }} />
               </div>
               <span className="text-xs font-semibold text-ink/50">{remainingPct}%</span>
@@ -99,7 +99,9 @@ export default function Dashboard() {
         <section className="card p-5">
           <div className="flex items-start justify-between gap-3">
             <p className="panel-title">Spending by category</p>
-            <Link to="/categories" className="text-sm font-semibold text-accent">View all</Link>
+            <Link to="/categories" className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors">
+              View all <ArrowRight size={14} />
+            </Link>
           </div>
           {(!summary || summary.budget_status.length === 0) && (
             <p className="mt-6 text-sm text-ink/40">No budgets set for this period yet.</p>
@@ -110,23 +112,26 @@ export default function Dashboard() {
               const cat = categoryByName.get(b.category_name);
               const Icon = getCategoryIcon(b.category_name);
               return (
-                <div key={b.category_id} className="grid grid-cols-[1.6fr_0.75fr_0.75fr_1fr] items-center gap-3 py-2.5">
+                <div
+                  key={b.category_id}
+                  className="grid grid-cols-[1.6fr_0.75fr_0.75fr_1fr] items-center gap-3 py-2.5 -mx-2 px-2 rounded-lg transition-colors hover:bg-surface-raised/60"
+                >
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="category-icon" style={cat ? { background: `${cat.color}1a`, color: cat.color } : undefined}>
                       <Icon />
                     </span>
                     <span className="truncate text-sm font-medium text-ink">{b.category_name}</span>
                   </div>
-                  <span className="text-sm font-semibold text-ink">{formatCurrency(b.spent, 0)}</span>
-                  <span className="text-sm text-ink/55">{formatCurrency(b.budget, 0)}</span>
+                  <span className="numeral text-sm text-ink">{formatCurrency(b.spent, 0)}</span>
+                  <span className="numeral text-sm text-ink/55">{formatCurrency(b.budget, 0)}</span>
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 min-w-12 flex-1 rounded-full bg-[var(--track,#ebe9e5)] overflow-hidden">
+                    <div className="h-2 min-w-12 flex-1 rounded-full bg-surface-sunken overflow-hidden shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">
                       <div
-                        className={`h-full rounded-full ${b.over ? "bg-expense" : "bg-income"}`}
+                        className={`h-full rounded-full transition-[width] duration-300 ease-out ${b.over ? "bg-expense" : "bg-income"}`}
                         style={{ width: `${Math.min(100, percent)}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-sm text-ink/55">{percent}%</span>
+                    <span className={`numeral w-8 text-right text-xs tabular-nums ${b.over ? "text-expense" : "text-ink/45"}`}>{percent}%</span>
                   </div>
                 </div>
               );
@@ -138,19 +143,24 @@ export default function Dashboard() {
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="card p-5">
           <p className="panel-title">Upcoming charges (30 days)</p>
-          <div className="mt-4 space-y-3">
-            {upcoming.length === 0 && <p className="text-sm text-ink/40">No upcoming recurring charges detected.</p>}
+          <div className="mt-4 space-y-1 -mx-2">
+            {upcoming.length === 0 && <p className="mx-2 text-sm text-ink/40">No upcoming recurring charges detected.</p>}
             {upcoming.slice(0, 5).map((u: any) => (
-              <div key={u.id} className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-ink">{u.merchant}</p>
-                  <p className="text-xs text-ink/50">{u.cadence} · {u.date}</p>
+              <div key={u.id} className="flex items-center justify-between gap-3 px-2 py-2 rounded-lg transition-colors hover:bg-surface-raised/60">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="category-icon">
+                    <Clock />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink">{u.merchant}</p>
+                    <p className="text-xs text-ink/50">{u.cadence} · {u.date}</p>
+                  </div>
                 </div>
-                <p className="shrink-0 text-sm font-semibold text-ink">{formatCurrency(u.expected_amount)}</p>
+                <p className="numeral shrink-0 text-sm text-ink">{formatCurrency(u.expected_amount, 0)}</p>
               </div>
             ))}
           </div>
-          <Link to="/recurring" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent">
+          <Link to="/recurring" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors">
             View all upcoming <ArrowRight size={14} />
           </Link>
         </section>
@@ -158,7 +168,9 @@ export default function Dashboard() {
         <section className="card p-5">
           <div className="flex items-start justify-between gap-3">
             <p className="panel-title">Net worth</p>
-            <Link to="/cashflow" className="text-sm font-semibold text-accent">View history</Link>
+            <Link to="/cashflow" className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors">
+              View history <ArrowRight size={14} />
+            </Link>
           </div>
           <p className="numeral mt-4 text-3xl text-income-deep">{formatCurrency(netWorthNow, 0)}</p>
           {netWorth.length > 1 && (
