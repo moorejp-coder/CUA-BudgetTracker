@@ -23,12 +23,15 @@ export default function Anomalies() {
       {data && (
         <>
           <div className="card">
-            <h2 className="text-sm font-semibold mb-3">AI summary</h2>
+            <h2 className="panel-title">AI summary</h2>
+            <p className="panel-subtitle mb-3">A plain-language read of what stood out.</p>
             <div className="text-sm text-ink/80 whitespace-pre-line">{data.summary}</div>
             <div className="text-[10px] text-ink/30 mt-2 uppercase tracking-wide">{data.source}</div>
           </div>
 
           <div className="card">
+            <h2 className="panel-title">Flagged transactions</h2>
+            <p className="panel-subtitle mb-3">Transactions that stand out from your typical spending in that category.</p>
             <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-ink/50 text-xs uppercase">
@@ -42,18 +45,22 @@ export default function Anomalies() {
               </thead>
               <tbody>
                 {data.anomalies.map((a) => (
-                  <tr key={a.transaction_id} className="border-t border-border-subtle">
+                  <tr key={a.transaction_id} className="border-t border-border-subtle transition-colors hover:bg-surface-raised/60">
                     <td className="py-2 whitespace-nowrap">{a.date}</td>
                     <td className="py-2">{a.payee || "—"}</td>
                     <td className="py-2">{a.category_name ?? "Uncategorized"}</td>
                     <td className="py-2 text-right numeral text-expense">{formatCurrency(a.amount)}</td>
-                    <td className="py-2 text-ink/50 text-xs">{a.reason}</td>
+                    <td className="py-2">
+                      <span className="inline-block rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning">
+                        {a.reason}
+                      </span>
+                    </td>
                   </tr>
                 ))}
                 {data.anomalies.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-ink/40">
-                      No anomalies detected in the last 30 days.
+                    <td colSpan={5} className="py-8 text-center text-sm text-ink/40">
+                      No anomalies detected in the last 30 days — nothing stood out from your usual spending.
                     </td>
                   </tr>
                 )}

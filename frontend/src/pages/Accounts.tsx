@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
 import AccountBuckets from "@/components/AccountBuckets";
 import TransactionTable from "@/components/TransactionTable";
@@ -34,7 +35,8 @@ export default function Accounts() {
       <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Accounts</h1>
 
       <div className="card">
-        <h2 className="text-sm font-semibold mb-3">Add account</h2>
+        <h2 className="panel-title">Add account</h2>
+        <p className="panel-subtitle mb-4">Track a checking, savings, credit card, loan, or investment account.</p>
         <form onSubmit={addAccount} className="flex flex-wrap gap-3 items-end">
           <div>
             <label className="label">Name</label>
@@ -79,22 +81,25 @@ export default function Accounts() {
           <div key={a.id} className="card">
             <div className="flex justify-between items-start">
               <button className="text-left" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
-                <div className="font-semibold hover:text-accent">{a.name}</div>
+                <div className="font-semibold text-ink transition-colors hover:text-accent">{a.name}</div>
                 <div className="text-xs text-ink/40 capitalize">
                   {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
                 </div>
               </button>
-              <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs">
+              <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs transition-colors">
                 Delete
               </button>
             </div>
             <button
-              className={`text-2xl numeral mt-3 block hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
+              className={`numeral mt-3 block text-2xl transition-colors hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
               onClick={() => setExpanded(expanded === a.id ? null : a.id)}
             >
               {formatCurrency(a.current_balance)}
             </button>
-            <button className="text-accent text-xs mt-3" onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}>
+            <button
+              className="mt-3 text-xs font-semibold text-accent transition-colors hover:text-accent/80"
+              onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}
+            >
               {snapshotFor === a.id ? "Cancel" : "Update balance"}
             </button>
             {snapshotFor === a.id && <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />}
@@ -102,7 +107,7 @@ export default function Accounts() {
             {expanded === a.id && <AccountTransactionHistory accountId={a.id} />}
           </div>
         ))}
-        {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above.</p>}
+        {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above to start tracking balances.</p>}
       </div>
     </div>
   );
@@ -133,9 +138,12 @@ function AccountTransactionHistory({ accountId }: { accountId: string }) {
   return (
     <div className="mt-4 pt-4 border-t border-border-subtle">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50">Transaction history</h3>
-        <Link to={`/transactions?account_id=${accountId}`} className="text-accent text-xs">
-          View all
+        <h3 className="panel-title">Transaction history</h3>
+        <Link
+          to={`/transactions?account_id=${accountId}`}
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent transition-colors hover:text-accent/80"
+        >
+          View all <ArrowRight size={14} />
         </Link>
       </div>
       <TransactionTable

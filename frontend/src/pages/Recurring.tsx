@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Clock } from "lucide-react";
 import { RecurringApi } from "@/api/resources";
 import { formatCurrency } from "@/lib/format";
 
@@ -29,14 +30,26 @@ export default function Recurring() {
 
       {suggestions.length > 0 && (
         <div className="card">
-          <h2 className="text-sm font-semibold mb-3">Detected patterns — confirm to track</h2>
-          <ul className="space-y-2">
+          <h2 className="panel-title">Detected patterns</h2>
+          <p className="panel-subtitle mb-3">Recurring charges we noticed in your transactions — confirm to start tracking them.</p>
+          <ul className="-mx-2">
             {suggestions.map((s, i) => (
-              <li key={i} className="flex items-center justify-between text-sm">
-                <span>
-                  {s.merchant} · {formatCurrency(s.expected_amount)} · {s.cadence} ({s.occurrences}x seen)
+              <li
+                key={i}
+                className="flex items-center justify-between gap-3 text-sm px-2 py-2 rounded-lg transition-colors hover:bg-surface-raised/60"
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="category-icon">
+                    <Clock />
+                  </span>
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium text-ink">{s.merchant}</span>{" "}
+                    <span className="text-ink/50">
+                      · <span className="numeral">{formatCurrency(s.expected_amount)}</span> · {s.cadence} ({s.occurrences}x seen)
+                    </span>
+                  </span>
                 </span>
-                <button className="btn-secondary text-xs px-3 py-1" onClick={() => confirmSuggestion(s)}>
+                <button className="btn-secondary text-xs px-3 py-1 shrink-0" onClick={() => confirmSuggestion(s)}>
                   Confirm
                 </button>
               </li>
@@ -46,7 +59,8 @@ export default function Recurring() {
       )}
 
       <div className="card">
-        <h2 className="text-sm font-semibold mb-3">Confirmed recurring items</h2>
+        <h2 className="panel-title">Confirmed recurring items</h2>
+        <p className="panel-subtitle mb-3">Subscriptions and bills tracked on a schedule.</p>
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
           <thead className="text-ink/50 text-xs uppercase">
@@ -60,11 +74,18 @@ export default function Recurring() {
           </thead>
           <tbody>
             {recurring.map((r) => (
-              <tr key={r.id} className="border-t border-border-subtle">
-                <td className="py-2">{r.merchant}</td>
+              <tr key={r.id} className="border-t border-border-subtle transition-colors hover:bg-surface-raised/60">
+                <td className="py-2">
+                  <span className="flex items-center gap-2.5">
+                    <span className="category-icon">
+                      <Clock />
+                    </span>
+                    {r.merchant}
+                  </span>
+                </td>
                 <td className="py-2 capitalize">{r.cadence}</td>
                 <td className="py-2">{r.next_expected_date ?? "—"}</td>
-                <td className="py-2 text-right tabular">{formatCurrency(r.expected_amount)}</td>
+                <td className="py-2 text-right numeral text-ink">{formatCurrency(r.expected_amount)}</td>
                 <td className="py-2 text-right">
                   <input type="checkbox" checked={r.active} onChange={() => toggleActive(r.id, r.active)} />
                 </td>
@@ -72,8 +93,8 @@ export default function Recurring() {
             ))}
             {recurring.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-6 text-center text-ink/40">
-                  No confirmed recurring items yet.
+                <td colSpan={5} className="py-6 text-center text-sm text-ink/40">
+                  No confirmed recurring items yet — confirmed items will appear here once you add them.
                 </td>
               </tr>
             )}

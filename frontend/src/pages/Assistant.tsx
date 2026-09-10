@@ -81,12 +81,12 @@ export default function Assistant() {
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[80%] rounded-xl px-4 py-2.5 text-sm whitespace-pre-line ${
+              className={`max-w-[80%] rounded-xl px-4 py-2.5 text-sm whitespace-pre-line border ${
                 m.role === "user"
-                  ? "bg-accent text-ink"
+                  ? "bg-accent-bg border-accent/25 text-ink"
                   : m.error
-                    ? "bg-expense-bg text-expense"
-                    : "bg-surface-raised text-ink/80"
+                    ? "bg-expense-bg border-expense/20 text-expense"
+                    : "bg-surface-raised border-border-subtle text-ink/80 border-l-2 border-l-accent"
               }`}
             >
               {m.text}
@@ -96,7 +96,7 @@ export default function Assistant() {
                     {m.source === "policy" ? "out of scope" : m.source}
                   </span>
                   {m.intents?.map((intent) => (
-                    <span key={intent} className="px-1.5 py-0.5 rounded bg-surface-raised">
+                    <span key={intent} className="px-1.5 py-0.5 rounded bg-accent-bg text-accent">
                       {intent}
                     </span>
                   ))}

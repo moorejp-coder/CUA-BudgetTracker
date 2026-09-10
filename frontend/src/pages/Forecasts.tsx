@@ -65,22 +65,24 @@ export default function Forecasts() {
 
       {forecast && (
         <div className="card">
+          <p className="panel-title">Projected balance</p>
+          <p className="panel-subtitle mb-4">Based on your recent averages and upcoming recurring charges.</p>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 text-sm">
             <div>
               <div className="text-ink/50 text-xs">Avg monthly income</div>
-              <div className="text-income font-semibold tabular">{formatCurrency(forecast.avg_monthly_income, 0)}</div>
+              <div className="numeral text-income">{formatCurrency(forecast.avg_monthly_income, 0)}</div>
             </div>
             <div>
               <div className="text-ink/50 text-xs">Avg monthly expense</div>
-              <div className="text-expense font-semibold tabular">{formatCurrency(forecast.avg_monthly_expense, 0)}</div>
+              <div className="numeral text-expense">{formatCurrency(forecast.avg_monthly_expense, 0)}</div>
             </div>
             <div>
               <div className="text-ink/50 text-xs">Upcoming recurring ({horizon}d)</div>
-              <div className="font-semibold tabular">{formatCurrency(forecast.upcoming_recurring_total, 0)}</div>
+              <div className="numeral text-ink">{formatCurrency(forecast.upcoming_recurring_total, 0)}</div>
             </div>
             <div>
               <div className="text-ink/50 text-xs">Starting balance</div>
-              <div className="font-semibold tabular">{formatCurrency(forecast.starting_balance, 0)}</div>
+              <div className="numeral text-ink">{formatCurrency(forecast.starting_balance, 0)}</div>
             </div>
           </div>
           <ForecastChart forecast={forecast} />
@@ -89,8 +91,8 @@ export default function Forecasts() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
-          <h2 className="text-sm font-semibold mb-3">Scenario builder</h2>
-          <p className="text-xs text-ink/50 mb-3">
+          <h2 className="panel-title">Scenario builder</h2>
+          <p className="panel-subtitle mb-3">
             Target a category name for a % change (e.g. -0.2 = cut 20%) or any other label for
             an absolute $/month contribution change.
           </p>
@@ -127,7 +129,7 @@ export default function Forecasts() {
         </div>
 
         <div className="card">
-          <h2 className="text-sm font-semibold mb-3">Ask in plain English</h2>
+          <h2 className="panel-title mb-3">Ask in plain English</h2>
           <form onSubmit={askScenario} className="flex gap-2 mb-3">
             <input
               className="input flex-1"
@@ -157,11 +159,11 @@ function ScenarioResultView({ result }: { result: ScenarioResult }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div>
           <div className="text-ink/50 text-xs">Baseline net/mo</div>
-          <div className="font-semibold tabular">{formatCurrency(result.baseline_monthly_net)}</div>
+          <div className="numeral text-ink">{formatCurrency(result.baseline_monthly_net)}</div>
         </div>
         <div>
           <div className="text-ink/50 text-xs">Projected net/mo</div>
-          <div className={`font-semibold tabular ${result.monthly_net_delta >= 0 ? "text-income" : "text-expense"}`}>
+          <div className={`numeral ${result.monthly_net_delta >= 0 ? "text-income" : "text-expense"}`}>
             {formatCurrency(result.projected_monthly_net)} ({result.monthly_net_delta >= 0 ? "+" : ""}
             {formatCurrency(result.monthly_net_delta)})
           </div>

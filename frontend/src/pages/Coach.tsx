@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { NudgesApi } from "@/api/resources";
 
 const EVENT_LABELS: Record<string, { label: string; tone: string; link?: string }> = {
@@ -57,8 +58,11 @@ export default function Coach() {
                 <div className="flex items-center gap-3 mt-2">
                   <span className="text-[10px] text-ink/30 uppercase tracking-wide">{n.source}</span>
                   {meta.link && (
-                    <Link to={meta.link} className="text-accent text-xs">
-                      View details →
+                    <Link
+                      to={meta.link}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:text-accent/80 transition-colors"
+                    >
+                      View details <ArrowRight size={12} />
                     </Link>
                   )}
                 </div>

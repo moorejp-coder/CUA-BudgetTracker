@@ -51,11 +51,12 @@ export default function Settings() {
 
   return (
     <div className="max-w-sm">
-      <h1 className="font-display text-2xl font-semibold text-ink tracking-tight mb-1">Settings</h1>
+      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight mb-1">Settings</h1>
       <p className="text-sm text-ink/50 mb-6">Manage your account.</p>
 
       <div className="card">
-        <h2 className="text-sm font-semibold text-ink mb-4">Change password</h2>
+        <h2 className="panel-title">Change password</h2>
+        <p className="panel-subtitle mb-4">Update the password you use to sign in.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="label">Current password</label>
@@ -88,8 +89,8 @@ export default function Settings() {
       </div>
 
       <div className="card mt-4">
-        <h2 className="text-sm font-semibold text-ink mb-1">Log out everywhere</h2>
-        <p className="text-xs text-ink/50 mb-4">
+        <h2 className="panel-title">Log out everywhere</h2>
+        <p className="panel-subtitle mb-4">
           Ends every active session for your account, including this one — on any other device or
           browser you're signed into. Use this if you think your account may be compromised.
         </p>

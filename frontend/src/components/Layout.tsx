@@ -90,7 +90,7 @@ export default function Layout() {
 
       {navOpen && (
         <div
-          className="md:hidden fixed inset-0 z-20 bg-black/30 top-[calc(57px+env(safe-area-inset-top))] animate-fade-in"
+          className="md:hidden fixed inset-0 z-20 bg-ink/30 top-[calc(57px+env(safe-area-inset-top))] animate-fade-in"
           onClick={() => setNavOpen(false)}
         />
       )}

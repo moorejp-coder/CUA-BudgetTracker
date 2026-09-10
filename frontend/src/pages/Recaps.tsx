@@ -45,15 +45,16 @@ export default function Recaps() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card col-span-1">
-          <h2 className="text-sm font-semibold mb-3">History</h2>
+          <h2 className="panel-title">History</h2>
+          <p className="panel-subtitle mb-3">Recaps you've generated, most recent first.</p>
           {isLoading && <p className="text-ink/40 text-sm">Loading…</p>}
-          <ul className="space-y-1">
+          <ul className="-mx-2">
             {recaps.map((r) => (
               <li key={r.id}>
                 <button
                   onClick={() => setSelected(r)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
-                    active?.id === r.id ? "bg-surface-raised text-ink" : "text-ink/60 hover:bg-surface-raised"
+                  className={`w-full text-left -mx-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    active?.id === r.id ? "bg-surface-raised text-ink" : "text-ink/60 hover:bg-surface-raised/60"
                   }`}
                 >
                   <div className="font-medium capitalize">{r.period_type}ly</div>
@@ -63,38 +64,39 @@ export default function Recaps() {
                 </button>
               </li>
             ))}
-            {recaps.length === 0 && !isLoading && <p className="text-ink/40 text-sm px-1">No recaps yet.</p>}
+            {recaps.length === 0 && !isLoading && <p className="text-ink/40 text-sm px-1">No recaps yet — generate one above.</p>}
           </ul>
         </div>
 
         <div className="card col-span-2">
           {active ? (
             <>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold capitalize">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="panel-title capitalize">
                   {active.period_type}ly recap · {active.period_start} – {active.period_end}
                 </h2>
                 <span className="text-[10px] text-ink/30 uppercase tracking-wide">{active.source}</span>
               </div>
+              <p className="panel-subtitle mb-4">An automated read on the period's income, spending, and savings rate.</p>
               <div className="text-sm text-ink/80 whitespace-pre-line leading-relaxed">{active.recap_text}</div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-                <div className="bg-surface-sunken rounded-lg p-3">
+                <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
                   <div className="text-xs text-ink/50">Income</div>
-                  <div className="text-lg numeral text-income">{formatCurrency(Number(active.context.income ?? 0), 0)}</div>
+                  <div className="numeral text-lg text-income mt-0.5">{formatCurrency(Number(active.context.income ?? 0), 0)}</div>
                 </div>
-                <div className="bg-surface-sunken rounded-lg p-3">
+                <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
                   <div className="text-xs text-ink/50">Expenses</div>
-                  <div className="text-lg numeral text-expense">{formatCurrency(Number(active.context.expenses ?? 0), 0)}</div>
+                  <div className="numeral text-lg text-expense mt-0.5">{formatCurrency(Number(active.context.expenses ?? 0), 0)}</div>
                 </div>
-                <div className="bg-surface-sunken rounded-lg p-3">
+                <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
                   <div className="text-xs text-ink/50">Savings rate</div>
-                  <div className="text-lg numeral text-ink">{(Number(active.context.savings_rate ?? 0) * 100).toFixed(0)}%</div>
+                  <div className="numeral text-lg text-ink mt-0.5">{(Number(active.context.savings_rate ?? 0) * 100).toFixed(0)}%</div>
                 </div>
               </div>
             </>
           ) : (
-            <p className="text-ink/40 text-sm">Generate a recap to see it here.</p>
+            <p className="text-ink/40 text-sm">Generate a recap above to see it here.</p>
           )}
         </div>
       </div>

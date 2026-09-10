@@ -50,12 +50,18 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
   return (
     <div className="mt-4 pt-4 border-t border-border-subtle">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50">Savings Goals</h3>
+        <div>
+          <h3 className="panel-title">Savings Goals</h3>
+          <p className="panel-subtitle">Set money aside within this account toward specific goals.</p>
+        </div>
         <div className="flex items-center gap-3">
-          <button className="text-ink/40 hover:text-ink text-xs" onClick={() => setShowActivity((v) => !v)}>
+          <button className="text-xs text-ink/40 transition-colors hover:text-ink" onClick={() => setShowActivity((v) => !v)}>
             {showActivity ? "Hide activity" : "Activity"}
           </button>
-          <button className="text-accent text-xs" onClick={() => setShowCreate(true)}>
+          <button
+            className="text-xs font-semibold text-accent transition-colors hover:text-accent/80"
+            onClick={() => setShowCreate(true)}
+          >
             + Create goal
           </button>
         </div>
@@ -77,8 +83,8 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
 
           {buckets.length === 0 ? (
             <p className="text-ink/40 text-xs mb-3">
-              No goals yet — all {formatCurrency(currentBalance)} is available to allocate. Create a goal to start
-              setting money aside.
+              No goals yet — all <span className="numeral">{formatCurrency(currentBalance)}</span> is available to
+              allocate. Create a goal to start setting money aside.
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
@@ -175,28 +181,28 @@ function BucketCard({
   }
 
   return (
-    <div className="rounded-lg border border-border-subtle p-3 relative">
+    <div className="relative rounded-lg border border-border-subtle p-3 transition-colors hover:bg-surface-raised/60">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ background: bucket.color }} />
           <span className="font-medium text-sm">{bucket.name}</span>
         </div>
         <div className="relative">
-          <button className="text-ink/30 hover:text-ink px-1" onClick={() => setMenuOpen((v) => !v)}>
+          <button className="px-1 text-ink/30 transition-colors hover:text-ink" onClick={() => setMenuOpen((v) => !v)}>
             ⋯
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-6 z-10 bg-surface-raised border border-border rounded-lg shadow-lg text-xs w-40 overflow-hidden">
-              <button className="block w-full text-left px-3 py-2 hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onAllocate(); }}>
+            <div className="absolute right-0 top-6 z-10 w-40 overflow-hidden rounded-lg border border-border bg-surface-raised text-xs shadow-[0_4px_16px_rgba(74,54,27,0.12)]">
+              <button className="block w-full px-3 py-2 text-left transition-colors hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onAllocate(); }}>
                 Allocate money
               </button>
-              <button className="block w-full text-left px-3 py-2 hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onMove(); }}>
+              <button className="block w-full px-3 py-2 text-left transition-colors hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onMove(); }}>
                 Move money
               </button>
-              <button className="block w-full text-left px-3 py-2 hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onEdit(); }}>
+              <button className="block w-full px-3 py-2 text-left transition-colors hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onEdit(); }}>
                 Edit goal
               </button>
-              <button className="block w-full text-left px-3 py-2 hover:bg-surface-sunken text-expense" onClick={archive}>
+              <button className="block w-full px-3 py-2 text-left text-expense transition-colors hover:bg-surface-sunken" onClick={archive}>
                 Archive goal
               </button>
             </div>
@@ -209,14 +215,16 @@ function BucketCard({
       {hasTarget ? (
         <>
           <div className="flex items-center justify-between text-xs text-ink/50 mt-0.5">
-            <span>of {money(bucket.target_amount as number)} goal</span>
-            <span className={overfunded ? "text-income" : fullyFunded ? "text-income" : ""}>
+            <span>
+              of <span className="numeral">{money(bucket.target_amount as number)}</span> goal
+            </span>
+            <span className={`numeral tabular-nums ${overfunded ? "text-income" : fullyFunded ? "text-income" : ""}`}>
               {pct !== null ? `${pct.toFixed(0)}%` : ""}
             </span>
           </div>
-          <div className="h-1.5 rounded-full bg-surface-sunken overflow-hidden mt-1">
+          <div className="h-2 rounded-full bg-surface-sunken overflow-hidden mt-1.5 shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">
             <div
-              className="h-full rounded-full transition-all"
+              className="h-full rounded-full transition-[width] duration-300 ease-out"
               style={{ width: `${Math.min(100, pct ?? 0)}%`, background: overfunded ? "#3f825f" : bucket.color }}
             />
           </div>
@@ -294,10 +302,14 @@ function AllocateModal({
             </div>
           </div>
         )}
-        {exceedsAvailable && <p className="text-expense text-xs">You only have {money(available)} available to allocate.</p>}
+        {exceedsAvailable && (
+          <p className="text-expense text-xs">
+            You only have <span className="numeral">{money(available)}</span> available to allocate.
+          </p>
+        )}
         {error && <p className="text-expense text-xs">{error}</p>}
         <div className="flex gap-2 justify-end pt-1">
-          <button type="button" className="text-xs text-ink/50" onClick={onClose}>
+          <button type="button" className="text-xs text-ink/50 transition-colors hover:text-ink" onClick={onClose}>
             Cancel
           </button>
           <button className="btn-primary text-xs px-3" disabled={submitting || !amt || exceedsAvailable}>
@@ -379,10 +391,14 @@ function MoveMoneyModal({
             </div>
           </div>
         )}
-        {exceeds && <p className="text-expense text-xs">This goal only has {money(bucket.balance)} available.</p>}
+        {exceeds && (
+          <p className="text-expense text-xs">
+            This goal only has <span className="numeral">{money(bucket.balance)}</span> available.
+          </p>
+        )}
         {error && <p className="text-expense text-xs">{error}</p>}
         <div className="flex gap-2 justify-end pt-1">
-          <button type="button" className="text-xs text-ink/50" onClick={onClose}>
+          <button type="button" className="text-xs text-ink/50 transition-colors hover:text-ink" onClick={onClose}>
             Cancel
           </button>
           <button className="btn-primary text-xs px-3" disabled={submitting || !amt || exceeds}>
@@ -445,7 +461,7 @@ function CreateBucketModal({ accountId, onClose, onDone }: { accountId: string; 
         </div>
         {error && <p className="text-expense text-xs">{error}</p>}
         <div className="flex gap-2 justify-end pt-1">
-          <button type="button" className="text-xs text-ink/50" onClick={onClose}>
+          <button type="button" className="text-xs text-ink/50 transition-colors hover:text-ink" onClick={onClose}>
             Cancel
           </button>
           <button className="btn-primary text-xs px-3" disabled={submitting || !name.trim()}>
@@ -510,7 +526,7 @@ function EditBucketModal({ bucket, onClose, onDone }: { bucket: Bucket | null; o
         </div>
         {error && <p className="text-expense text-xs">{error}</p>}
         <div className="flex gap-2 justify-end pt-1">
-          <button type="button" className="text-xs text-ink/50" onClick={onClose}>
+          <button type="button" className="text-xs text-ink/50 transition-colors hover:text-ink" onClick={onClose}>
             Cancel
           </button>
           <button className="btn-primary text-xs px-3" disabled={submitting || !name.trim()}>
@@ -558,9 +574,9 @@ function ActivityHistory({ accountId }: { accountId: string }) {
 
 function ModalShell({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50" onClick={onClose}>
       <div className="card w-96" onClick={(e) => e.stopPropagation()}>
-        <h3 className="font-semibold mb-3">{title}</h3>
+        <h3 className="panel-title mb-3">{title}</h3>
         {children}
       </div>
     </div>

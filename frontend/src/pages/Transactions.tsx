@@ -60,40 +60,44 @@ export default function Transactions() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <input
-          className="input flex-1 min-w-[200px]"
-          placeholder="Search description…"
-          value={filters.q}
-          onChange={(e) => setFilters({ ...filters, q: e.target.value })}
-        />
-        <select className="input" value={filters.account_id} onChange={(e) => setFilters({ ...filters, account_id: e.target.value })}>
-          <option value="">All accounts</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-        <select className="input" value={filters.category_id} onChange={(e) => setFilters({ ...filters, category_id: e.target.value })}>
-          <option value="">All categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.emoji} {c.name}
-            </option>
-          ))}
-        </select>
-        <select className="input" value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
-          <option value="">All types</option>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-          <option value="transfer">Transfer</option>
-        </select>
+      <div className="card">
+        <h2 className="panel-title">Filter transactions</h2>
+        <p className="panel-subtitle mb-4">Narrow the list below by description, account, category, or type.</p>
+        <div className="flex flex-wrap gap-3">
+          <input
+            className="input flex-1 min-w-[200px]"
+            placeholder="Search description…"
+            value={filters.q}
+            onChange={(e) => setFilters({ ...filters, q: e.target.value })}
+          />
+          <select className="input" value={filters.account_id} onChange={(e) => setFilters({ ...filters, account_id: e.target.value })}>
+            <option value="">All accounts</option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+          <select className="input" value={filters.category_id} onChange={(e) => setFilters({ ...filters, category_id: e.target.value })}>
+            <option value="">All categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.emoji} {c.name}
+              </option>
+            ))}
+          </select>
+          <select className="input" value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
+            <option value="">All types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+            <option value="transfer">Transfer</option>
+          </select>
+        </div>
       </div>
 
       {selected.size > 0 && (
         <div className="card flex items-center gap-3 py-3">
-          <span className="text-sm text-ink/60">{selected.size} selected</span>
+          <span className="text-sm font-medium text-ink/60">{selected.size} selected</span>
           <select className="input" onChange={(e) => e.target.value && handleBulkCategory(e.target.value)} defaultValue="">
             <option value="" disabled>
               Set category…
@@ -119,11 +123,11 @@ export default function Transactions() {
       />
 
       {data && data.total > data.page_size && (
-        <div className="flex justify-center gap-3 text-sm">
+        <div className="flex justify-center items-center gap-3 text-sm">
           <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(page - 1)}>
             Previous
           </button>
-          <span className="py-2 text-ink/50">
+          <span className="py-2 numeral text-ink/50">
             Page {page} of {Math.ceil(data.total / data.page_size)}
           </span>
           <button className="btn-secondary" disabled={page * data.page_size >= data.total} onClick={() => setPage(page + 1)}>
@@ -196,9 +200,9 @@ function AddTransactionModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50" onClick={onClose}>
       <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-lg font-bold mb-4">Add Transaction</h2>
+        <h2 className="font-display text-xl font-semibold text-ink mb-4">Add transaction</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex rounded-lg border border-border overflow-hidden">
             {(["expense", "income", "transfer"] as const).map((t) => (
@@ -206,14 +210,14 @@ function AddTransactionModal({
                 type="button"
                 key={t}
                 onClick={() => setType(t)}
-                className={`flex-1 py-2 text-sm font-semibold capitalize ${
+                className={`flex-1 py-2 text-sm font-semibold capitalize transition-colors ${
                   type === t
                     ? t === "income"
-                      ? "bg-income text-black"
+                      ? "bg-income text-white"
                       : t === "expense"
-                        ? "bg-expense text-black"
+                        ? "bg-expense text-white"
                         : "bg-ink/20 text-ink"
-                    : "text-ink/50"
+                    : "text-ink/50 hover:bg-surface-raised"
                 }`}
               >
                 {t}

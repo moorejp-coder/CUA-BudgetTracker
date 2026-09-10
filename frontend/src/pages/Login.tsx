@@ -99,7 +99,7 @@ export default function Login() {
     <div className="min-h-screen bg-canvas text-ink/90 flex items-center justify-center">
       <div className="card w-full max-w-sm">
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-display italic font-semibold text-canvas text-lg">b</div>
+          <div className="brand-mark w-8 h-8 font-display italic font-semibold text-lg">b</div>
           <span className="font-display italic text-lg text-ink">Budget Tracker</span>
         </div>
         <h1 className="font-display text-2xl font-semibold text-ink tracking-tight mb-1">{TITLES[mode]}</h1>

@@ -30,21 +30,23 @@ export default function CashFlow() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Total income</div>
-          <div className="text-2xl font-bold text-income tabular">{formatCurrency(totalIncome, 0)}</div>
+          <div className="numeral text-2xl text-income">{formatCurrency(totalIncome, 0)}</div>
         </div>
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Total expenses</div>
-          <div className="text-2xl font-bold text-expense tabular">{formatCurrency(totalExpense, 0)}</div>
+          <div className="numeral text-2xl text-expense">{formatCurrency(totalExpense, 0)}</div>
         </div>
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Net</div>
-          <div className={`text-2xl numeral ${totalIncome - totalExpense < 0 ? "text-expense" : "text-income"}`}>
+          <div className={`numeral text-2xl ${totalIncome - totalExpense < 0 ? "text-expense" : "text-income"}`}>
             {formatCurrency(totalIncome - totalExpense, 0)}
           </div>
         </div>
       </div>
 
       <div className="card">
+        <p className="panel-title">Income vs. expenses</p>
+        <p className="panel-subtitle mb-4">Monthly totals over the selected range.</p>
         <CashflowChart data={cashflow} />
       </div>
     </div>
