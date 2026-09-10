@@ -211,7 +211,7 @@ export default function Categories() {
             return budget ? (
               <BudgetProgress key={c.id} budget={budget} right={form} />
             ) : (
-              <div key={c.id} className="grid grid-cols-[minmax(0,1fr)_100px_auto] items-center text-sm gap-3">
+              <div key={c.id} className="grid grid-cols-[minmax(0,1fr)_110px_auto] items-center text-sm gap-4">
                 <span className="flex items-center gap-2.5 min-w-0 truncate">
                   <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
                     <CategoryIcon name={c.name} />
@@ -255,7 +255,7 @@ function BudgetInlineForm({
   return (
     <div className="flex items-center gap-1.5 shrink-0">
       <input
-        className="input w-16 text-right text-xs py-1"
+        className="input w-24 px-2 text-right text-xs py-1"
         placeholder="—"
         type="number"
         value={amount}
