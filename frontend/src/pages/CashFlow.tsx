@@ -16,8 +16,8 @@ export default function CashFlow() {
   const totalExpense = cashflow.reduce((s, p) => s + p.expense, 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <div className="shrink-0 flex items-center justify-between">
         <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Cash Flow</h1>
         <select className="input" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
           <option value={3}>Last 3 months</option>
@@ -27,7 +27,7 @@ export default function CashFlow() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="shrink-0 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card">
           <div className="text-xs text-ink/60 mb-1">Total income</div>
           <div className="numeral text-2xl text-income">{formatCurrency(totalIncome, 0)}</div>
@@ -44,10 +44,12 @@ export default function CashFlow() {
         </div>
       </div>
 
-      <div className="card">
-        <p className="panel-title">Income vs. expenses</p>
-        <p className="panel-subtitle mb-4">Monthly totals over the selected range.</p>
-        <CashflowChart data={cashflow} />
+      <div className="card flex-1 min-h-0 flex flex-col">
+        <p className="shrink-0 panel-title">Income vs. expenses</p>
+        <p className="shrink-0 panel-subtitle mb-4">Monthly totals over the selected range.</p>
+        <div className="flex-1 min-h-0">
+          <CashflowChart data={cashflow} />
+        </div>
       </div>
     </div>
   );

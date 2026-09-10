@@ -3,8 +3,15 @@ import type { CashflowPoint } from "@/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 export default function CashflowChart({ data }: { data: CashflowPoint[] }) {
+  if (!data.length) {
+    return (
+      <div className="h-full min-h-[8rem] flex items-center justify-center text-ink/40 text-sm">
+        No cash flow data for this range yet.
+      </div>
+    );
+  }
   return (
-    <div className="h-64">
+    <div className="h-full min-h-[8rem]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#eee7db" vertical={false} />

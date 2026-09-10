@@ -31,8 +31,8 @@ export default function Coach() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <div className="shrink-0 flex items-center justify-between">
         <div>
           <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Coach</h1>
           <p className="text-sm text-ink/50 mt-1">
@@ -45,9 +45,9 @@ export default function Coach() {
         </button>
       </div>
 
-      {isLoading && <p className="text-ink/40 text-sm">Loading…</p>}
+      {isLoading && <p className="shrink-0 text-ink/40 text-sm">Loading…</p>}
 
-      <div className="space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-0.5">
         {nudges.map((n) => {
           const meta = EVENT_LABELS[n.event_type] ?? { label: n.event_type, tone: "bg-surface-sunken text-ink/60" };
           return (

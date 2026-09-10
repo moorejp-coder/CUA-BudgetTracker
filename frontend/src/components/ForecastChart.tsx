@@ -3,8 +3,15 @@ import type { CashflowForecast } from "@/types";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 export default function ForecastChart({ forecast }: { forecast: CashflowForecast }) {
+  if (!forecast.points.length) {
+    return (
+      <div className="h-full min-h-[8rem] flex items-center justify-center text-ink/40 text-sm">
+        Not enough data yet to project a forecast.
+      </div>
+    );
+  }
   return (
-    <div className="h-64">
+    <div className="h-full min-h-[8rem]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={forecast.points}>
           <CartesianGrid strokeDasharray="3 3" stroke="#eee7db" vertical={false} />

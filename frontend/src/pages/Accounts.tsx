@@ -31,10 +31,10 @@ export default function Accounts() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Accounts</h1>
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <h1 className="shrink-0 font-display text-[28px] font-semibold text-ink tracking-tight">Accounts</h1>
 
-      <div className="card">
+      <div className="card shrink-0">
         <h2 className="panel-title">Add account</h2>
         <p className="panel-subtitle mb-4">Track a checking, savings, credit card, loan, or investment account.</p>
         <form onSubmit={addAccount} className="flex flex-wrap gap-3 items-end">
@@ -76,8 +76,9 @@ export default function Accounts() {
         </form>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {accounts.map((a) => (
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {accounts.map((a) => (
           <div key={a.id} className="card">
             <div className="flex justify-between items-start">
               <button className="text-left" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
@@ -106,8 +107,9 @@ export default function Accounts() {
             <AccountBuckets accountId={a.id} currentBalance={a.current_balance} />
             {expanded === a.id && <AccountTransactionHistory accountId={a.id} />}
           </div>
-        ))}
-        {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above to start tracking balances.</p>}
+          ))}
+          {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above to start tracking balances.</p>}
+        </div>
       </div>
     </div>
   );

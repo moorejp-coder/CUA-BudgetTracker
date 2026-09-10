@@ -6,13 +6,13 @@ export default function Subscriptions() {
   const { data, isLoading } = useQuery({ queryKey: ["assistant-subscriptions"], queryFn: AssistantApi.subscriptions });
 
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Subscriptions</h1>
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <h1 className="shrink-0 font-display text-[28px] font-semibold text-ink tracking-tight">Subscriptions</h1>
 
-      {isLoading && <p className="text-ink/40 text-sm">Loading…</p>}
+      {isLoading && <p className="shrink-0 text-ink/40 text-sm">Loading…</p>}
 
       {data && (
-        <>
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-6 pr-0.5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="card">
               <div className="text-xs text-ink/60 mb-1">Total monthly subscription cost</div>
@@ -107,7 +107,7 @@ export default function Subscriptions() {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

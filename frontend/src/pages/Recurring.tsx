@@ -25,14 +25,15 @@ export default function Recurring() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Recurring &amp; Subscriptions</h1>
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <h1 className="shrink-0 font-display text-[28px] font-semibold text-ink tracking-tight">Recurring &amp; Subscriptions</h1>
 
-      {suggestions.length > 0 && (
-        <div className="card">
-          <h2 className="panel-title">Detected patterns</h2>
-          <p className="panel-subtitle mb-3">Recurring charges we noticed in your transactions — confirm to start tracking them.</p>
-          <ul className="-mx-2">
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {suggestions.length > 0 ? (
+        <div className="card min-h-0 flex flex-col">
+          <h2 className="shrink-0 panel-title">Detected patterns</h2>
+          <p className="shrink-0 panel-subtitle mb-3">Recurring charges we noticed in your transactions — confirm to start tracking them.</p>
+          <ul className="flex-1 min-h-0 overflow-y-auto -mx-2">
             {suggestions.map((s, i) => (
               <li
                 key={i}
@@ -56,12 +57,16 @@ export default function Recurring() {
             ))}
           </ul>
         </div>
+      ) : (
+        <div className="card min-h-0 hidden lg:flex flex-col items-center justify-center text-sm text-ink/40">
+          No detected patterns right now — we'll flag recurring charges here as we spot them.
+        </div>
       )}
 
-      <div className="card">
-        <h2 className="panel-title">Confirmed recurring items</h2>
-        <p className="panel-subtitle mb-3">Subscriptions and bills tracked on a schedule.</p>
-        <div className="overflow-x-auto">
+      <div className="card min-h-0 flex flex-col">
+        <h2 className="shrink-0 panel-title">Confirmed recurring items</h2>
+        <p className="shrink-0 panel-subtitle mb-3">Subscriptions and bills tracked on a schedule.</p>
+        <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm">
           <thead className="text-ink/50 text-xs uppercase">
             <tr>
@@ -101,6 +106,7 @@ export default function Recurring() {
           </tbody>
         </table>
         </div>
+      </div>
       </div>
     </div>
   );

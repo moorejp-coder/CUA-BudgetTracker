@@ -24,8 +24,8 @@ export default function Recaps() {
   const active = selected ?? recaps[0] ?? null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <div className="shrink-0 flex items-center justify-between">
         <div>
           <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Recaps</h1>
           <p className="text-sm text-ink/50 mt-1">
@@ -43,12 +43,12 @@ export default function Recaps() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card col-span-1">
-          <h2 className="panel-title">History</h2>
-          <p className="panel-subtitle mb-3">Recaps you've generated, most recent first.</p>
-          {isLoading && <p className="text-ink/40 text-sm">Loading…</p>}
-          <ul className="-mx-2">
+      <div className="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="card col-span-1 flex flex-col min-h-0">
+          <h2 className="shrink-0 panel-title">History</h2>
+          <p className="shrink-0 panel-subtitle mb-3">Recaps you've generated, most recent first.</p>
+          {isLoading && <p className="shrink-0 text-ink/40 text-sm">Loading…</p>}
+          <ul className="flex-1 min-h-0 overflow-y-auto -mx-2">
             {recaps.map((r) => (
               <li key={r.id}>
                 <button
@@ -68,30 +68,32 @@ export default function Recaps() {
           </ul>
         </div>
 
-        <div className="card col-span-2">
+        <div className="card col-span-2 flex flex-col min-h-0">
           {active ? (
             <>
-              <div className="flex items-center justify-between mb-1">
+              <div className="shrink-0 flex items-center justify-between mb-1">
                 <h2 className="panel-title capitalize">
                   {active.period_type}ly recap · {active.period_start} – {active.period_end}
                 </h2>
                 <span className="text-[10px] text-ink/30 uppercase tracking-wide">{active.source}</span>
               </div>
-              <p className="panel-subtitle mb-4">An automated read on the period's income, spending, and savings rate.</p>
-              <div className="text-sm text-ink/80 whitespace-pre-line leading-relaxed">{active.recap_text}</div>
+              <p className="shrink-0 panel-subtitle mb-4">An automated read on the period's income, spending, and savings rate.</p>
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <div className="text-sm text-ink/80 whitespace-pre-line leading-relaxed">{active.recap_text}</div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-                <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
-                  <div className="text-xs text-ink/50">Income</div>
-                  <div className="numeral text-lg text-income mt-0.5">{formatCurrency(Number(active.context.income ?? 0), 0)}</div>
-                </div>
-                <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
-                  <div className="text-xs text-ink/50">Expenses</div>
-                  <div className="numeral text-lg text-expense mt-0.5">{formatCurrency(Number(active.context.expenses ?? 0), 0)}</div>
-                </div>
-                <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
-                  <div className="text-xs text-ink/50">Savings rate</div>
-                  <div className="numeral text-lg text-ink mt-0.5">{(Number(active.context.savings_rate ?? 0) * 100).toFixed(0)}%</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+                  <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
+                    <div className="text-xs text-ink/50">Income</div>
+                    <div className="numeral text-lg text-income mt-0.5">{formatCurrency(Number(active.context.income ?? 0), 0)}</div>
+                  </div>
+                  <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
+                    <div className="text-xs text-ink/50">Expenses</div>
+                    <div className="numeral text-lg text-expense mt-0.5">{formatCurrency(Number(active.context.expenses ?? 0), 0)}</div>
+                  </div>
+                  <div className="rounded-lg bg-surface-raised p-3.5 border border-border-subtle">
+                    <div className="text-xs text-ink/50">Savings rate</div>
+                    <div className="numeral text-lg text-ink mt-0.5">{(Number(active.context.savings_rate ?? 0) * 100).toFixed(0)}%</div>
+                  </div>
                 </div>
               </div>
             </>

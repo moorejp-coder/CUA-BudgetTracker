@@ -9,8 +9,8 @@ export default function Anomalies() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <div className="shrink-0">
         <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Anomalies</h1>
         <p className="text-sm text-ink/50 mt-1">
           Transactions from the last 30 days that stand out from your own historical spending
@@ -18,21 +18,21 @@ export default function Anomalies() {
         </p>
       </div>
 
-      {isLoading && <p className="text-ink/40 text-sm">Loading…</p>}
+      {isLoading && <p className="shrink-0 text-ink/40 text-sm">Loading…</p>}
 
       {data && (
-        <>
-          <div className="card">
+        <div className="flex-1 min-h-0 flex flex-col gap-4">
+          <div className="card shrink-0">
             <h2 className="panel-title">AI summary</h2>
             <p className="panel-subtitle mb-3">A plain-language read of what stood out.</p>
             <div className="text-sm text-ink/80 whitespace-pre-line">{data.summary}</div>
             <div className="text-[10px] text-ink/30 mt-2 uppercase tracking-wide">{data.source}</div>
           </div>
 
-          <div className="card">
-            <h2 className="panel-title">Flagged transactions</h2>
-            <p className="panel-subtitle mb-3">Transactions that stand out from your typical spending in that category.</p>
-            <div className="overflow-x-auto">
+          <div className="card flex-1 min-h-0 flex flex-col">
+            <h2 className="shrink-0 panel-title">Flagged transactions</h2>
+            <p className="shrink-0 panel-subtitle mb-3">Transactions that stand out from your typical spending in that category.</p>
+            <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm">
               <thead className="text-ink/50 text-xs uppercase">
                 <tr>
@@ -68,7 +68,7 @@ export default function Anomalies() {
             </table>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

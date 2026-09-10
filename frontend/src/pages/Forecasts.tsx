@@ -47,8 +47,8 @@ export default function Forecasts() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <div className="shrink-0 flex items-center justify-between">
         <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Forecasts</h1>
         <div className="flex gap-1">
           {[30, 60, 90].map((d) => (
@@ -64,10 +64,10 @@ export default function Forecasts() {
       </div>
 
       {forecast && (
-        <div className="card">
-          <p className="panel-title">Projected balance</p>
-          <p className="panel-subtitle mb-4">Based on your recent averages and upcoming recurring charges.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 text-sm">
+        <div className="card flex-1 min-h-0 flex flex-col">
+          <p className="shrink-0 panel-title">Projected balance</p>
+          <p className="shrink-0 panel-subtitle mb-4">Based on your recent averages and upcoming recurring charges.</p>
+          <div className="shrink-0 grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4 text-sm">
             <div>
               <div className="text-ink/50 text-xs">Avg monthly income</div>
               <div className="numeral text-income">{formatCurrency(forecast.avg_monthly_income, 0)}</div>
@@ -85,18 +85,20 @@ export default function Forecasts() {
               <div className="numeral text-ink">{formatCurrency(forecast.starting_balance, 0)}</div>
             </div>
           </div>
-          <ForecastChart forecast={forecast} />
+          <div className="flex-1 min-h-0">
+            <ForecastChart forecast={forecast} />
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="shrink-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card">
           <h2 className="panel-title">Scenario builder</h2>
           <p className="panel-subtitle mb-3">
             Target a category name for a % change (e.g. -0.2 = cut 20%) or any other label for
             an absolute $/month contribution change.
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
             {rows.map((row, i) => (
               <div key={i} className="flex gap-2">
                 <input

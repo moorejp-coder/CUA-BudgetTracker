@@ -5,13 +5,13 @@ import { formatCurrency, formatNumber } from "@/lib/format";
 export default function NetWorthChart({ data }: { data: NetWorthPoint[] }) {
   if (!data.length) {
     return (
-      <div className="h-64 flex items-center justify-center text-ink/40 text-sm">
+      <div className="h-full min-h-[8rem] flex items-center justify-center text-ink/40 text-sm">
         No balance snapshots yet — add one from the Accounts page.
       </div>
     );
   }
   return (
-    <div className="h-64">
+    <div className="h-full min-h-[8rem]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#eee7db" vertical={false} />

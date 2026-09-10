@@ -106,7 +106,7 @@ export default function TransactionTable({
   );
 
   return (
-    <div className="card p-0 overflow-hidden">
+    <div className={`card p-0 overflow-hidden ${compact ? "" : "flex-1 min-h-0 flex flex-col"}`}>
       {/* Card list — small/medium screens (or forced), no horizontal scrolling needed */}
       <div className={`${compact ? "block" : "md:hidden"} divide-y divide-border-subtle`}>
         {transactions.map((t) =>
@@ -182,7 +182,11 @@ export default function TransactionTable({
       </div>
 
       {/* Table — md and up (unless compact is forced) */}
-      <div className={`${compact ? "hidden" : "hidden md:block"} overflow-x-auto`}>
+      <div
+        className={`${compact ? "hidden" : "hidden md:block"} overflow-x-auto ${
+          compact ? "" : "md:flex-1 md:min-h-0 md:overflow-y-auto"
+        }`}
+      >
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-surface-sunken text-ink/50 text-xs font-medium uppercase tracking-wide">
             <tr>

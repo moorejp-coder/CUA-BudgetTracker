@@ -50,7 +50,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="max-w-sm">
+    <div className="h-full flex flex-col min-h-0 max-w-sm overflow-y-auto">
       <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight mb-1">Settings</h1>
       <p className="text-sm text-ink/50 mb-6">Manage your account.</p>
 

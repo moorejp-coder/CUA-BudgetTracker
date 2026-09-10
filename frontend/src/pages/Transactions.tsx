@@ -50,8 +50,8 @@ export default function Transactions() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-4 min-h-0">
+      <div className="shrink-0 flex items-center justify-between">
         <h1 className="font-display text-[28px] font-semibold text-ink tracking-tight">Transactions</h1>
         <div className="flex gap-2">
           <button className="btn-primary" onClick={() => setShowAdd(true)}>
@@ -60,7 +60,7 @@ export default function Transactions() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="shrink-0 card">
         <h2 className="panel-title">Filter transactions</h2>
         <p className="panel-subtitle mb-4">Narrow the list below by description, account, category, or type.</p>
         <div className="flex flex-wrap gap-3">
@@ -96,7 +96,7 @@ export default function Transactions() {
       </div>
 
       {selected.size > 0 && (
-        <div className="card flex items-center gap-3 py-3">
+        <div className="shrink-0 card flex items-center gap-3 py-3">
           <span className="text-sm font-medium text-ink/60">{selected.size} selected</span>
           <select className="input" onChange={(e) => e.target.value && handleBulkCategory(e.target.value)} defaultValue="">
             <option value="" disabled>
@@ -111,19 +111,21 @@ export default function Transactions() {
         </div>
       )}
 
-      <TransactionTable
-        transactions={data?.items ?? []}
-        categories={categories}
-        accounts={accounts}
-        onCategoryChange={handleCategoryChange}
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
-        selected={selected}
-        onSelectionChange={setSelected}
-      />
+      <div className="flex-1 min-h-0 flex flex-col">
+        <TransactionTable
+          transactions={data?.items ?? []}
+          categories={categories}
+          accounts={accounts}
+          onCategoryChange={handleCategoryChange}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+          selected={selected}
+          onSelectionChange={setSelected}
+        />
+      </div>
 
       {data && data.total > data.page_size && (
-        <div className="flex justify-center items-center gap-3 text-sm">
+        <div className="shrink-0 flex justify-center items-center gap-3 text-sm">
           <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(page - 1)}>
             Previous
           </button>

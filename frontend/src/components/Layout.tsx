@@ -73,7 +73,7 @@ export default function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-canvas text-ink/90">
+    <div className="flex min-h-screen md:h-screen md:overflow-hidden bg-canvas text-ink/90">
       <header className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-canvas/95 backdrop-blur safe-top">
         <div className="flex items-center gap-2">
           <div className="brand-mark w-7 h-7 font-display italic font-semibold text-base">b</div>
@@ -96,7 +96,7 @@ export default function Layout() {
       )}
 
       <nav
-        className={`w-60 shrink-0 border-r border-border-subtle p-4 flex flex-col fixed md:static inset-y-0 left-0 z-20 bg-canvas transition-transform duration-200 pt-[calc(73px+env(safe-area-inset-top))] md:pt-4 safe-bottom ${
+        className={`w-60 shrink-0 border-r border-border-subtle p-4 flex flex-col fixed md:static inset-y-0 left-0 z-20 bg-canvas transition-transform duration-200 pt-[calc(73px+env(safe-area-inset-top))] md:pt-4 md:h-screen safe-bottom ${
           navOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
@@ -104,7 +104,7 @@ export default function Layout() {
           <div className="brand-mark w-8 h-8 font-display italic font-semibold text-lg">b</div>
           <span className="font-display italic text-lg text-ink">Budget Tracker</span>
         </div>
-        <ul className="flex-1 space-y-0.5 overflow-y-auto scrollbar-none">
+        <ul className="flex-1 min-h-0 space-y-0.5 overflow-y-auto scrollbar-none">
           {NAV_ITEMS.map((item) => (
             <li key={item.to}>
               <NavItemLink {...item} />
@@ -140,7 +140,7 @@ export default function Layout() {
           </button>
         </div>
       </nav>
-      <main className="flex-1 p-4 md:p-8 pt-[calc(73px+env(safe-area-inset-top))] md:pt-8 max-w-[1280px] min-w-0 safe-bottom">
+      <main className="flex-1 flex flex-col min-w-0 min-h-0 p-4 md:p-8 pt-[calc(73px+env(safe-area-inset-top))] md:pt-8 md:h-screen md:overflow-hidden max-w-[1280px] safe-bottom">
         <Outlet />
       </main>
     </div>
