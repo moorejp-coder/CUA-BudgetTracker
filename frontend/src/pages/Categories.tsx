@@ -27,6 +27,7 @@ export default function Categories() {
   });
 
   const [newCat, setNewCat] = useState({ name: "", type: "expense" as "income" | "expense", emoji: "" });
+  const [openPanel, setOpenPanel] = useState<"suggestion" | "homePlan" | null>(null);
 
   async function addCategory(e: React.FormEvent) {
     e.preventDefault();
@@ -151,74 +152,50 @@ export default function Categories() {
           </div>
         </div>
 
-        {/* Right column: suggestion + home plan (fixed) + monthly budgets (scrollable) */}
+        {/* Right column: quick-access summary buttons + monthly budgets (scrollable) */}
         <div className="min-h-0 flex flex-col gap-4">
-          {suggestion && suggestion.monthly_income > 0 && (
-            <div className="card shrink-0 p-3.5">
-              <h2 className="text-[13px] font-semibold text-ink">Suggested budget — {period}</h2>
-              <p className="text-[11px] text-ink/50 mt-0.5 mb-2 leading-snug">
-                Based on <span className="numeral">{suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}</span> of
-                monthly income.{" "}
-                {suggestion.has_debt
-                  ? "You have outstanding debt, so 10% is allocated to paying it down."
-                  : "You're debt-free, so that 10% is allocated to investing instead."}
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-                {suggestion.buckets.map((b) => (
-                  <div key={b.key} className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
-                    <div className="text-[10px] text-ink/50 leading-3.5 truncate">
-                      {b.label} · {Math.round(b.pct * 100)}%
-                    </div>
-                    <div className="numeral text-sm text-ink mt-0.5">
-                      {b.amount.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
-                    </div>
+          {(suggestion && suggestion.monthly_income > 0) || (homePlan && homePlan.monthly_income > 0) ? (
+            <div className="shrink-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {suggestion && suggestion.monthly_income > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setOpenPanel("suggestion")}
+                  className="card text-left p-3.5 hover:border-accent/40 hover:bg-surface-raised/40 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-[13px] font-semibold text-ink">Suggested budget — {period}</h2>
+                    <span className="text-ink/30 text-xs shrink-0">View →</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  <p className="text-[11px] text-ink/50 mt-0.5 leading-snug truncate">
+                    Based on{" "}
+                    <span className="numeral">
+                      {suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+                    </span>{" "}
+                    of monthly income
+                  </p>
+                </button>
+              )}
 
-          {homePlan && homePlan.monthly_income > 0 && (
-            <div className="card shrink-0 p-3.5">
-              <h2 className="text-[13px] font-semibold text-ink">House down payment plan — {period}</h2>
-              <p className="text-[11px] text-ink/50 mt-0.5 mb-2 leading-snug">
-                Conventional 10% down, assuming no other debts.
-                {homePlan.has_debt && " You currently have outstanding debt, so treat this as an optimistic ceiling."}
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
-                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Max monthly payment</div>
-                  <div className="numeral text-sm text-ink mt-0.5">
-                    {homePlan.max_monthly_mortgage_payment.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+              {homePlan && homePlan.monthly_income > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setOpenPanel("homePlan")}
+                  className="card text-left p-3.5 hover:border-accent/40 hover:bg-surface-raised/40 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-[13px] font-semibold text-ink">House down payment plan — {period}</h2>
+                    <span className="text-ink/30 text-xs shrink-0">View →</span>
                   </div>
-                </div>
-                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
-                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Max home price</div>
-                  <div className="numeral text-sm text-ink mt-0.5">
-                    {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
-                  </div>
-                </div>
-                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
-                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Needed to close</div>
-                  <div className="numeral text-sm text-ink mt-0.5">
-                    {homePlan.amount_needed_to_close.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
-                  </div>
-                </div>
-                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
-                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Suggested savings</div>
-                  <div className="numeral text-sm text-ink mt-0.5">
-                    {homePlan.suggested_monthly_savings.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo
-                  </div>
-                </div>
-                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
-                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Time to save from $0</div>
-                  <div className="numeral text-sm text-ink mt-0.5">
-                    {homePlan.months_to_save_from_zero !== null ? `${homePlan.months_to_save_from_zero} months` : "—"}
-                  </div>
-                </div>
-              </div>
+                  <p className="text-[11px] text-ink/50 mt-0.5 leading-snug truncate">
+                    Max home price{" "}
+                    <span className="numeral">
+                      {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+                    </span>
+                  </p>
+                </button>
+              )}
             </div>
-          )}
+          ) : null}
 
           <div className="card flex-1 min-h-0 flex flex-col">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
@@ -256,6 +233,92 @@ export default function Categories() {
             </div>
           </div>
         </div>
+      </div>
+
+      {openPanel === "suggestion" && suggestion && (
+        <DetailModal title={`Suggested budget — ${period}`} onClose={() => setOpenPanel(null)}>
+          <p className="text-sm text-ink/60 mb-4 leading-snug">
+            Based on <span className="numeral">{suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}</span> of
+            monthly income.{" "}
+            {suggestion.has_debt
+              ? "You have outstanding debt, so 10% is allocated to paying it down."
+              : "You're debt-free, so that 10% is allocated to investing instead."}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {suggestion.buckets.map((b) => (
+              <div key={b.key} className="rounded-lg bg-surface-raised p-3 border border-border-subtle">
+                <div className="text-xs text-ink/50 leading-4">
+                  {b.label} · {Math.round(b.pct * 100)}%
+                </div>
+                <div className="numeral text-lg text-ink mt-0.5">
+                  {b.amount.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DetailModal>
+      )}
+
+      {openPanel === "homePlan" && homePlan && (
+        <DetailModal title={`House down payment plan — ${period}`} onClose={() => setOpenPanel(null)}>
+          <p className="text-sm text-ink/60 mb-4 leading-snug">
+            Conventional 10% down, assuming no other debts.
+            {homePlan.has_debt && " You currently have outstanding debt, so treat this as an optimistic ceiling."}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="rounded-lg bg-surface-raised p-3 border border-border-subtle">
+              <div className="text-xs text-ink/50 leading-4">Max monthly payment</div>
+              <div className="numeral text-lg text-ink mt-0.5">
+                {homePlan.max_monthly_mortgage_payment.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+              </div>
+            </div>
+            <div className="rounded-lg bg-surface-raised p-3 border border-border-subtle">
+              <div className="text-xs text-ink/50 leading-4">Max home price</div>
+              <div className="numeral text-lg text-ink mt-0.5">
+                {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+              </div>
+            </div>
+            <div className="rounded-lg bg-surface-raised p-3 border border-border-subtle">
+              <div className="text-xs text-ink/50 leading-4">Needed to close</div>
+              <div className="numeral text-lg text-ink mt-0.5">
+                {homePlan.amount_needed_to_close.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
+              </div>
+            </div>
+            <div className="rounded-lg bg-surface-raised p-3 border border-border-subtle">
+              <div className="text-xs text-ink/50 leading-4">Suggested savings</div>
+              <div className="numeral text-lg text-ink mt-0.5">
+                {homePlan.suggested_monthly_savings.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo
+              </div>
+            </div>
+            <div className="rounded-lg bg-surface-raised p-3 border border-border-subtle">
+              <div className="text-xs text-ink/50 leading-4">Time to save from $0</div>
+              <div className="numeral text-lg text-ink mt-0.5">
+                {homePlan.months_to_save_from_zero !== null ? `${homePlan.months_to_save_from_zero} months` : "—"}
+              </div>
+            </div>
+          </div>
+        </DetailModal>
+      )}
+    </div>
+  );
+}
+
+function DetailModal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between gap-4 mb-1">
+          <h2 className="font-display text-xl font-semibold text-ink">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-ink/40 hover:text-ink text-xl leading-none shrink-0"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        {children}
       </div>
     </div>
   );
