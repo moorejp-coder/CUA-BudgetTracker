@@ -1,13 +1,23 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, GripVertical } from "lucide-react";
 import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
 import AccountBuckets from "@/components/AccountBuckets";
 import TransactionTable from "@/components/TransactionTable";
 import { formatCurrency } from "@/lib/format";
 
 const TYPES = ["checking", "savings", "credit_card", "loan", "investment", "cash", "other"];
+const ORDER_KEY = "accounts-card-order";
+
+function loadOrder(): string[] {
+  try {
+    const raw = localStorage.getItem(ORDER_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function Accounts() {
   const qc = useQueryClient();
@@ -15,6 +25,39 @@ export default function Accounts() {
   const [form, setForm] = useState({ name: "", type: "checking", institution: "", current_balance: "", is_liability: false });
   const [snapshotFor, setSnapshotFor] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [order, setOrder] = useState<string[]>(loadOrder);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  const orderedAccounts = useMemo(() => {
+    const byId = new Map(accounts.map((a) => [a.id, a]));
+    const known = order.filter((id) => byId.has(id)).map((id) => byId.get(id)!);
+    const knownIds = new Set(known.map((a) => a.id));
+    const rest = accounts.filter((a) => !knownIds.has(a.id));
+    return [...known, ...rest];
+  }, [accounts, order]);
+
+  function persistOrder(ids: string[]) {
+    setOrder(ids);
+    try {
+      localStorage.setItem(ORDER_KEY, JSON.stringify(ids));
+    } catch {
+      // ignore storage errors (e.g. private browsing)
+    }
+  }
+
+  function handleDrop(targetId: string) {
+    if (draggedId && draggedId !== targetId) {
+      const ids = orderedAccounts.map((a) => a.id);
+      const from = ids.indexOf(draggedId);
+      const to = ids.indexOf(targetId);
+      ids.splice(from, 1);
+      ids.splice(to, 0, draggedId);
+      persistOrder(ids);
+    }
+    setDraggedId(null);
+    setDragOverId(null);
+  }
 
   async function addAccount(e: React.FormEvent) {
     e.preventDefault();
@@ -78,16 +121,39 @@ export default function Accounts() {
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {accounts.map((a) => (
-          <div key={a.id} className="card p-3.5">
+          {orderedAccounts.map((a) => (
+          <div
+            key={a.id}
+            draggable
+            onDragStart={() => setDraggedId(a.id)}
+            onDragOver={(e) => {
+              e.preventDefault();
+              if (draggedId && draggedId !== a.id) setDragOverId(a.id);
+            }}
+            onDragLeave={() => setDragOverId((id) => (id === a.id ? null : id))}
+            onDrop={(e) => {
+              e.preventDefault();
+              handleDrop(a.id);
+            }}
+            onDragEnd={() => {
+              setDraggedId(null);
+              setDragOverId(null);
+            }}
+            className={`card p-3.5 cursor-grab active:cursor-grabbing transition-shadow ${
+              draggedId === a.id ? "opacity-50" : ""
+            } ${dragOverId === a.id ? "ring-2 ring-accent/50" : ""}`}
+          >
             <div className="flex justify-between items-start">
-              <button className="text-left" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
-                <div className="font-semibold text-sm text-ink transition-colors hover:text-accent">{a.name}</div>
-                <div className="text-[11px] text-ink/40 capitalize">
-                  {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
-                </div>
+              <button className="text-left flex items-start gap-1.5 min-w-0" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
+                <GripVertical size={14} className="mt-0.5 shrink-0 text-ink/20" />
+                <span className="min-w-0">
+                  <div className="font-semibold text-sm text-ink transition-colors hover:text-accent">{a.name}</div>
+                  <div className="text-[11px] text-ink/40 capitalize">
+                    {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
+                  </div>
+                </span>
               </button>
-              <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs transition-colors">
+              <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs transition-colors shrink-0">
                 Delete
               </button>
             </div>
