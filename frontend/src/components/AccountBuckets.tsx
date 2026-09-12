@@ -48,18 +48,18 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
   const archivedCount = allBuckets.filter((b) => b.status === "archived").length;
 
   return (
-    <div className="mt-4 pt-4 border-t border-border-subtle">
-      <div className="flex items-center justify-between mb-3">
+    <div className="mt-3 pt-3 border-t border-border-subtle">
+      <div className="flex items-center justify-between mb-2">
         <div>
-          <h3 className="panel-title">Savings Goals</h3>
-          <p className="panel-subtitle">Set money aside within this account toward specific goals.</p>
+          <h3 className="text-xs font-semibold text-ink">Savings Goals</h3>
+          <p className="text-[11px] text-ink/50 leading-snug">Set money aside toward specific goals.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="text-xs text-ink/40 transition-colors hover:text-ink" onClick={() => setShowActivity((v) => !v)}>
+        <div className="flex items-center gap-2.5">
+          <button className="text-[11px] text-ink/40 transition-colors hover:text-ink" onClick={() => setShowActivity((v) => !v)}>
             {showActivity ? "Hide activity" : "Activity"}
           </button>
           <button
-            className="text-xs font-semibold text-accent transition-colors hover:text-accent/80"
+            className="text-[11px] font-semibold text-accent transition-colors hover:text-accent/80"
             onClick={() => setShowCreate(true)}
           >
             + Create goal
@@ -71,7 +71,7 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
 
       {summary && (
         <>
-          <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
+          <div className="grid grid-cols-3 gap-2 mb-2.5 text-[11px]">
             <Stat label="Total Savings" value={summary.account_balance} tone="text-ink" />
             <Stat label="Assigned to Goals" value={summary.assigned_balance} tone="text-ink/70" />
             <Stat
@@ -82,12 +82,12 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
           </div>
 
           {buckets.length === 0 ? (
-            <p className="text-ink/40 text-xs mb-3">
+            <p className="text-ink/40 text-xs mb-2">
               No goals yet — all <span className="numeral">{formatCurrency(currentBalance)}</span> is available to
               allocate. Create a goal to start setting money aside.
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
               {buckets.map((b) => (
                 <BucketCard
                   key={b.id}
@@ -142,8 +142,8 @@ export default function AccountBuckets({ accountId, currentBalance }: { accountI
 function Stat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
     <div>
-      <div className="text-ink/40">{label}</div>
-      <div className={`numeral text-base font-semibold ${tone}`}>{money(value)}</div>
+      <div className="text-ink/40 truncate">{label}</div>
+      <div className={`numeral text-sm font-semibold truncate ${tone}`}>{money(value)}</div>
     </div>
   );
 }
@@ -181,13 +181,13 @@ function BucketCard({
   }
 
   return (
-    <div className="relative rounded-lg border border-border-subtle p-3 transition-colors hover:bg-surface-raised/60">
+    <div className="relative rounded-lg border border-border-subtle p-2.5 transition-colors hover:bg-surface-raised/60">
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ background: bucket.color }} />
-          <span className="font-medium text-sm">{bucket.name}</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ background: bucket.color }} />
+          <span className="font-medium text-xs truncate">{bucket.name}</span>
         </div>
-        <div className="relative">
+        <div className="relative shrink-0">
           <button className="px-1 text-ink/30 transition-colors hover:text-ink" onClick={() => setMenuOpen((v) => !v)}>
             ⋯
           </button>
@@ -210,11 +210,11 @@ function BucketCard({
         </div>
       </div>
 
-      <div className="numeral text-lg font-semibold mt-1.5">{money(bucket.balance)}</div>
+      <div className="numeral text-sm font-semibold mt-1">{money(bucket.balance)}</div>
 
       {hasTarget ? (
         <>
-          <div className="flex items-center justify-between text-xs text-ink/50 mt-0.5">
+          <div className="flex items-center justify-between text-[11px] text-ink/50 mt-0.5">
             <span>
               of <span className="numeral">{money(bucket.target_amount as number)}</span> goal
             </span>
@@ -222,22 +222,22 @@ function BucketCard({
               {pct !== null ? `${pct.toFixed(0)}%` : ""}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-surface-sunken overflow-hidden mt-1.5 shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">
+          <div className="h-1.5 rounded-full bg-surface-sunken overflow-hidden mt-1 shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">
             <div
               className="h-full rounded-full transition-[width] duration-300 ease-out"
               style={{ width: `${Math.min(100, pct ?? 0)}%`, background: overfunded ? "#3f825f" : bucket.color }}
             />
           </div>
-          {overfunded && <p className="text-income text-xs mt-1">Goal exceeded — consider raising the target or moving the extra out.</p>}
+          {overfunded && <p className="text-income text-[11px] mt-1">Goal exceeded.</p>}
         </>
       ) : (
-        <p className="text-ink/30 text-xs mt-1">No target set</p>
+        <p className="text-ink/30 text-[11px] mt-1">No target set</p>
       )}
 
       {bucket.target_date && (
-        <p className="text-ink/30 text-xs mt-1">Target date: {new Date(bucket.target_date).toLocaleDateString()}</p>
+        <p className="text-ink/30 text-[11px] mt-1">Target date: {new Date(bucket.target_date).toLocaleDateString()}</p>
       )}
-      {error && <p className="text-expense text-xs mt-2">{error}</p>}
+      {error && <p className="text-expense text-[11px] mt-2">{error}</p>}
     </div>
   );
 }

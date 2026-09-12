@@ -77,13 +77,13 @@ export default function Accounts() {
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {accounts.map((a) => (
-          <div key={a.id} className="card">
+          <div key={a.id} className="card p-3.5">
             <div className="flex justify-between items-start">
               <button className="text-left" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
-                <div className="font-semibold text-ink transition-colors hover:text-accent">{a.name}</div>
-                <div className="text-xs text-ink/40 capitalize">
+                <div className="font-semibold text-sm text-ink transition-colors hover:text-accent">{a.name}</div>
+                <div className="text-[11px] text-ink/40 capitalize">
                   {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
                 </div>
               </button>
@@ -92,13 +92,13 @@ export default function Accounts() {
               </button>
             </div>
             <button
-              className={`numeral mt-3 block text-2xl transition-colors hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
+              className={`numeral mt-2 block text-xl transition-colors hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
               onClick={() => setExpanded(expanded === a.id ? null : a.id)}
             >
               {formatCurrency(a.current_balance)}
             </button>
             <button
-              className="mt-3 text-xs font-semibold text-accent transition-colors hover:text-accent/80"
+              className="mt-2 text-xs font-semibold text-accent transition-colors hover:text-accent/80"
               onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}
             >
               {snapshotFor === a.id ? "Cancel" : "Update balance"}
