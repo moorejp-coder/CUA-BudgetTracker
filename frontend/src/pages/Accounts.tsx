@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ArrowRight, GripVertical } from "lucide-react";
@@ -27,7 +27,7 @@ export default function Accounts() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [order, setOrder] = useState<string[]>(loadOrder);
   const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragIdsRef = useRef<string[]>([]);
 
   const orderedAccounts = useMemo(() => {
     const byId = new Map(accounts.map((a) => [a.id, a]));
@@ -46,17 +46,33 @@ export default function Accounts() {
     }
   }
 
-  function handleDrop(targetId: string) {
-    if (draggedId && draggedId !== targetId) {
-      const ids = orderedAccounts.map((a) => a.id);
-      const from = ids.indexOf(draggedId);
-      const to = ids.indexOf(targetId);
-      ids.splice(from, 1);
-      ids.splice(to, 0, draggedId);
-      persistOrder(ids);
-    }
+  // Pointer Events (not HTML5 drag-and-drop) so reordering works with touch too.
+  function handleDragPointerDown(e: React.PointerEvent, id: string) {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragIdsRef.current = orderedAccounts.map((a) => a.id);
+    setDraggedId(id);
+  }
+
+  function handleDragPointerMove(e: React.PointerEvent) {
+    if (!draggedId) return;
+    e.preventDefault();
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const cardEl = target instanceof Element ? target.closest<HTMLElement>("[data-account-id]") : null;
+    const overId = cardEl?.dataset.accountId;
+    if (!overId || overId === draggedId) return;
+    const ids = dragIdsRef.current;
+    const from = ids.indexOf(draggedId);
+    const to = ids.indexOf(overId);
+    if (from === -1 || to === -1 || from === to) return;
+    ids.splice(from, 1);
+    ids.splice(to, 0, draggedId);
+    setOrder([...ids]);
+  }
+
+  function handleDragPointerEnd() {
+    if (draggedId) persistOrder(dragIdsRef.current);
     setDraggedId(null);
-    setDragOverId(null);
   }
 
   async function addAccount(e: React.FormEvent) {
@@ -124,35 +140,30 @@ export default function Accounts() {
           {orderedAccounts.map((a) => (
           <div
             key={a.id}
-            draggable
-            onDragStart={() => setDraggedId(a.id)}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (draggedId && draggedId !== a.id) setDragOverId(a.id);
-            }}
-            onDragLeave={() => setDragOverId((id) => (id === a.id ? null : id))}
-            onDrop={(e) => {
-              e.preventDefault();
-              handleDrop(a.id);
-            }}
-            onDragEnd={() => {
-              setDraggedId(null);
-              setDragOverId(null);
-            }}
-            className={`card p-3.5 cursor-grab active:cursor-grabbing transition-shadow ${
-              draggedId === a.id ? "opacity-50" : ""
-            } ${dragOverId === a.id ? "ring-2 ring-accent/50" : ""}`}
+            data-account-id={a.id}
+            className={`card p-3.5 transition-shadow ${draggedId === a.id ? "opacity-50 shadow-lg" : ""}`}
           >
             <div className="flex justify-between items-start">
-              <button className="text-left flex items-start gap-1.5 min-w-0" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
-                <GripVertical size={14} className="mt-0.5 shrink-0 text-ink/20" />
-                <span className="min-w-0">
+              <div className="flex items-start gap-1.5 min-w-0">
+                <button
+                  type="button"
+                  aria-label="Drag to reorder"
+                  className="mt-0.5 shrink-0 text-ink/20 hover:text-ink/50 cursor-grab active:cursor-grabbing select-none touch-none"
+                  style={{ touchAction: "none" }}
+                  onPointerDown={(e) => handleDragPointerDown(e, a.id)}
+                  onPointerMove={handleDragPointerMove}
+                  onPointerUp={handleDragPointerEnd}
+                  onPointerCancel={handleDragPointerEnd}
+                >
+                  <GripVertical size={14} />
+                </button>
+                <button className="text-left min-w-0" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
                   <div className="font-semibold text-sm text-ink transition-colors hover:text-accent">{a.name}</div>
                   <div className="text-[11px] text-ink/40 capitalize">
                     {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
                   </div>
-                </span>
-              </button>
+                </button>
+              </div>
               <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs transition-colors shrink-0">
                 Delete
               </button>
