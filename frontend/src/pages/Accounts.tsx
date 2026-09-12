@@ -181,8 +181,12 @@ export default function Accounts() {
               {snapshotFor === a.id ? "Cancel" : "Update balance"}
             </button>
             {snapshotFor === a.id && <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />}
-            <AccountBuckets accountId={a.id} currentBalance={a.current_balance} />
-            {expanded === a.id && <AccountTransactionHistory accountId={a.id} />}
+            {expanded === a.id && (
+              <>
+                <AccountBuckets accountId={a.id} currentBalance={a.current_balance} />
+                <AccountTransactionHistory accountId={a.id} />
+              </>
+            )}
           </div>
           ))}
           {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above to start tracking balances.</p>}
