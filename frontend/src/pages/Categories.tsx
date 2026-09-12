@@ -6,9 +6,9 @@ import BudgetProgress from "@/components/BudgetProgress";
 import { getCategoryIcon } from "@/lib/categoryIcon";
 import type { BudgetSection, Category } from "@/types";
 
-function CategoryIcon({ name }: { name: string }) {
+function CategoryIcon({ name, size }: { name: string; size?: number }) {
   const Icon = getCategoryIcon(name);
-  return <Icon />;
+  return <Icon width={size ?? 16} height={size ?? 16} />;
 }
 
 const PALETTE = ["#cf8e27", "#3f825f", "#6ea4bb", "#c85d43", "#9b7ebd", "#d4b483", "#6e8fa3", "#b5a45c", "#a85c7c", "#7a7268"];
@@ -197,11 +197,11 @@ export default function Categories() {
         <div className="min-h-0 flex flex-col gap-4">
           <div className="card flex flex-col max-h-full lg:max-h-[calc(100vh-160px)]">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
-            <p className="shrink-0 panel-subtitle mb-3">Set a monthly limit per category and track spending against it.</p>
-            <div className="min-h-0 overflow-y-auto">
+            <p className="shrink-0 panel-subtitle mb-2">Set a monthly limit per category and track spending against it.</p>
+            <div className="min-h-0 overflow-y-auto lg:columns-2 lg:gap-x-6">
               {groupBySection(expenseCategories).map((group) => (
-                <div key={group.key} className="mb-3 last:mb-0">
-                  <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 px-2 mb-1">{group.label}</h3>
+                <div key={group.key} className="mb-1.5 last:mb-0 break-inside-avoid-column">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 px-2 leading-4">{group.label}</h3>
                   {group.categories.map((c) => {
                     const budget = budgets.find((b) => b.category.id === c.id);
                     const form = (
@@ -217,18 +217,18 @@ export default function Categories() {
                         {budget ? (
                           <BudgetProgress budget={budget} right={form} />
                         ) : (
-                          <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                              <span className="flex items-center gap-2 min-w-[90px] flex-1">
+                          <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-0.5">
+                            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                              <span className="flex items-center gap-1.5 min-w-[60px] flex-1">
                                 <span
                                   className="shrink-0 grid place-items-center rounded-md"
-                                  style={{ width: 22, height: 22, background: `${c.color}1a`, color: c.color }}
+                                  style={{ width: 18, height: 18, background: `${c.color}1a`, color: c.color }}
                                 >
-                                  <CategoryIcon name={c.name} />
+                                  <CategoryIcon name={c.name} size={11} />
                                 </span>
-                                <span className="font-medium text-ink truncate min-w-0 text-[13px]">{c.name}</span>
+                                <span className="font-medium text-ink truncate min-w-0 text-[12px]">{c.name}</span>
                               </span>
-                              <span className="text-[11px] text-ink/40 shrink-0">No budget set</span>
+                              <span className="text-[10px] text-ink/40 shrink-0">No budget set</span>
                               {form}
                             </div>
                           </div>
@@ -451,16 +451,16 @@ function BudgetInlineForm({
   }
 
   return (
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="flex items-center gap-1 shrink-0">
       <input
-        className="input w-20 px-2 text-right text-xs py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="input w-14 px-1.5 py-0.5 text-right text-[11px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         placeholder="—"
         type="number"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
       <button
-        className="btn-secondary text-xs px-1.5 py-1 disabled:opacity-50"
+        className="btn-secondary text-[11px] px-1 py-0.5 disabled:opacity-50"
         onClick={handleSet}
         disabled={saving}
       >
