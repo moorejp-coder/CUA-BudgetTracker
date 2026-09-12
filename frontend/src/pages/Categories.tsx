@@ -104,8 +104,8 @@ export default function Categories() {
                 <li className="text-sm text-ink/40 px-2 py-3">No expense categories yet.</li>
               )}
               {expenseCategories.map((c) => (
-                <li key={c.id} className="group flex items-center justify-between text-sm px-2 py-2 rounded-lg transition-colors hover:bg-surface-raised/60">
-                  <span className="flex items-center gap-2.5 min-w-0 truncate">
+                <li key={c.id} className="group flex items-center justify-between text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
+                  <span className="flex items-center gap-3 min-w-0 truncate">
                     <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
                       <CategoryIcon name={c.name} />
                     </span>
@@ -113,7 +113,7 @@ export default function Categories() {
                   </span>
                   <button
                     onClick={() => removeCategory(c.id)}
-                    className="text-xs text-ink/30 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                    className="text-xs font-normal text-ink/40 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                   >
                     Delete
                   </button>
@@ -132,8 +132,8 @@ export default function Categories() {
                 <li className="text-sm text-ink/40 px-2 py-3">No income categories yet.</li>
               )}
               {incomeCategories.map((c) => (
-                <li key={c.id} className="group flex items-center justify-between text-sm px-2 py-2 rounded-lg transition-colors hover:bg-surface-raised/60">
-                  <span className="flex items-center gap-2.5 min-w-0 truncate">
+                <li key={c.id} className="group flex items-center justify-between text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
+                  <span className="flex items-center gap-3 min-w-0 truncate">
                     <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
                       <CategoryIcon name={c.name} />
                     </span>
@@ -154,22 +154,22 @@ export default function Categories() {
         {/* Right column: suggestion + home plan (fixed) + monthly budgets (scrollable) */}
         <div className="min-h-0 flex flex-col gap-4">
           {suggestion && suggestion.monthly_income > 0 && (
-            <div className="card shrink-0">
-              <h2 className="panel-title">Suggested budget — {period}</h2>
-              <p className="panel-subtitle mb-3">
+            <div className="card shrink-0 p-3.5">
+              <h2 className="text-[13px] font-semibold text-ink">Suggested budget — {period}</h2>
+              <p className="text-[11px] text-ink/50 mt-0.5 mb-2 leading-snug">
                 Based on <span className="numeral">{suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}</span> of
                 monthly income.{" "}
                 {suggestion.has_debt
                   ? "You have outstanding debt, so 10% is allocated to paying it down."
                   : "You're debt-free, so that 10% is allocated to investing instead."}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                 {suggestion.buckets.map((b) => (
-                  <div key={b.key} className="rounded-lg bg-surface-raised p-2.5 border border-border-subtle">
-                    <div className="text-[11px] text-ink/50 leading-4">
+                  <div key={b.key} className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
+                    <div className="text-[10px] text-ink/50 leading-3.5 truncate">
                       {b.label} · {Math.round(b.pct * 100)}%
                     </div>
-                    <div className="numeral text-base text-ink mt-0.5">
+                    <div className="numeral text-sm text-ink mt-0.5">
                       {b.amount.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
                     </div>
                   </div>
@@ -179,40 +179,40 @@ export default function Categories() {
           )}
 
           {homePlan && homePlan.monthly_income > 0 && (
-            <div className="card shrink-0">
-              <h2 className="panel-title">House down payment plan — {period}</h2>
-              <p className="panel-subtitle mb-3">
+            <div className="card shrink-0 p-3.5">
+              <h2 className="text-[13px] font-semibold text-ink">House down payment plan — {period}</h2>
+              <p className="text-[11px] text-ink/50 mt-0.5 mb-2 leading-snug">
                 Conventional 10% down, assuming no other debts.
                 {homePlan.has_debt && " You currently have outstanding debt, so treat this as an optimistic ceiling."}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                <div className="rounded-lg bg-surface-raised p-2.5 border border-border-subtle">
-                  <div className="text-[11px] text-ink/50 leading-4">Max monthly payment</div>
-                  <div className="numeral text-base text-ink mt-0.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
+                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Max monthly payment</div>
+                  <div className="numeral text-sm text-ink mt-0.5">
                     {homePlan.max_monthly_mortgage_payment.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
                   </div>
                 </div>
-                <div className="rounded-lg bg-surface-raised p-2.5 border border-border-subtle">
-                  <div className="text-[11px] text-ink/50 leading-4">Max home price</div>
-                  <div className="numeral text-base text-ink mt-0.5">
+                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
+                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Max home price</div>
+                  <div className="numeral text-sm text-ink mt-0.5">
                     {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
                   </div>
                 </div>
-                <div className="rounded-lg bg-surface-raised p-2.5 border border-border-subtle">
-                  <div className="text-[11px] text-ink/50 leading-4">Needed to close</div>
-                  <div className="numeral text-base text-ink mt-0.5">
+                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
+                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Needed to close</div>
+                  <div className="numeral text-sm text-ink mt-0.5">
                     {homePlan.amount_needed_to_close.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
                   </div>
                 </div>
-                <div className="rounded-lg bg-surface-raised p-2.5 border border-border-subtle">
-                  <div className="text-[11px] text-ink/50 leading-4">Suggested savings</div>
-                  <div className="numeral text-base text-ink mt-0.5">
+                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
+                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Suggested savings</div>
+                  <div className="numeral text-sm text-ink mt-0.5">
                     {homePlan.suggested_monthly_savings.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}/mo
                   </div>
                 </div>
-                <div className="rounded-lg bg-surface-raised p-2.5 border border-border-subtle">
-                  <div className="text-[11px] text-ink/50 leading-4">Time to save from $0</div>
-                  <div className="numeral text-base text-ink mt-0.5">
+                <div className="rounded-lg bg-surface-raised px-2 py-1.5 border border-border-subtle">
+                  <div className="text-[10px] text-ink/50 leading-3.5 truncate">Time to save from $0</div>
+                  <div className="numeral text-sm text-ink mt-0.5">
                     {homePlan.months_to_save_from_zero !== null ? `${homePlan.months_to_save_from_zero} months` : "—"}
                   </div>
                 </div>
@@ -239,14 +239,14 @@ export default function Categories() {
                     {budget ? (
                       <BudgetProgress budget={budget} right={form} />
                     ) : (
-                      <div className="grid grid-cols-[minmax(0,1fr)_110px_auto] items-center text-sm gap-4 px-2 py-1.5">
-                        <span className="flex items-center gap-2.5 min-w-0 truncate">
+                      <div className="grid grid-cols-[minmax(0,1fr)_110px_auto] items-center text-[15px] gap-4 px-2 py-1.5">
+                        <span className="flex items-center gap-3 font-medium text-ink min-w-0 truncate">
                           <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
                             <CategoryIcon name={c.name} />
                           </span>
                           {c.name}
                         </span>
-                        <span className="text-xs text-ink/30 text-right">No budget set</span>
+                        <span className="text-xs text-ink/40 text-right">No budget set</span>
                         {form}
                       </div>
                     )}
