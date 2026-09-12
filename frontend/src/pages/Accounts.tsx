@@ -147,29 +147,40 @@ export default function Accounts() {
             className={`card p-3.5 cursor-pointer transition-shadow ${draggedId === a.id ? "opacity-50 shadow-lg" : ""}`}
           >
             <div className="flex justify-between items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start gap-1.5 min-w-0">
-                  <button
-                    type="button"
-                    aria-label="Drag to reorder"
-                    className="mt-0.5 shrink-0 text-ink/20 hover:text-ink/50 cursor-grab active:cursor-grabbing select-none touch-none"
-                    style={{ touchAction: "none" }}
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => handleDragPointerDown(e, a.id)}
-                    onPointerMove={handleDragPointerMove}
-                    onPointerUp={handleDragPointerEnd}
-                    onPointerCancel={handleDragPointerEnd}
-                  >
-                    <GripVertical size={14} />
-                  </button>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm text-ink transition-colors">{a.name}</div>
-                    <div className="text-[11px] text-ink/40 capitalize">
-                      {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
-                    </div>
+              <div className="flex items-start gap-1.5 min-w-0">
+                <button
+                  type="button"
+                  aria-label="Drag to reorder"
+                  className="mt-0.5 shrink-0 text-ink/20 hover:text-ink/50 cursor-grab active:cursor-grabbing select-none touch-none"
+                  style={{ touchAction: "none" }}
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => handleDragPointerDown(e, a.id)}
+                  onPointerMove={handleDragPointerMove}
+                  onPointerUp={handleDragPointerEnd}
+                  onPointerCancel={handleDragPointerEnd}
+                >
+                  <GripVertical size={14} />
+                </button>
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm text-ink transition-colors">{a.name}</div>
+                  <div className="text-[11px] text-ink/40 capitalize">
+                    {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
                   </div>
                 </div>
-                <div className={`numeral mt-2 text-xl ${a.is_liability ? "text-expense" : "text-ink"}`}>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeAccount(a.id);
+                }}
+                className="text-ink/30 hover:text-expense text-xs transition-colors shrink-0"
+              >
+                Delete
+              </button>
+            </div>
+            <div className="flex justify-between items-start gap-3 mt-2">
+              <div className="min-w-0 flex-1">
+                <div className={`numeral text-xl ${a.is_liability ? "text-expense" : "text-ink"}`}>
                   {formatCurrency(a.current_balance)}
                 </div>
                 <button
@@ -187,16 +198,7 @@ export default function Accounts() {
                   </div>
                 )}
               </div>
-              <div className="shrink-0 text-right">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeAccount(a.id);
-                  }}
-                  className="text-ink/30 hover:text-expense text-xs transition-colors"
-                >
-                  Delete
-                </button>
+              <div className="shrink-0">
                 <AccountGoalsSummary accountId={a.id} />
               </div>
             </div>
@@ -249,7 +251,7 @@ function AccountGoalsSummary({ accountId }: { accountId: string }) {
   const extra = summary.buckets.length - shown.length;
 
   return (
-    <div className="mt-1 text-[11px] leading-relaxed min-w-[110px]">
+    <div className="text-[11px] leading-relaxed min-w-[110px]">
       {shown.map((b) => (
         <div key={b.id} className="truncate">
           <span className="text-ink/50">{b.name}:</span>{" "}
