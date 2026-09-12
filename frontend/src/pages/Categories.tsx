@@ -62,32 +62,27 @@ export default function Categories() {
 
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[300px_1fr] lg:items-start gap-4">
         {/* Left column: add category + category lists */}
-        <div className="min-h-0 flex flex-col gap-4">
-          <div className="card shrink-0">
-            <h2 className="panel-title">Add category</h2>
-            <p className="panel-subtitle mb-4">Create a category to start budgeting and tagging transactions against it.</p>
-            <form onSubmit={addCategory} className="flex flex-col gap-3">
-              <div>
-                <label className="label">Name</label>
+        <div className="min-h-0 flex flex-col gap-4 lg:max-h-[calc(100vh-160px)] lg:overflow-y-auto">
+          <div className="card shrink-0 p-4">
+            <h2 className="text-[13px] font-semibold text-ink">Add category</h2>
+            <form onSubmit={addCategory} className="flex flex-col gap-2 mt-3">
+              <input
+                className="input w-full"
+                placeholder="e.g. Dining Out"
+                value={newCat.name}
+                onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
+              />
+              <div className="flex gap-2">
                 <input
-                  className="input w-full"
-                  placeholder="e.g. Dining Out"
-                  value={newCat.name}
-                  onChange={(e) => setNewCat({ ...newCat, name: e.target.value })}
+                  className="input w-14 text-center shrink-0"
+                  placeholder="🍽️"
+                  value={newCat.emoji}
+                  onChange={(e) => setNewCat({ ...newCat, emoji: e.target.value })}
                 />
-              </div>
-              <div className="flex gap-3">
-                <div className="w-16">
-                  <label className="label">Emoji</label>
-                  <input className="input w-full text-center" placeholder="🍽️" value={newCat.emoji} onChange={(e) => setNewCat({ ...newCat, emoji: e.target.value })} />
-                </div>
-                <div className="flex-1">
-                  <label className="label">Type</label>
-                  <select className="input w-full" value={newCat.type} onChange={(e) => setNewCat({ ...newCat, type: e.target.value as any })}>
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
-                  </select>
-                </div>
+                <select className="input flex-1" value={newCat.type} onChange={(e) => setNewCat({ ...newCat, type: e.target.value as any })}>
+                  <option value="expense">Expense</option>
+                  <option value="income">Income</option>
+                </select>
               </div>
               <button type="submit" className="btn-primary" disabled={!newCat.name.trim()}>
                 Add category
