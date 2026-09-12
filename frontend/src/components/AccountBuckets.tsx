@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Minus, Plus } from "lucide-react";
 import { BucketsApi } from "@/api/resources";
 import type { Bucket, SummaryBucket } from "@/types";
 import { formatCurrency } from "@/lib/format";
@@ -187,17 +188,30 @@ function BucketCard({
           <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ background: bucket.color }} />
           <span className="font-medium text-xs truncate">{bucket.name}</span>
         </div>
-        <div className="relative shrink-0">
+        <div className="relative shrink-0 flex items-center gap-0.5">
+          <button
+            aria-label="Withdraw to available"
+            title="Withdraw to available"
+            className="p-0.5 rounded text-ink/30 transition-colors hover:text-expense hover:bg-surface-sunken"
+            onClick={onMove}
+          >
+            <Minus size={13} />
+          </button>
+          <button
+            aria-label="Allocate money"
+            title="Allocate money"
+            className="p-0.5 rounded text-ink/30 transition-colors hover:text-income hover:bg-surface-sunken"
+            onClick={onAllocate}
+          >
+            <Plus size={13} />
+          </button>
           <button className="px-1 text-ink/30 transition-colors hover:text-ink" onClick={() => setMenuOpen((v) => !v)}>
             ⋯
           </button>
           {menuOpen && (
             <div className="absolute right-0 top-6 z-10 w-40 overflow-hidden rounded-lg border border-border bg-surface-raised text-xs shadow-[0_4px_16px_rgba(74,54,27,0.12)]">
-              <button className="block w-full px-3 py-2 text-left transition-colors hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onAllocate(); }}>
-                Allocate money
-              </button>
               <button className="block w-full px-3 py-2 text-left transition-colors hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onMove(); }}>
-                Move money
+                Move to another goal
               </button>
               <button className="block w-full px-3 py-2 text-left transition-colors hover:bg-surface-sunken" onClick={() => { setMenuOpen(false); onEdit(); }}>
                 Edit goal
