@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ArrowRight, GripVertical } from "lucide-react";
-import { AccountsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
+import { AccountsApi, BucketsApi, CategoriesApi, TransactionsApi } from "@/api/resources";
 import AccountBuckets from "@/components/AccountBuckets";
 import TransactionTable from "@/components/TransactionTable";
 import { formatCurrency } from "@/lib/format";
@@ -143,46 +143,63 @@ export default function Accounts() {
           <div
             key={a.id}
             data-account-id={a.id}
-            className={`card p-3.5 transition-shadow ${draggedId === a.id ? "opacity-50 shadow-lg" : ""}`}
+            onClick={() => setExpanded(a.id)}
+            className={`card p-3.5 cursor-pointer transition-shadow ${draggedId === a.id ? "opacity-50 shadow-lg" : ""}`}
           >
-            <div className="flex justify-between items-start">
-              <div className="flex items-start gap-1.5 min-w-0">
-                <button
-                  type="button"
-                  aria-label="Drag to reorder"
-                  className="mt-0.5 shrink-0 text-ink/20 hover:text-ink/50 cursor-grab active:cursor-grabbing select-none touch-none"
-                  style={{ touchAction: "none" }}
-                  onPointerDown={(e) => handleDragPointerDown(e, a.id)}
-                  onPointerMove={handleDragPointerMove}
-                  onPointerUp={handleDragPointerEnd}
-                  onPointerCancel={handleDragPointerEnd}
-                >
-                  <GripVertical size={14} />
-                </button>
-                <button className="text-left min-w-0" onClick={() => setExpanded(expanded === a.id ? null : a.id)}>
-                  <div className="font-semibold text-sm text-ink transition-colors hover:text-accent">{a.name}</div>
-                  <div className="text-[11px] text-ink/40 capitalize">
-                    {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
+            <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start gap-1.5 min-w-0">
+                  <button
+                    type="button"
+                    aria-label="Drag to reorder"
+                    className="mt-0.5 shrink-0 text-ink/20 hover:text-ink/50 cursor-grab active:cursor-grabbing select-none touch-none"
+                    style={{ touchAction: "none" }}
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => handleDragPointerDown(e, a.id)}
+                    onPointerMove={handleDragPointerMove}
+                    onPointerUp={handleDragPointerEnd}
+                    onPointerCancel={handleDragPointerEnd}
+                  >
+                    <GripVertical size={14} />
+                  </button>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-ink transition-colors">{a.name}</div>
+                    <div className="text-[11px] text-ink/40 capitalize">
+                      {a.type.replace("_", " ")} {a.institution && `· ${a.institution}`}
+                    </div>
                   </div>
+                </div>
+                <div className={`numeral mt-2 text-xl ${a.is_liability ? "text-expense" : "text-ink"}`}>
+                  {formatCurrency(a.current_balance)}
+                </div>
+                <button
+                  className="mt-2 text-xs font-semibold text-accent transition-colors hover:text-accent/80"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSnapshotFor(snapshotFor === a.id ? null : a.id);
+                  }}
+                >
+                  {snapshotFor === a.id ? "Cancel" : "Update balance"}
                 </button>
+                {snapshotFor === a.id && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />
+                  </div>
+                )}
               </div>
-              <button onClick={() => removeAccount(a.id)} className="text-ink/30 hover:text-expense text-xs transition-colors shrink-0">
-                Delete
-              </button>
+              <div className="shrink-0 text-right">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeAccount(a.id);
+                  }}
+                  className="text-ink/30 hover:text-expense text-xs transition-colors"
+                >
+                  Delete
+                </button>
+                <AccountGoalsSummary accountId={a.id} />
+              </div>
             </div>
-            <button
-              className={`numeral mt-2 block text-xl transition-colors hover:text-accent ${a.is_liability ? "text-expense" : "text-ink"}`}
-              onClick={() => setExpanded(expanded === a.id ? null : a.id)}
-            >
-              {formatCurrency(a.current_balance)}
-            </button>
-            <button
-              className="mt-2 text-xs font-semibold text-accent transition-colors hover:text-accent/80"
-              onClick={() => setSnapshotFor(snapshotFor === a.id ? null : a.id)}
-            >
-              {snapshotFor === a.id ? "Cancel" : "Update balance"}
-            </button>
-            {snapshotFor === a.id && <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />}
           </div>
           ))}
           {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above to start tracking balances.</p>}
@@ -220,6 +237,32 @@ export default function Accounts() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function AccountGoalsSummary({ accountId }: { accountId: string }) {
+  const { data: summary } = useQuery({ queryKey: ["bucket-summary", accountId], queryFn: () => BucketsApi.summary(accountId) });
+  if (!summary) return null;
+
+  const shown = summary.buckets.slice(0, 3);
+  const extra = summary.buckets.length - shown.length;
+
+  return (
+    <div className="mt-1 text-[11px] leading-relaxed min-w-[110px]">
+      {shown.map((b) => (
+        <div key={b.id} className="truncate">
+          <span className="text-ink/50">{b.name}:</span>{" "}
+          <span className="numeral text-ink/80">{formatCurrency(b.balance)}</span>
+        </div>
+      ))}
+      {extra > 0 && <div className="text-ink/30">+{extra} more</div>}
+      <div className="text-ink/50">
+        Available:{" "}
+        <span className={`numeral ${summary.unassigned_balance > 0 ? "text-income" : "text-ink/50"}`}>
+          {formatCurrency(summary.unassigned_balance)}
+        </span>
+      </div>
     </div>
   );
 }
