@@ -37,6 +37,8 @@ export default function Accounts() {
     return [...known, ...rest];
   }, [accounts, order]);
 
+  const expandedAccount = accounts.find((a) => a.id === expanded) ?? null;
+
   function persistOrder(ids: string[]) {
     setOrder(ids);
     try {
@@ -181,17 +183,43 @@ export default function Accounts() {
               {snapshotFor === a.id ? "Cancel" : "Update balance"}
             </button>
             {snapshotFor === a.id && <BalanceSnapshotForm accountId={a.id} onDone={() => setSnapshotFor(null)} />}
-            {expanded === a.id && (
-              <>
-                <AccountBuckets accountId={a.id} currentBalance={a.current_balance} />
-                <AccountTransactionHistory accountId={a.id} />
-              </>
-            )}
           </div>
           ))}
           {accounts.length === 0 && <p className="text-ink/40 text-sm">No accounts yet — add one above to start tracking balances.</p>}
         </div>
       </div>
+
+      {expandedAccount && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/50 p-4" onClick={() => setExpanded(null)}>
+          <div
+            className="card w-full max-w-2xl max-h-[85vh] overflow-y-auto p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-1">
+              <div>
+                <h2 className="font-display text-xl font-semibold text-ink">{expandedAccount.name}</h2>
+                <p className="text-xs text-ink/40 capitalize">
+                  {expandedAccount.type.replace("_", " ")} {expandedAccount.institution && `· ${expandedAccount.institution}`}
+                </p>
+              </div>
+              <button
+                onClick={() => setExpanded(null)}
+                aria-label="Close"
+                className="text-ink/40 hover:text-ink transition-colors text-xl leading-none px-1"
+              >
+                ×
+              </button>
+            </div>
+            <div
+              className={`numeral text-2xl mt-1 ${expandedAccount.is_liability ? "text-expense" : "text-ink"}`}
+            >
+              {formatCurrency(expandedAccount.current_balance)}
+            </div>
+            <AccountBuckets accountId={expandedAccount.id} currentBalance={expandedAccount.current_balance} />
+            <AccountTransactionHistory accountId={expandedAccount.id} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
