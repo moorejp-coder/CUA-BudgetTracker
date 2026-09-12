@@ -78,6 +78,11 @@ export default function Categories() {
     qc.invalidateQueries({ queryKey: ["categories"] });
   }
 
+  async function updateCategorySection(id: string, section: BudgetSection | "") {
+    await CategoriesApi.update(id, { section: section || null });
+    qc.invalidateQueries({ queryKey: ["categories"] });
+  }
+
   async function setBudgetAmount(categoryId: string, amount: number, existing?: string, rollover?: boolean) {
     if (existing) {
       await BudgetsApi.update(existing, { amount, rollover: rollover ?? false });
@@ -240,7 +245,12 @@ export default function Categories() {
 
       {openPanel === "expense" && (
         <DetailModal title="Expense categories" onClose={() => setOpenPanel(null)}>
-          <CategoryList categories={expenseCategories} onRemove={removeCategory} emptyLabel="No expense categories yet." />
+          <CategoryList
+            categories={expenseCategories}
+            onRemove={removeCategory}
+            onUpdateSection={updateCategorySection}
+            emptyLabel="No expense categories yet."
+          />
         </DetailModal>
       )}
 
@@ -347,10 +357,12 @@ function SummaryButton({
 function CategoryList({
   categories,
   onRemove,
+  onUpdateSection,
   emptyLabel,
 }: {
-  categories: Array<{ id: string; name: string; color: string }>;
+  categories: Array<{ id: string; name: string; color: string; section?: BudgetSection | null }>;
   onRemove: (id: string) => void;
+  onUpdateSection?: (id: string, section: BudgetSection | "") => void;
   emptyLabel: string;
 }) {
   if (categories.length === 0) {
@@ -359,19 +371,35 @@ function CategoryList({
   return (
     <ul className="-mx-2 max-h-[60vh] overflow-y-auto">
       {categories.map((c) => (
-        <li key={c.id} className="group flex items-center justify-between text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
+        <li key={c.id} className="group flex items-center justify-between gap-3 text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
           <span className="flex items-center gap-3 min-w-0 truncate">
             <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
               <CategoryIcon name={c.name} />
             </span>
             {c.name}
           </span>
-          <button
-            onClick={() => onRemove(c.id)}
-            className="text-xs font-normal text-ink/40 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-          >
-            Delete
-          </button>
+          <span className="flex items-center gap-2 shrink-0">
+            {onUpdateSection && (
+              <select
+                className="input text-xs py-1 px-2 w-36"
+                value={c.section ?? ""}
+                onChange={(e) => onUpdateSection(c.id, e.target.value as BudgetSection | "")}
+              >
+                <option value="">No section</option>
+                {SECTION_ORDER.map((key) => (
+                  <option key={key} value={key}>
+                    {SECTION_LABELS[key]}
+                  </option>
+                ))}
+              </select>
+            )}
+            <button
+              onClick={() => onRemove(c.id)}
+              className="text-xs font-normal text-ink/40 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+            >
+              Delete
+            </button>
+          </span>
         </li>
       ))}
     </ul>
