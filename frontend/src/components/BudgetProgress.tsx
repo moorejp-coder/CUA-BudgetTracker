@@ -15,7 +15,7 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
 
   return (
     <div className="group -mx-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-surface-raised/60">
-      <div className="grid grid-cols-[minmax(0,1fr)_110px_auto] items-center text-[15px] gap-4">
+      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_110px_auto] sm:items-center sm:gap-4 text-[15px]">
         <span className="flex items-center gap-3 font-medium text-ink min-w-0 truncate">
           <span
             className="category-icon"
@@ -25,10 +25,12 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
           </span>
           {budget.category.name}
         </span>
-        <span className="numeral text-sm text-ink/70 text-right whitespace-nowrap">
-          {formatCurrency(budget.spent, 0)} <span className="text-ink/35">/</span> {formatCurrency(effectiveLimit, 0)}
-        </span>
-        {right}
+        <div className="flex items-center justify-between gap-3 sm:contents">
+          <span className="numeral text-sm text-ink/70 whitespace-nowrap sm:text-right">
+            {formatCurrency(budget.spent, 0)} <span className="text-ink/35">/</span> {formatCurrency(effectiveLimit, 0)}
+          </span>
+          {right}
+        </div>
       </div>
       <div className="flex items-center gap-2 mt-2">
         <div className="h-2 flex-1 rounded-full bg-surface-sunken overflow-hidden shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">

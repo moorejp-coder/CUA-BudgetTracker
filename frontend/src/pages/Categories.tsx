@@ -216,15 +216,17 @@ export default function Categories() {
                     {budget ? (
                       <BudgetProgress budget={budget} right={form} />
                     ) : (
-                      <div className="grid grid-cols-[minmax(0,1fr)_110px_auto] items-center text-[15px] gap-4 px-2 py-1.5">
+                      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_110px_auto] sm:items-center text-[15px] sm:gap-4 px-2 py-1.5">
                         <span className="flex items-center gap-3 font-medium text-ink min-w-0 truncate">
                           <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
                             <CategoryIcon name={c.name} />
                           </span>
                           {c.name}
                         </span>
-                        <span className="text-xs text-ink/40 text-right">No budget set</span>
-                        {form}
+                        <div className="flex items-center justify-between gap-3 sm:contents">
+                          <span className="text-xs text-ink/40 sm:text-right">No budget set</span>
+                          {form}
+                        </div>
                       </div>
                     )}
                   </div>
