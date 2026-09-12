@@ -27,7 +27,7 @@ export default function Categories() {
   });
 
   const [newCat, setNewCat] = useState({ name: "", type: "expense" as "income" | "expense", emoji: "" });
-  const [openPanel, setOpenPanel] = useState<"suggestion" | "homePlan" | null>(null);
+  const [openPanel, setOpenPanel] = useState<"suggestion" | "homePlan" | "expense" | "income" | null>(null);
 
   async function addCategory(e: React.FormEvent) {
     e.preventDefault();
@@ -95,108 +95,58 @@ export default function Categories() {
             </form>
           </div>
 
-          <div className="card flex-1 min-h-0 flex flex-col">
-            <h2 className="shrink-0 panel-title flex items-center justify-between">
-              Expense categories
-              <span className="text-xs font-medium text-ink/35 tabular-nums">{expenseCategories.length}</span>
-            </h2>
-            <ul className="mt-3 flex-1 min-h-0 overflow-y-auto -mx-2">
-              {expenseCategories.length === 0 && (
-                <li className="text-sm text-ink/40 px-2 py-3">No expense categories yet.</li>
-              )}
-              {expenseCategories.map((c) => (
-                <li key={c.id} className="group flex items-center justify-between text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
-                  <span className="flex items-center gap-3 min-w-0 truncate">
-                    <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
-                      <CategoryIcon name={c.name} />
-                    </span>
-                    {c.name}
-                  </span>
-                  <button
-                    onClick={() => removeCategory(c.id)}
-                    className="text-xs font-normal text-ink/40 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="shrink-0 flex flex-col gap-3">
+            <SummaryButton
+              title="Expense categories"
+              stat={`${expenseCategories.length}`}
+              subtitle={expenseCategories.length > 0 ? expenseCategories.map((c) => c.name).join(", ") : "No expense categories yet."}
+              onClick={() => setOpenPanel("expense")}
+            />
 
-          <div className="card flex-1 min-h-0 flex flex-col">
-            <h2 className="shrink-0 panel-title flex items-center justify-between">
-              Income categories
-              <span className="text-xs font-medium text-ink/35 tabular-nums">{incomeCategories.length}</span>
-            </h2>
-            <ul className="mt-3 flex-1 min-h-0 overflow-y-auto -mx-2">
-              {incomeCategories.length === 0 && (
-                <li className="text-sm text-ink/40 px-2 py-3">No income categories yet.</li>
-              )}
-              {incomeCategories.map((c) => (
-                <li key={c.id} className="group flex items-center justify-between text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
-                  <span className="flex items-center gap-3 min-w-0 truncate">
-                    <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
-                      <CategoryIcon name={c.name} />
-                    </span>
-                    {c.name}
-                  </span>
-                  <button
-                    onClick={() => removeCategory(c.id)}
-                    className="text-xs text-ink/30 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+            <SummaryButton
+              title="Income categories"
+              stat={`${incomeCategories.length}`}
+              subtitle={incomeCategories.length > 0 ? incomeCategories.map((c) => c.name).join(", ") : "No income categories yet."}
+              onClick={() => setOpenPanel("income")}
+            />
 
-        {/* Right column: quick-access summary buttons + monthly budgets (scrollable) */}
-        <div className="min-h-0 flex flex-col gap-4">
-          {(suggestion && suggestion.monthly_income > 0) || (homePlan && homePlan.monthly_income > 0) ? (
-            <div className="shrink-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {suggestion && suggestion.monthly_income > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setOpenPanel("suggestion")}
-                  className="card text-left p-3.5 hover:border-accent/40 hover:bg-surface-raised/40 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-[13px] font-semibold text-ink">Suggested budget — {period}</h2>
-                    <span className="text-ink/30 text-xs shrink-0">View →</span>
-                  </div>
-                  <p className="text-[11px] text-ink/50 mt-0.5 leading-snug truncate">
+            {suggestion && suggestion.monthly_income > 0 && (
+              <SummaryButton
+                title={`Suggested budget — ${period}`}
+                stat="View →"
+                subtitle={
+                  <>
                     Based on{" "}
                     <span className="numeral">
                       {suggestion.monthly_income.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
                     </span>{" "}
                     of monthly income
-                  </p>
-                </button>
-              )}
+                  </>
+                }
+                onClick={() => setOpenPanel("suggestion")}
+              />
+            )}
 
-              {homePlan && homePlan.monthly_income > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setOpenPanel("homePlan")}
-                  className="card text-left p-3.5 hover:border-accent/40 hover:bg-surface-raised/40 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-[13px] font-semibold text-ink">House down payment plan — {period}</h2>
-                    <span className="text-ink/30 text-xs shrink-0">View →</span>
-                  </div>
-                  <p className="text-[11px] text-ink/50 mt-0.5 leading-snug truncate">
+            {homePlan && homePlan.monthly_income > 0 && (
+              <SummaryButton
+                title={`House down payment plan — ${period}`}
+                stat="View →"
+                subtitle={
+                  <>
                     Max home price{" "}
                     <span className="numeral">
                       {homePlan.max_home_price.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
                     </span>
-                  </p>
-                </button>
-              )}
-            </div>
-          ) : null}
+                  </>
+                }
+                onClick={() => setOpenPanel("homePlan")}
+              />
+            )}
+          </div>
+        </div>
 
+        {/* Right column: monthly budgets, full height */}
+        <div className="min-h-0 flex flex-col gap-4">
           <div className="card flex-1 min-h-0 flex flex-col">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
             <p className="shrink-0 panel-subtitle mb-3">Set a monthly limit per category and track spending against it.</p>
@@ -236,6 +186,18 @@ export default function Categories() {
           </div>
         </div>
       </div>
+
+      {openPanel === "expense" && (
+        <DetailModal title="Expense categories" onClose={() => setOpenPanel(null)}>
+          <CategoryList categories={expenseCategories} onRemove={removeCategory} emptyLabel="No expense categories yet." />
+        </DetailModal>
+      )}
+
+      {openPanel === "income" && (
+        <DetailModal title="Income categories" onClose={() => setOpenPanel(null)}>
+          <CategoryList categories={incomeCategories} onRemove={removeCategory} emptyLabel="No income categories yet." />
+        </DetailModal>
+      )}
 
       {openPanel === "suggestion" && suggestion && (
         <DetailModal title={`Suggested budget — ${period}`} onClose={() => setOpenPanel(null)}>
@@ -302,6 +264,66 @@ export default function Categories() {
         </DetailModal>
       )}
     </div>
+  );
+}
+
+function SummaryButton({
+  title,
+  stat,
+  subtitle,
+  onClick,
+}: {
+  title: string;
+  stat: string;
+  subtitle: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="card text-left p-3.5 hover:border-accent/40 hover:bg-surface-raised/40 transition-colors cursor-pointer"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-[13px] font-semibold text-ink">{title}</h2>
+        <span className="text-ink/30 text-xs shrink-0 tabular-nums">{stat}</span>
+      </div>
+      <p className="text-[11px] text-ink/50 mt-0.5 leading-snug truncate">{subtitle}</p>
+    </button>
+  );
+}
+
+function CategoryList({
+  categories,
+  onRemove,
+  emptyLabel,
+}: {
+  categories: Array<{ id: string; name: string; color: string }>;
+  onRemove: (id: string) => void;
+  emptyLabel: string;
+}) {
+  if (categories.length === 0) {
+    return <p className="text-sm text-ink/40">{emptyLabel}</p>;
+  }
+  return (
+    <ul className="-mx-2 max-h-[60vh] overflow-y-auto">
+      {categories.map((c) => (
+        <li key={c.id} className="group flex items-center justify-between text-[15px] font-medium text-ink px-2 py-2.5 rounded-lg transition-colors hover:bg-surface-raised/60">
+          <span className="flex items-center gap-3 min-w-0 truncate">
+            <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
+              <CategoryIcon name={c.name} />
+            </span>
+            {c.name}
+          </span>
+          <button
+            onClick={() => onRemove(c.id)}
+            className="text-xs font-normal text-ink/40 hover:text-expense opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+          >
+            Delete
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
