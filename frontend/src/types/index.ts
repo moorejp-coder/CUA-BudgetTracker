@@ -1,3 +1,5 @@
+export type BudgetSection = "essentials" | "guilt_free" | "debt_investing" | "short_term_goals" | "long_term_goals";
+
 export interface Category {
   id: string;
   name: string;
@@ -5,6 +7,7 @@ export interface Category {
   color: string;
   emoji: string;
   parent_id: string | null;
+  section: BudgetSection | null;
 }
 
 export interface Account {

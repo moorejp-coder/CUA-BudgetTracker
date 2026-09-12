@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { AnalyticsApi, BudgetsApi, CategoriesApi } from "@/api/resources";
 import BudgetProgress from "@/components/BudgetProgress";
 import { getCategoryIcon } from "@/lib/categoryIcon";
+import type { BudgetSection, Category } from "@/types";
 
 function CategoryIcon({ name }: { name: string }) {
   const Icon = getCategoryIcon(name);
@@ -11,6 +12,33 @@ function CategoryIcon({ name }: { name: string }) {
 }
 
 const PALETTE = ["#cf8e27", "#3f825f", "#6ea4bb", "#c85d43", "#9b7ebd", "#d4b483", "#6e8fa3", "#b5a45c", "#a85c7c", "#7a7268"];
+
+const SECTION_ORDER: BudgetSection[] = ["essentials", "guilt_free", "debt_investing", "short_term_goals", "long_term_goals"];
+
+const SECTION_LABELS: Record<BudgetSection, string> = {
+  essentials: "Essentials",
+  guilt_free: "Guilt Free",
+  debt_investing: "Debt/Investing",
+  short_term_goals: "Short Term Goals",
+  long_term_goals: "Long Term Goals",
+};
+
+function groupBySection(categories: Category[]) {
+  const groups = new Map<string, Category[]>();
+  for (const c of categories) {
+    const key = c.section ?? "unassigned";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(c);
+  }
+  const ordered: Array<{ key: string; label: string; categories: Category[] }> = [];
+  for (const key of SECTION_ORDER) {
+    const group = groups.get(key);
+    if (group?.length) ordered.push({ key, label: SECTION_LABELS[key], categories: group });
+  }
+  const unassigned = groups.get("unassigned");
+  if (unassigned?.length) ordered.push({ key: "unassigned", label: "Unassigned", categories: unassigned });
+  return ordered;
+}
 
 export default function Categories() {
   const qc = useQueryClient();
@@ -26,15 +54,21 @@ export default function Categories() {
     queryFn: () => AnalyticsApi.homeSavingsPlan(period),
   });
 
-  const [newCat, setNewCat] = useState({ name: "", type: "expense" as "income" | "expense", emoji: "" });
+  const [newCat, setNewCat] = useState({ name: "", type: "expense" as "income" | "expense", emoji: "", section: "" as BudgetSection | "" });
   const [openPanel, setOpenPanel] = useState<"suggestion" | "homePlan" | "expense" | "income" | null>(null);
 
   async function addCategory(e: React.FormEvent) {
     e.preventDefault();
     if (!newCat.name.trim()) return;
     const color = PALETTE[categories.length % PALETTE.length];
-    await CategoriesApi.create({ ...newCat, color });
-    setNewCat({ name: "", type: "expense", emoji: "" });
+    await CategoriesApi.create({
+      name: newCat.name,
+      type: newCat.type,
+      emoji: newCat.emoji,
+      color,
+      section: newCat.type === "expense" && newCat.section ? newCat.section : null,
+    });
+    setNewCat({ name: "", type: "expense", emoji: "", section: "" });
     qc.invalidateQueries({ queryKey: ["categories"] });
   }
 
@@ -84,6 +118,20 @@ export default function Categories() {
                   <option value="income">Income</option>
                 </select>
               </div>
+              {newCat.type === "expense" && (
+                <select
+                  className="input w-full"
+                  value={newCat.section}
+                  onChange={(e) => setNewCat({ ...newCat, section: e.target.value as BudgetSection | "" })}
+                >
+                  <option value="">No section</option>
+                  {SECTION_ORDER.map((key) => (
+                    <option key={key} value={key}>
+                      {SECTION_LABELS[key]}
+                    </option>
+                  ))}
+                </select>
+              )}
               <button type="submit" className="btn-primary" disabled={!newCat.name.trim()}>
                 Add category
               </button>
@@ -146,40 +194,45 @@ export default function Categories() {
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
             <p className="shrink-0 panel-subtitle mb-3">Set a monthly limit per category and track spending against it.</p>
             <div className="min-h-0 overflow-y-auto">
-              {expenseCategories.map((c) => {
-                const budget = budgets.find((b) => b.category.id === c.id);
-                const form = (
-                  <BudgetInlineForm
-                    key={budget?.id ?? c.id}
-                    initialAmount={budget?.amount}
-                    initialRollover={budget?.rollover}
-                    onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
-                  />
-                );
-                return (
-                  <div key={c.id}>
-                    {budget ? (
-                      <BudgetProgress budget={budget} right={form} />
-                    ) : (
-                      <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="flex items-center gap-2 min-w-[90px] flex-1">
-                            <span
-                              className="shrink-0 grid place-items-center rounded-md"
-                              style={{ width: 22, height: 22, background: `${c.color}1a`, color: c.color }}
-                            >
-                              <CategoryIcon name={c.name} />
-                            </span>
-                            <span className="font-medium text-ink truncate min-w-0 text-[13px]">{c.name}</span>
-                          </span>
-                          <span className="text-[11px] text-ink/40 shrink-0">No budget set</span>
-                          {form}
-                        </div>
+              {groupBySection(expenseCategories).map((group) => (
+                <div key={group.key} className="mb-3 last:mb-0">
+                  <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 px-2 mb-1">{group.label}</h3>
+                  {group.categories.map((c) => {
+                    const budget = budgets.find((b) => b.category.id === c.id);
+                    const form = (
+                      <BudgetInlineForm
+                        key={budget?.id ?? c.id}
+                        initialAmount={budget?.amount}
+                        initialRollover={budget?.rollover}
+                        onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
+                      />
+                    );
+                    return (
+                      <div key={c.id}>
+                        {budget ? (
+                          <BudgetProgress budget={budget} right={form} />
+                        ) : (
+                          <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span className="flex items-center gap-2 min-w-[90px] flex-1">
+                                <span
+                                  className="shrink-0 grid place-items-center rounded-md"
+                                  style={{ width: 22, height: 22, background: `${c.color}1a`, color: c.color }}
+                                >
+                                  <CategoryIcon name={c.name} />
+                                </span>
+                                <span className="font-medium text-ink truncate min-w-0 text-[13px]">{c.name}</span>
+                              </span>
+                              <span className="text-[11px] text-ink/40 shrink-0">No budget set</span>
+                              {form}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </div>

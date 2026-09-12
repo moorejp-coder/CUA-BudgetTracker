@@ -4,6 +4,14 @@ from pydantic import BaseModel, Field, field_validator
 
 CategoryType = Literal["income", "expense"]
 
+BudgetSection = Literal[
+    "essentials",
+    "guilt_free",
+    "debt_investing",
+    "short_term_goals",
+    "long_term_goals",
+]
+
 _HEX_COLOR_RE = r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
 
 
@@ -13,6 +21,7 @@ class CategoryCreate(BaseModel):
     color: str = Field("#5b8def", pattern=_HEX_COLOR_RE)
     emoji: str = Field("", max_length=8)
     parent_id: str | None = Field(default=None, min_length=1, max_length=64)
+    section: BudgetSection | None = None
 
     @field_validator("name")
     @classmethod
@@ -27,6 +36,7 @@ class CategoryUpdate(BaseModel):
     color: str | None = Field(default=None, pattern=_HEX_COLOR_RE)
     emoji: str | None = Field(default=None, max_length=8)
     parent_id: str | None = Field(default=None, min_length=1, max_length=64)
+    section: BudgetSection | None = None
 
     @field_validator("name")
     @classmethod
@@ -43,5 +53,6 @@ class CategoryOut(BaseModel):
     color: str
     emoji: str
     parent_id: str | None = Field(default=None, min_length=1, max_length=64)
+    section: str | None = None
 
     model_config = {"from_attributes": True}

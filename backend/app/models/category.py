@@ -8,6 +8,14 @@ from app.models.mixins import IdMixin, TimestampMixin
 
 CATEGORY_TYPES = ("income", "expense")
 
+BUDGET_SECTIONS = (
+    "essentials",
+    "guilt_free",
+    "debt_investing",
+    "short_term_goals",
+    "long_term_goals",
+)
+
 
 class Category(IdMixin, TimestampMixin, Base):
     __tablename__ = "categories"
@@ -18,6 +26,7 @@ class Category(IdMixin, TimestampMixin, Base):
     color: Mapped[str] = mapped_column(String(9), default="#5b8def")
     emoji: Mapped[str] = mapped_column(String(8), default="")
     parent_id: Mapped[str | None] = mapped_column(ForeignKey("categories.id"), nullable=True)
+    section: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="categories")
     transactions: Mapped[list["Transaction"]] = relationship(back_populates="category")
