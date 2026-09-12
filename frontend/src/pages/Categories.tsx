@@ -40,6 +40,22 @@ function groupBySection(categories: Category[]) {
   return ordered;
 }
 
+type ColumnItem = { kind: "header"; key: string; label: string } | { kind: "category"; key: string; category: Category };
+
+function splitIntoColumns(groups: Array<{ key: string; label: string; categories: Category[] }>): ColumnItem[][] {
+  const columns: ColumnItem[][] = [[], []];
+  const counts = [0, 0];
+  for (const group of groups) {
+    const idx = counts[0] <= counts[1] ? 0 : 1;
+    columns[idx].push({ kind: "header", key: `h-${group.key}`, label: group.label });
+    for (const category of group.categories) {
+      columns[idx].push({ kind: "category", key: category.id, category });
+    }
+    counts[idx] += group.categories.length;
+  }
+  return columns;
+}
+
 export default function Categories() {
   const qc = useQueryClient();
   const period = format(new Date(), "yyyy-MM");
@@ -198,11 +214,18 @@ export default function Categories() {
           <div className="card flex flex-col h-full lg:max-h-[calc(100vh-160px)]">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
             <p className="shrink-0 panel-subtitle mb-2">Set a monthly limit per category and track spending against it.</p>
-            <div className="min-h-0 overflow-y-auto lg:columns-2 lg:gap-x-6">
-              {groupBySection(expenseCategories).map((group) => (
-                <div key={group.key} className="mb-1.5 last:mb-0 break-inside-avoid-column">
-                  <h3 className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 px-2 leading-4">{group.label}</h3>
-                  {group.categories.map((c) => {
+            <div className="flex-1 min-h-0 overflow-y-auto flex flex-col lg:flex-row lg:gap-6">
+              {splitIntoColumns(groupBySection(expenseCategories)).map((column, i) => (
+                <div key={i} className="flex-1 flex flex-col min-h-0">
+                  {column.map((item) => {
+                    if (item.kind === "header") {
+                      return (
+                        <h3 key={item.key} className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-ink/40 px-2 leading-4 mt-2 first:mt-0">
+                          {item.label}
+                        </h3>
+                      );
+                    }
+                    const c = item.category;
                     const budget = budgets.find((b) => b.category.id === c.id);
                     const form = (
                       <BudgetInlineForm
@@ -213,7 +236,7 @@ export default function Categories() {
                       />
                     );
                     return (
-                      <div key={c.id}>
+                      <div key={item.key} className="flex-1 min-h-[24px] flex flex-col justify-center">
                         {budget ? (
                           <BudgetProgress budget={budget} right={form} />
                         ) : (
