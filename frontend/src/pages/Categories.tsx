@@ -193,9 +193,9 @@ export default function Categories() {
           </div>
         </div>
 
-        {/* Right column: monthly budgets, sized to content up to the available height */}
-        <div className="min-h-0 flex flex-col gap-4">
-          <div className="card flex flex-col max-h-full lg:max-h-[calc(100vh-160px)]">
+        {/* Right column: monthly budgets, fills the available height */}
+        <div className="min-h-0 flex flex-col gap-4 lg:self-stretch">
+          <div className="card flex flex-col h-full lg:max-h-[calc(100vh-160px)]">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
             <p className="shrink-0 panel-subtitle mb-2">Set a monthly limit per category and track spending against it.</p>
             <div className="min-h-0 overflow-y-auto lg:columns-2 lg:gap-x-6">
