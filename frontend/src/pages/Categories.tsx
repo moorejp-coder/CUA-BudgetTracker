@@ -60,7 +60,7 @@ export default function Categories() {
     <div className="h-full flex flex-col gap-4 min-h-0">
       <h1 className="shrink-0 font-display text-[28px] font-semibold text-ink tracking-tight">Categories &amp; Budgets</h1>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4">
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
         {/* Left column: add category + category lists */}
         <div className="min-h-0 flex flex-col gap-4">
           <div className="card shrink-0">
@@ -150,38 +150,43 @@ export default function Categories() {
           <div className="card flex-1 min-h-0 flex flex-col">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
             <p className="shrink-0 panel-subtitle mb-3">Set a monthly limit per category and track spending against it.</p>
-            <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-border-subtle">
-              {expenseCategories.map((c) => {
-                const budget = budgets.find((b) => b.category.id === c.id);
-                const form = (
-                  <BudgetInlineForm
-                    key={budget?.id ?? c.id}
-                    initialAmount={budget?.amount}
-                    initialRollover={budget?.rollover}
-                    onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
-                  />
-                );
-                return (
-                  <div key={c.id} className="py-2 first:pt-0 last:pb-0">
-                    {budget ? (
-                      <BudgetProgress budget={budget} right={form} />
-                    ) : (
-                      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_110px_auto] sm:items-center text-[15px] sm:gap-4 px-2 py-1.5">
-                        <span className="flex items-center gap-3 font-medium text-ink min-w-0 truncate">
-                          <span className="category-icon" style={{ background: `${c.color}1a`, color: c.color }}>
-                            <CategoryIcon name={c.name} />
-                          </span>
-                          {c.name}
-                        </span>
-                        <div className="flex items-center justify-between gap-3 sm:contents">
-                          <span className="text-xs text-ink/40 sm:text-right">No budget set</span>
-                          {form}
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">
+                {expenseCategories.map((c) => {
+                  const budget = budgets.find((b) => b.category.id === c.id);
+                  const form = (
+                    <BudgetInlineForm
+                      key={budget?.id ?? c.id}
+                      initialAmount={budget?.amount}
+                      initialRollover={budget?.rollover}
+                      onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
+                    />
+                  );
+                  return (
+                    <div key={c.id}>
+                      {budget ? (
+                        <BudgetProgress budget={budget} right={form} />
+                      ) : (
+                        <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="flex items-center gap-2 min-w-[90px] flex-1">
+                              <span
+                                className="shrink-0 grid place-items-center rounded-md"
+                                style={{ width: 22, height: 22, background: `${c.color}1a`, color: c.color }}
+                              >
+                                <CategoryIcon name={c.name} />
+                              </span>
+                              <span className="font-medium text-ink truncate min-w-0 text-[13px]">{c.name}</span>
+                            </span>
+                            <span className="text-[11px] text-ink/40 shrink-0">No budget set</span>
+                            {form}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -374,7 +379,7 @@ function BudgetInlineForm({
   return (
     <div className="flex items-center gap-1.5 shrink-0">
       <input
-        className="input w-24 px-2 text-right text-xs py-1"
+        className="input w-20 px-2 text-right text-xs py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         placeholder="—"
         type="number"
         value={amount}

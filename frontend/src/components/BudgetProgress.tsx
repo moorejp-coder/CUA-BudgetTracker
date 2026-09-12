@@ -14,36 +14,34 @@ export default function BudgetProgress({ budget, right }: { budget: Budget; righ
       : null;
 
   return (
-    <div className="group -mx-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-surface-raised/60">
-      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_110px_auto] sm:items-center sm:gap-4 text-[15px]">
-        <span className="flex items-center gap-3 font-medium text-ink min-w-0 truncate">
+    <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="flex items-center gap-2 min-w-[90px] flex-1">
           <span
-            className="category-icon"
-            style={{ background: `${budget.category.color}1a`, color: budget.category.color }}
+            className="shrink-0 grid place-items-center rounded-md"
+            style={{ width: 22, height: 22, background: `${budget.category.color}1a`, color: budget.category.color }}
           >
-            <Icon />
+            <Icon width={12} height={12} />
           </span>
-          {budget.category.name}
+          <span className="font-medium text-ink truncate min-w-0 text-[13px]">{budget.category.name}</span>
         </span>
-        <div className="flex items-center justify-between gap-3 sm:contents">
-          <span className="numeral text-sm text-ink/70 whitespace-nowrap sm:text-right">
-            {formatCurrency(budget.spent, 0)} <span className="text-ink/35">/</span> {formatCurrency(effectiveLimit, 0)}
-          </span>
-          {right}
-        </div>
-      </div>
-      <div className="flex items-center gap-2 mt-2">
-        <div className="h-2 flex-1 rounded-full bg-surface-sunken overflow-hidden shadow-[inset_0_1px_2px_rgba(74,54,27,0.08)]">
+        <span className="numeral text-[11px] text-ink/60 whitespace-nowrap shrink-0">
+          {formatCurrency(budget.spent, 0)}
+          <span className="text-ink/35">/</span>
+          {formatCurrency(effectiveLimit, 0)}
+        </span>
+        <div className="h-1.5 w-10 shrink-0 rounded-full bg-surface-sunken overflow-hidden shadow-[inset_0_1px_1px_rgba(74,54,27,0.08)]">
           <div
             className="h-full rounded-full transition-[width] duration-300 ease-out"
             style={{ width: `${Math.max(pct, budget.spent > 0 ? 3 : 0)}%`, background: over ? "#c85d43" : budget.category.color }}
           />
         </div>
-        <span className={`numeral text-[11px] w-9 text-right tabular-nums ${over ? "text-expense" : "text-ink/35"}`}>
+        <span className={`numeral text-[10px] w-6 text-right shrink-0 tabular-nums ${over ? "text-expense" : "text-ink/35"}`}>
           {Math.round(pct)}%
         </span>
+        {right}
       </div>
-      {note && <div className={`text-xs mt-1 ${over ? "text-expense font-medium" : "text-ink/40"}`}>{note}</div>}
+      {note && <div className={`text-[10px] mt-0.5 ${over ? "text-expense font-medium" : "text-ink/40"}`}>{note}</div>}
     </div>
   );
 }
