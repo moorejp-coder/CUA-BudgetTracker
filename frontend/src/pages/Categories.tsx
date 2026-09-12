@@ -60,7 +60,7 @@ export default function Categories() {
     <div className="h-full flex flex-col gap-4 min-h-0">
       <h1 className="shrink-0 font-display text-[28px] font-semibold text-ink tracking-tight">Categories &amp; Budgets</h1>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[300px_1fr] lg:items-start gap-4">
         {/* Left column: add category + category lists */}
         <div className="min-h-0 flex flex-col gap-4">
           <div className="card shrink-0">
@@ -145,48 +145,46 @@ export default function Categories() {
           </div>
         </div>
 
-        {/* Right column: monthly budgets, full height */}
+        {/* Right column: monthly budgets, sized to content up to the available height */}
         <div className="min-h-0 flex flex-col gap-4">
-          <div className="card flex-1 min-h-0 flex flex-col">
+          <div className="card flex flex-col max-h-full lg:max-h-[calc(100vh-160px)]">
             <h2 className="shrink-0 panel-title">Monthly budgets — {period}</h2>
             <p className="shrink-0 panel-subtitle mb-3">Set a monthly limit per category and track spending against it.</p>
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">
-                {expenseCategories.map((c) => {
-                  const budget = budgets.find((b) => b.category.id === c.id);
-                  const form = (
-                    <BudgetInlineForm
-                      key={budget?.id ?? c.id}
-                      initialAmount={budget?.amount}
-                      initialRollover={budget?.rollover}
-                      onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
-                    />
-                  );
-                  return (
-                    <div key={c.id}>
-                      {budget ? (
-                        <BudgetProgress budget={budget} right={form} />
-                      ) : (
-                        <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
-                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <span className="flex items-center gap-2 min-w-[90px] flex-1">
-                              <span
-                                className="shrink-0 grid place-items-center rounded-md"
-                                style={{ width: 22, height: 22, background: `${c.color}1a`, color: c.color }}
-                              >
-                                <CategoryIcon name={c.name} />
-                              </span>
-                              <span className="font-medium text-ink truncate min-w-0 text-[13px]">{c.name}</span>
+            <div className="min-h-0 overflow-y-auto">
+              {expenseCategories.map((c) => {
+                const budget = budgets.find((b) => b.category.id === c.id);
+                const form = (
+                  <BudgetInlineForm
+                    key={budget?.id ?? c.id}
+                    initialAmount={budget?.amount}
+                    initialRollover={budget?.rollover}
+                    onSet={(amount, rollover) => setBudgetAmount(c.id, amount, budget?.id, rollover)}
+                  />
+                );
+                return (
+                  <div key={c.id}>
+                    {budget ? (
+                      <BudgetProgress budget={budget} right={form} />
+                    ) : (
+                      <div className="group rounded-lg transition-colors hover:bg-surface-raised/60 px-2 py-1">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="flex items-center gap-2 min-w-[90px] flex-1">
+                            <span
+                              className="shrink-0 grid place-items-center rounded-md"
+                              style={{ width: 22, height: 22, background: `${c.color}1a`, color: c.color }}
+                            >
+                              <CategoryIcon name={c.name} />
                             </span>
-                            <span className="text-[11px] text-ink/40 shrink-0">No budget set</span>
-                            {form}
-                          </div>
+                            <span className="font-medium text-ink truncate min-w-0 text-[13px]">{c.name}</span>
+                          </span>
+                          <span className="text-[11px] text-ink/40 shrink-0">No budget set</span>
+                          {form}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
